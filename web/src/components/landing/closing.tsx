@@ -3,9 +3,15 @@
 import Link from "next/link";
 import { useRef } from "react";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
-import { GOLD_LINES } from "./motifs";
 
-/** L8 · The close: the name returns at full width in songket gold on kayu. */
+/** The name, built large: each letter knocked out of an arch-topped block. */
+const BLOCKS = [
+  { letter: "B", bg: "#3b2618", ink: "#eeeeea", height: "100%" },
+  { letter: "a", bg: "#6e1f1f", ink: "#eeeeea", height: "78%" },
+  { letter: "y", bg: "#2f7a4d", ink: "#eeeeea", height: "90%" },
+  { letter: "u", bg: "#c9a24a", ink: "#3b2618", height: "70%" },
+];
+
 export function Closing() {
   const root = useRef<HTMLElement>(null);
 
@@ -13,13 +19,15 @@ export function Closing() {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
+        // The blocks rise into place, one after another, as the page ends.
         gsap.fromTo(
-          "[data-wordmark]",
-          { scale: 0.9, transformOrigin: "0% 100%" },
+          "[data-block]",
+          { yPercent: 45 },
           {
-            scale: 1,
-            ease: "none",
-            scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom bottom", scrub: true },
+            yPercent: 0,
+            ease: "power2.out",
+            stagger: 0.12,
+            scrollTrigger: { trigger: "[data-blocks]", start: "top bottom", end: "bottom 85%", scrub: 0.6 },
           },
         );
       });
@@ -28,51 +36,47 @@ export function Closing() {
   );
 
   return (
-    <footer ref={root} className="on-dark relative overflow-hidden bg-kayu text-bone">
-      <svg
-        viewBox="0 120 1280 140"
-        preserveAspectRatio="xMidYMid slice"
-        className="pointer-events-none absolute inset-x-0 top-4 h-24 w-full opacity-50"
-        fill="none"
-        stroke="#c9a24a"
-        strokeWidth={1.6}
-        strokeLinecap="round"
-        aria-hidden="true"
-      >
-        <path d={GOLD_LINES[0]} transform="translate(-860 0)" />
-        <path d={GOLD_LINES[0]} transform="translate(-420 0)" />
-        <path d={GOLD_LINES[0]} />
-      </svg>
-
-      <div className="mx-auto flex w-full max-w-[1312px] flex-col gap-16 px-4 pt-36 pb-10 sm:px-8 lg:pt-44">
-        <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
-          <p className="max-w-[32rem] font-display text-[clamp(1.6rem,4vw,2.25rem)] leading-[1.2] font-medium">
-            Jom, list your first book. The breeze does the rest.
-          </p>
-          <Link
-            href="/login"
-            className="rounded-full bg-songket px-8 py-5 text-lg font-bold text-kayu no-underline transition-[background-color,transform] duration-200 hover:bg-bone active:scale-[0.98]"
-          >
-            Join the Ansan pilot
-          </Link>
+    <footer ref={root} className="bg-bone text-ink">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-14 px-4 pt-14 pb-10 sm:px-8">
+        <div
+          data-blocks=""
+          aria-label="Bayu"
+          role="img"
+          className="flex h-[26svh] items-end gap-1 overflow-hidden md:h-[34svh]"
+        >
+          {BLOCKS.map((b) => (
+            <div
+              key={b.letter}
+              data-block=""
+              className="arch flex flex-1 items-end justify-center pb-[6svh]"
+              style={{ background: b.bg, color: b.ink, height: b.height }}
+            >
+              <span className="font-display text-[clamp(4rem,14vw,13rem)] leading-[0.8] font-semibold">
+                {b.letter}
+              </span>
+            </div>
+          ))}
         </div>
 
-        <p
-          data-wordmark=""
-          aria-hidden="true"
-          className="-ml-[0.04em] font-display text-[clamp(7rem,27vw,23rem)] leading-[0.8] font-semibold tracking-[-0.04em] text-songket"
-        >
-          Bayu
-        </p>
-
-        <div className="flex flex-col justify-between gap-4 text-sm text-kayu-muted sm:flex-row sm:items-center">
-          <span>A breeze between readers, made in Ansan.</span>
-          <nav aria-label="Footer" className="flex gap-6">
-            <a href="#how" className="text-kayu-muted hover:text-songket">How it works</a>
-            <a href="#safety" className="text-kayu-muted hover:text-songket">Safety</a>
-            <a href="#faq" className="text-kayu-muted hover:text-songket">FAQ</a>
-            <Link href="/login" className="text-kayu-muted hover:text-songket">Join</Link>
+        <div className="grid grid-cols-2 gap-8 text-[15px] md:grid-cols-12">
+          <nav aria-label="Footer" className="col-span-2 flex flex-wrap gap-x-8 gap-y-3 md:col-span-8">
+            <a href="#how" className="text-ink hover:text-pandan">How it works</a>
+            <a href="#safety" className="text-ink hover:text-pandan">Safety</a>
+            <a href="#faq" className="text-ink hover:text-pandan">FAQ</a>
+            <Link href="/login" className="text-ink hover:text-pandan">Sign in</Link>
           </nav>
+          <p className="col-span-2 text-muted md:col-span-4 md:text-right">
+            A breeze between readers, made in Ansan.
+          </p>
+        </div>
+        <div className="flex items-center justify-between text-[15px] text-muted">
+          <span>© 2026 Bayu</span>
+          <Link
+            href="/login"
+            className="btn-arch bg-ink px-5 pt-3 pb-2.5 font-semibold text-bone no-underline transition-colors duration-200 hover:bg-kayu"
+          >
+            Join the pilot
+          </Link>
         </div>
       </div>
     </footer>

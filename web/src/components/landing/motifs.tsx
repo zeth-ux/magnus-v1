@@ -61,8 +61,29 @@ export const SPINE_ORIGIN = "640 748";
 export function FlyingBook() {
   return (
     <>
-      <path d="M0 -16 C -12 -22, -28 -22, -40 -18 L -40 18 C -28 14, -12 14, 0 20 Z" fill="#f1efea" />
-      <path d="M0 -16 C 12 -22, 28 -22, 40 -18 L 40 18 C 28 14, 12 14, 0 20 Z" fill="#f1efea" />
+      <path d="M0 -16 C -12 -22, -28 -22, -40 -18 L -40 18 C -28 14, -12 14, 0 20 Z" fill="#eeeeea" />
+      <path d="M0 -16 C 12 -22, 28 -22, 40 -18 L 40 18 C 28 14, 12 14, 0 20 Z" fill="#eeeeea" />
     </>
+  );
+}
+
+/**
+ * Pucuk rebung ("bamboo shoot"): the rising-triangle border of songket cloth.
+ * Used once, as the full-width band that divides the page's two halves.
+ */
+export function PucukRebungBand({ className, id = "pucuk" }: { className?: string; id?: string }) {
+  return (
+    <svg className={className} width="100%" height="64" aria-hidden="true" preserveAspectRatio="none">
+      <defs>
+        <pattern id={id} width="56" height="64" patternUnits="userSpaceOnUse">
+          <rect width="56" height="64" fill="#6e1f1f" />
+          <path d="M0 60 L28 6 L56 60 Z" fill="#c9a24a" />
+          <path d="M12 60 L28 28 L44 60 Z" fill="#6e1f1f" />
+          <path d="M22 60 L28 47 L34 60 Z" fill="#c9a24a" />
+          <rect y="60" width="56" height="4" fill="#c9a24a" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="64" fill={`url(#${id})`} />
+    </svg>
   );
 }

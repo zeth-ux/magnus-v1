@@ -38,10 +38,12 @@ Two moods, one brand:
 
 Malay touches stay **subtle**: palette and linework, not costume.
 
-**Colour tokens** (updated 2026-10-30)
+**Colour tokens** (updated 2026-10-31)
 | Token | Use | Hex |
 |---|---|---|
-| `bone` | Paper ground (replaces the old cream `#FBF7EF`) | `#F1EFEA` |
+| `bone` | Paper ground (replaces the old cream `#FBF7EF` and `#F1EFEA`, which taste-skill still read as cream) | `#EEEEEA` |
+| `bone-deep` | Second paper tone (inputs, toggles, FAQ cards) | `#E2E1DB` |
+| `muted` | Secondary text on bone | `#5C574E` |
 | `ink` | Text | `#2B2A28` |
 | `sky` | Airy backgrounds, decoration only | `#9CC9E3` (light: `#DCEEF7`) |
 | `pandan` | Primary buttons on light grounds | `#2F7A4D` |
@@ -56,10 +58,11 @@ is now the most recognisable "AI-generated" look (taste-skill research). Our war
 comes from **real materials used as full fields** (timber, songket gold, oxblood),
 and the paper is a low-saturation bone (20% vs the old cream's 60%).
 
-Contrast checked (WCAG AA needs ≥ 4.5 for text): ink on bone 12.5 · bone on kayu
-12.4 · songket on kayu 5.9 · kayu on songket (button text) 5.9 · kayu-muted on
-kayu 7.9 · bone on merah hati 9.7 · songket on merah hati 4.7 · white on pandan
-5.2 · kopi on bone 6.0 · ink on sky 8.1. Sky is too light for text on bone; use
+Contrast checked (WCAG AA needs ≥ 4.5 for text): ink on bone 12.3 · bone on kayu
+12.2 · songket on kayu 5.9 · kayu on songket (button text) 5.9 · kayu-muted on
+kayu 7.9 · bone on merah hati 9.6 · songket on merah hati 4.7 · white on pandan
+5.2 · kopi on bone 5.5 · muted on bone 6.2 · muted on bone-deep 5.5 · bone on the
+how-it-works timber tints `#53371F` 9.3 and `#6B4A2C` 6.8 · ink on sky 8.1. Sky is too light for text on bone; use
 it only for backgrounds and decoration.
 
 **Malay motifs (linework only)**
@@ -67,6 +70,10 @@ it only for backgrounds and decoration.
   woodcarving and songket. Used as the wind lines.
 - **Ukiran tebuk tembus**: the pierced carved panels of a Malay house that let
   the breeze through. The landing's signature moment.
+- **The arch** (from the carved panel's top): the one shape of the brand.
+  Buttons (`.btn-arch`), windows, tabs and stages use it (`.arch`).
+- **Pucuk rebung** (bamboo shoot): the gold-on-oxblood triangle band from
+  songket borders. Used as a band on the closing section.
 - No Quranic verses or religious calligraphy as decoration. No invented Jawi;
   any Jawi is checked by a native reader first.
 

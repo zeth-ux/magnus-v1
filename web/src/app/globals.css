@@ -5,8 +5,8 @@
   Every colour here was contrast-checked (WCAG AA) in brand.md.
 */
 @theme {
-  --color-bone: #f1efea;
-  --color-bone-deep: #e7e3da;
+  --color-bone: #eeeeea;
+  --color-bone-deep: #e2e1db;
   --color-ink: #2b2a28;
   --color-muted: #5c574e;
   --color-sky: #9cc9e3;
@@ -58,6 +58,24 @@ body {
 a {
   text-underline-offset: 0.2em;
   text-decoration-thickness: 1px;
+}
+
+
+/* The motif: the arch of a carved Malay panel. Used for buttons, masks, tabs. */
+.arch {
+  border-top-left-radius: 999px;
+  border-top-right-radius: 999px;
+}
+.btn-arch {
+  border-radius: 999px 999px 6px 6px;
+}
+
+/* A real dialog (data-ui fragment) floats above the page, so it may cast a shadow. */
+.dialog-shadow { box-shadow: 0 24px 60px -18px rgba(43, 42, 40, 0.45); } /* taste-skill-ignore */
+
+/* SplitText chars need inline-block to move; keep kerning stable when split. */
+.split-ready {
+  font-kerning: none;
 }
 
 /* Hero load sequence: CSS only, over by ~1.2s. Off for reduced motion. */
@@ -126,4 +144,29 @@ a {
 .scene.is-live .scene-stage {
   position: sticky;
   top: 0;
+}
+
+/* A scene whose finished picture is a stack (e.g. the rantau postcards). */
+.scene:not(.is-live) .scene-stage.stack-when-static {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* FAQ cards (<details>): the answer slides open where the browser can animate
+   to height:auto; elsewhere it simply opens. Off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .faq-card {
+    interpolate-size: allow-keywords;
+  }
+  .faq-card::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 0.4s var(--ease-out),
+      content-visibility 0.4s allow-discrete;
+  }
+  .faq-card[open]::details-content {
+    height: auto;
+  }
 }
