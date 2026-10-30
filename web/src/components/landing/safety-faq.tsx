@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { FAQ, SAFETY_POINTS } from "@/content/landing";
 
@@ -8,11 +8,11 @@ const CARD_COLOURS = ["#dceef7", "#e2e1db", "#ead9ae", "#dceef7", "#e2e1db"];
 
 /**
  * Safety, then the FAQ filed like index cards in a drawer: each card's tab is
- * an arch (the motif), tabs step right, cards overlap. Open one card at a time.
+ * an arch (the motif), tabs step right, cards overlap. Native <details> with a
+ * shared name: one card open at a time, and it all works without JavaScript.
  */
 export function SafetyFaq() {
   const root = useRef<HTMLElement>(null);
-  const [open, setOpen] = useState(0);
 
   useGSAP(
     () => {
@@ -67,7 +67,6 @@ export function SafetyFaq() {
           </h2>
           <div data-drawer="" className="flex flex-col">
             {FAQ.map((item, i) => {
-              const isOpen = open === i;
               const bg = CARD_COLOURS[i % CARD_COLOURS.length];
               return (
                 <div
@@ -84,32 +83,21 @@ export function SafetyFaq() {
                   >
                     {item.tab}
                   </span>
-                  <div className="rounded-[6px] rounded-tl-none" style={{ background: bg }}>
-                    <button
-                      type="button"
-                      aria-expanded={isOpen}
-                      aria-controls={`faq-${i}`}
-                      onClick={() => setOpen(i)}
-                      className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-xl font-semibold"
-                    >
+                  <details
+                    name="faq"
+                    open={i === 0}
+                    className="faq-card group rounded-[6px] rounded-tl-none"
+                    style={{ background: bg }}
+                  >
+                    <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-left text-xl font-semibold [&::-webkit-details-marker]:hidden">
                       {item.q}
                       <span
                         aria-hidden="true"
-                        className="arch inline-block h-4 w-3 shrink-0 bg-ink transition-transform duration-300"
-                        style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                        className="arch inline-block h-4 w-3 shrink-0 bg-ink transition-transform duration-300 group-open:rotate-180"
                       />
-                    </button>
-                    <div
-                      id={`faq-${i}`}
-                      inert={!isOpen}
-                      className="grid transition-[grid-template-rows] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                      style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
-                    >
-                      <div className="overflow-hidden">
-                        <p className="max-w-[50ch] px-6 pb-12 text-[17px] leading-relaxed">{item.a}</p>
-                      </div>
-                    </div>
-                  </div>
+                    </summary>
+                    <p className="max-w-[50ch] px-6 pb-12 text-[17px] leading-relaxed">{item.a}</p>
+                  </details>
                 </div>
               );
             })}

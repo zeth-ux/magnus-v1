@@ -152,3 +152,21 @@ a {
   min-height: 0;
   overflow: visible;
 }
+
+/* FAQ cards (<details>): the answer slides open where the browser can animate
+   to height:auto; elsewhere it simply opens. Off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .faq-card {
+    interpolate-size: allow-keywords;
+  }
+  .faq-card::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 0.4s var(--ease-out),
+      content-visibility 0.4s allow-discrete;
+  }
+  .faq-card[open]::details-content {
+    height: auto;
+  }
+}

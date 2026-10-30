@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { HOW_STAGES } from "@/content/landing";
 
@@ -8,10 +8,19 @@ import { HOW_STAGES } from "@/content/landing";
  * How it works, as a horizontal accordion of four stages that read dark to
  * light: kayu timber through to songket gold. Open a stage and its library
  * stamp slams onto it. On a phone the accordion stacks vertically.
+ *
+ * Without JavaScript (and during server render) every stage is shown open in a
+ * plain stack, so all four steps can be read. Once hydrated it becomes the
+ * accordion.
  */
+const noop = () => () => {};
+
 export function HowItWorks() {
   const root = useRef<HTMLElement>(null);
+  const timer = useRef<number | undefined>(undefined);
   const [open, setOpen] = useState(0);
+  // false on the server and during hydration, true after: no mismatch.
+  const live = useSyncExternalStore(noop, () => true, () => false);
 
   // The stamp lands hard: big and tilted, then pressed flat with a little jolt.
   function slam(index: number) {
@@ -24,9 +33,9 @@ export function HowItWorks() {
       .fromTo(
         stamp,
         { scale: 2.6, rotation: -18, autoAlpha: 0 },
-        { scale: 1, rotation: -6, autoAlpha: 1, duration: 0.32, ease: "power4.in" },
+        { scale: 1, rotation: -6, autoAlpha: 1, duration: 0.32, ease: "power4.in", overwrite: "auto" },
       )
-      .fromTo(stage, { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 3, ease: "none" })
+      .fromTo(stage, { x: 0 }, { x: 6, duration: 0.05, yoyo: true, repeat: 3, ease: "none", overwrite: "auto" })
       .set(stage, { x: 0 });
   }
 
@@ -45,6 +54,12 @@ export function HowItWorks() {
           )
           .add(() => slam(0), 0.75);
       });
+      // Click tweens and the pending stamp timer live outside this context: clear them on unmount.
+      return () => {
+        window.clearTimeout(timer.current);
+        const el = root.current;
+        if (el) gsap.killTweensOf(el.querySelectorAll("[data-stamp], [data-stage]"));
+      };
     },
     { scope: root },
   );
@@ -53,7 +68,8 @@ export function HowItWorks() {
     if (index === open) return;
     setOpen(index);
     // Let the panel widen first, then stamp it.
-    window.setTimeout(() => slam(index), 260);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => slam(index), 260);
   }
 
   return (
@@ -72,37 +88,47 @@ export function HowItWorks() {
           </p>
         </div>
 
-        <div data-accordion="" className="mt-16 flex flex-col overflow-hidden rounded-[6px] lg:h-[520px] lg:flex-row">
+        <div
+          data-accordion=""
+          className={`mt-16 flex flex-col overflow-hidden rounded-[6px] ${live ? "lg:h-[520px] lg:flex-row" : ""}`}
+        >
           {HOW_STAGES.map((stage, i) => {
-            const isOpen = open === i;
+            const isOpen = !live || open === i;
+            const dark = stage.ink !== "#3b2618";
             return (
               <div
                 key={stage.name}
                 data-stage={i}
-                className="relative flex min-w-0 flex-col transition-[flex-grow,flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:basis-0"
-                style={{ background: stage.bg, color: stage.ink, flexGrow: isOpen ? 5.5 : 1 }}
+                className={`relative flex min-w-0 flex-col ${live ? "transition-[flex-grow,flex-basis] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:basis-0" : ""} ${dark ? "on-dark" : ""}`}
+                style={{ background: stage.bg, color: stage.ink, flexGrow: live ? (isOpen ? 5.5 : 1) : undefined }}
               >
-                <button
-                  type="button"
-                  aria-expanded={isOpen}
-                  aria-controls={`stage-${i}`}
-                  onClick={() => choose(i)}
-                  className="flex h-16 w-full items-center justify-between px-6 text-left lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7"
-                >
-                  <span
-                    className={`font-display font-medium ${isOpen ? "text-[clamp(1.75rem,2.6vw,2.5rem)]" : "text-[17px] lg:absolute lg:bottom-7 lg:left-7 lg:origin-bottom-left lg:-rotate-90 lg:text-xl lg:whitespace-nowrap"}`}
+                {/* Heading per stage (WAI-ARIA accordion pattern): jump between steps by heading. */}
+                <h3 className={live ? "lg:contents" : ""}>
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-controls={`stage-${i}`}
+                    disabled={!live}
+                    onClick={() => choose(i)}
+                    className={`flex h-16 w-full items-center justify-between px-6 text-left disabled:cursor-default ${dark ? "" : "focus-visible:outline-kayu"} ${live ? "lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7" : ""}`}
                   >
-                    {stage.name}
-                  </span>
-                  <span aria-hidden="true" className="text-2xl lg:hidden">
-                    {isOpen ? "−" : "+"}
-                  </span>
-                </button>
+                    <span
+                      className={`font-display font-medium ${isOpen ? "text-[clamp(1.75rem,2.6vw,2.5rem)]" : "text-[17px] lg:absolute lg:bottom-7 lg:left-7 lg:origin-bottom-left lg:-rotate-90 lg:text-xl lg:whitespace-nowrap"}`}
+                    >
+                      {stage.name}
+                    </span>
+                    {live ? (
+                      <span aria-hidden="true" className="text-2xl lg:hidden">
+                        {isOpen ? "−" : "+"}
+                      </span>
+                    ) : null}
+                  </button>
+                </h3>
 
                 <div
                   id={`stage-${i}`}
                   hidden={!isOpen}
-                  className="relative px-6 pb-8 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-7 lg:pb-8"
+                  className={`relative px-6 pb-8 ${live ? "lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-7 lg:pb-8" : ""}`}
                 >
                   <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                     <p className="max-w-[36ch] text-[17px] leading-relaxed">{stage.text}</p>
