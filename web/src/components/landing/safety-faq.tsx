@@ -1,55 +1,120 @@
-import { FAQ, SAFETY_POINTS } from "@/content/landing";
-import { Reveal } from "./reveal";
+"use client";
 
-/** L7 · Safety and questions. A quiet section; the FAQ is a native accordion. */
+import { useRef, useState } from "react";
+import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
+import { FAQ, SAFETY_POINTS } from "@/content/landing";
+
+const CARD_COLOURS = ["#dceef7", "#e2e1db", "#ead9ae", "#dceef7", "#e2e1db"];
+
+/**
+ * Safety, then the FAQ filed like index cards in a drawer: each card's tab is
+ * an arch (the motif), tabs step right, cards overlap. Open one card at a time.
+ */
 export function SafetyFaq() {
+  const root = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(0);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MOTION_OK, () => {
+        gsap.from("[data-safe]", {
+          x: -40,
+          autoAlpha: 0,
+          duration: 0.9,
+          ease: "expo.out",
+          stagger: 0.12,
+          scrollTrigger: { trigger: "[data-safe-list]", start: "top 80%", once: true },
+        });
+        // The cards drop into the drawer one after another.
+        gsap.from("[data-card-faq]", {
+          y: -80,
+          autoAlpha: 0,
+          rotation: () => gsap.utils.random(-4, 4),
+          duration: 0.8,
+          ease: "back.out(1.6)",
+          stagger: 0.09,
+          scrollTrigger: { trigger: "[data-drawer]", start: "top 80%", once: true },
+        });
+      });
+    },
+    { scope: root },
+  );
+
   return (
-    <section aria-label="Safety and questions" className="bg-bone text-ink">
-      <div className="mx-auto grid w-full max-w-[1312px] grid-cols-1 gap-20 px-4 py-28 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:py-40">
-        <Reveal className="flex flex-col gap-7 lg:col-span-5">
+    <section ref={root} aria-label="Safety and questions" className="bg-bone text-ink">
+      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-20 px-4 py-28 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:py-40">
+        <div className="flex flex-col gap-8 lg:col-span-4">
           <h2
             id="safety"
-            data-reveal=""
-            className="scroll-mt-8 font-display text-[clamp(2.25rem,5vw,3.25rem)] leading-[1.05] font-medium tracking-[-0.02em]"
+            className="scroll-mt-8 font-display text-[clamp(2.5rem,4.4vw,4rem)] leading-[1.02] font-medium tracking-[-0.02em]"
           >
             Safe by design
           </h2>
-          {SAFETY_POINTS.map((point) => (
-            <p key={point} data-reveal="" className="text-xl leading-snug font-semibold sm:text-[22px]">
-              {point}
-            </p>
-          ))}
-        </Reveal>
+          <ul data-safe-list="" className="flex flex-col gap-6">
+            {SAFETY_POINTS.map((point) => (
+              <li key={point} data-safe="" className="flex gap-4 text-xl leading-snug font-semibold">
+                <span aria-hidden="true" className="arch mt-1.5 inline-block h-[0.8em] w-[0.55em] shrink-0 bg-pandan" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <Reveal className="flex flex-col gap-2 lg:col-span-6 lg:col-start-7">
-          <h2 id="faq" data-reveal="" className="mb-3 scroll-mt-8 font-display text-4xl font-medium">
+        <div className="flex flex-col lg:col-span-7 lg:col-start-6">
+          <h2 id="faq" className="mb-10 scroll-mt-8 font-display text-[clamp(2.5rem,4.4vw,4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
             Questions
           </h2>
-          {FAQ.map((item, i) => (
-            <details
-              key={item.q}
-              data-reveal=""
-              open={i === 0}
-              className="group rounded-[4px] px-5 py-4 open:bg-bone-deep hover:bg-bone-deep"
-            >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-bold [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <svg
-                  viewBox="0 0 16 16"
-                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-45"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  aria-hidden="true"
+          <div data-drawer="" className="flex flex-col">
+            {FAQ.map((item, i) => {
+              const isOpen = open === i;
+              const bg = CARD_COLOURS[i % CARD_COLOURS.length];
+              return (
+                <div
+                  key={item.q}
+                  data-card-faq=""
+                  className="relative pt-10"
+                  style={{ marginTop: i === 0 ? 0 : "-28px", zIndex: i }}
                 >
-                  <path d="M8 2 V14 M2 8 H14" />
-                </svg>
-              </summary>
-              <p className="mt-2.5 text-base leading-relaxed">{item.a}</p>
-            </details>
-          ))}
-        </Reveal>
+                  {/* The tab: an arch, stepping right card by card. */}
+                  <span
+                    aria-hidden="true"
+                    className="arch absolute top-0 flex h-10 w-[7.5rem] items-center justify-center text-[15px] font-bold sm:w-[12rem]"
+                    style={{ background: bg, left: `min(${i * 18}%, calc(100% - 12rem))` }}
+                  >
+                    {item.tab}
+                  </span>
+                  <div className="rounded-[6px] rounded-tl-none" style={{ background: bg }}>
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-${i}`}
+                      onClick={() => setOpen(i)}
+                      className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-xl font-semibold"
+                    >
+                      {item.q}
+                      <span
+                        aria-hidden="true"
+                        className="arch inline-block h-4 w-3 shrink-0 bg-ink transition-transform duration-300"
+                        style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                      />
+                    </button>
+                    <div
+                      id={`faq-${i}`}
+                      inert={!isOpen}
+                      className="grid transition-[grid-template-rows] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                      style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                    >
+                      <div className="overflow-hidden">
+                        <p className="max-w-[50ch] px-6 pb-12 text-[17px] leading-relaxed">{item.a}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );

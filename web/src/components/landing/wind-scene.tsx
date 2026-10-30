@@ -2,26 +2,22 @@
 
 import { useRef } from "react";
 import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
-import {
-  ART_VIEWBOX,
-  BOOK_LEFT,
-  BOOK_RIGHT,
-  CarvedPanel,
-  FLIGHT_PATH,
-  FlyingBook,
-  GOLD_LINES,
-  SPINE_ORIGIN,
-  WIND_LINES,
-} from "./motifs";
+import { ART_VIEWBOX, CarvedPanel, GOLD_LINES, WIND_LINES } from "./motifs";
+
+/** Loose pages caught by the wind: each rides one of the wind lines. */
+const PAGE_COUNT = 18;
 
 /**
- * L2-L3 · Scene 1: the wind arrives, lifts a book's pages, and carries it
- * through a carved Malay panel; the kayu (timber) world opens behind it.
+ * L2-L3 · Scene 1 "Through the arch" (the signature moment).
  *
- * The markup below IS the finished picture (kayu, gold panel, the book flown,
- * the second line of copy). That's what people see with reduced motion or if
- * JavaScript fails. When motion is allowed, the script makes the section tall,
- * pins the stage, and scrubs a timeline from the start state to this one.
+ * The stage holds for ~3 screens while you scroll:
+ *   1. The arch (the motif) opens from a window into the whole screen.
+ *   2. A storm of loose pages lifts off and rides the awan larat wind lines.
+ *   3. The carved panel draws itself in songket gold, then the camera flies
+ *      straight through it into the kayu world.
+ *
+ * The markup is the finished picture (full kayu, gold panel, the line of copy),
+ * shown as-is for reduced motion or if JavaScript fails.
  */
 export function WindScene() {
   const root = useRef<HTMLElement>(null);
@@ -34,13 +30,19 @@ export function WindScene() {
 
       mm.add(MOTION_OK, () => {
         const q = gsap.utils.selector(section);
-        const flight = section.querySelector<SVGPathElement>("[data-flight]");
-        const flyer = section.querySelector<SVGGElement>("[data-flyer]");
-        if (!flight || !flyer) return;
+        const winds = Array.from(section.querySelectorAll<SVGPathElement>("[data-wind-path]"));
+        if (winds.length === 0) return;
         section.classList.add("is-live");
-        // The flyer's markup puts it at the end of its flight (the finished
-        // picture). Reset to identity so MotionPath's alignment starts clean.
-        gsap.set(flyer, { x: 0, y: 0, rotation: 0 });
+
+        // The arch window, measured from the live stage size.
+        const archClip = () => {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          const archW = Math.min(w * (w < 768 ? 0.78 : 0.34), 560);
+          const side = (w - archW) / 2;
+          const top = h * (w < 768 ? 0.36 : 0.26);
+          return `inset(${top}px ${side}px 0px ${side}px round ${archW / 2}px ${archW / 2}px 0px 0px)`;
+        };
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
@@ -48,51 +50,60 @@ export function WindScene() {
             trigger: section,
             start: "top top",
             end: "bottom bottom",
-            scrub: 0.6,
+            scrub: 0.8,
+            invalidateOnRefresh: true,
           },
         });
 
-        // 0 → 0.3: the wind draws itself across the sky; the pages lift.
-        tl.fromTo(q("[data-wind]"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.3, stagger: 0.04 }, 0)
-          .fromTo(
-            q("[data-page]"),
-            { rotation: 0 },
-            { rotation: (i: number) => -14 - i * 13, svgOrigin: SPINE_ORIGIN, duration: 0.22, stagger: 0.03 },
-            0.06,
-          )
-          .fromTo(q("[data-line1]"), { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.1 }, 0.08)
-          // 0.2 → 0.45: the carved panel appears in the wind's path.
-          .fromTo(q("[data-panel] path"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.25, stagger: 0.01 }, 0.2)
-          .to(q("[data-line1]"), { autoAlpha: 0, y: -16, duration: 0.08 }, 0.36)
-          // 0.25 → 0.75: a book lifts off the reader's copy and rides the wind through the panel.
-          .fromTo(flyer, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.04 }, 0.27)
-          .to(
-            flyer,
+        // 1. The window opens into the whole screen.
+        tl.fromTo(
+          q("[data-kayu]"),
+          { clipPath: archClip },
+          { clipPath: "inset(0px 0px 0px 0px round 0px 0px 0px 0px)", duration: 0.32, ease: "power2.inOut" },
+          0,
+        )
+          .fromTo(q("[data-sky-line]"), { autoAlpha: 1, y: 0 }, { autoAlpha: 0, y: -40, duration: 0.08 }, 0.07)
+          .fromTo(q("[data-wind]"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.3, stagger: 0.03 }, 0.02);
+
+        // 2. The storm of pages: each rides a wind line, spinning as it goes.
+        q("[data-loose-page]").forEach((page, i) => {
+          const path = winds[i % winds.length];
+          const begin = 0.06 + (i / PAGE_COUNT) * 0.5;
+          tl.fromTo(page, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.03 }, begin).to(
+            page,
             {
-              motionPath: { path: flight, align: flight, alignOrigin: [0.5, 0.5] },
-              rotation: -12,
-              duration: 0.5,
-              ease: "power1.inOut",
-              immediateRender: true,
+              motionPath: {
+                path,
+                align: path,
+                alignOrigin: [0.5, 0.5],
+                start: (i * 0.13) % 0.3,
+                end: 1,
+              },
+              rotation: gsap.utils.random(-540, 540),
+              scale: gsap.utils.random(0.6, 1.25),
+              duration: 0.38,
+              ease: "power1.in",
+              immediateRender: false,
             },
-            0.27,
-          )
-          // 0.5 → 0.8: as the book passes through, the kayu world opens outward from the panel.
+            begin,
+          );
+          tl.to(page, { autoAlpha: 0, duration: 0.04 }, begin + 0.34);
+        });
+
+        // 3. The carved panel draws itself in gold...
+        tl.fromTo(q("[data-panel] path"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.26, stagger: 0.008 }, 0.22)
+          // ...then the camera flies through it.
           .fromTo(
-            q("[data-kayu]"),
-            { clipPath: "circle(0% at 50% 50%)" },
-            { clipPath: "circle(150% at 50% 50%)", duration: 0.3, ease: "power2.in" },
-            0.5,
+            q("[data-panel]"),
+            { scale: 1, autoAlpha: 1, transformOrigin: "50% 50%" },
+            { scale: 9, autoAlpha: 0, duration: 0.24, ease: "power2.in" },
+            0.56,
           )
-          .fromTo(q("[data-panel]"), { attr: { stroke: "#7a5838" } }, { attr: { stroke: "#c9a24a" }, duration: 0.15 }, 0.55)
-          // 0.65 → 0.95: songket-gold linework draws on the timber; the second line arrives.
-          .fromTo(q("[data-gold]"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.25, stagger: 0.04 }, 0.65)
-          .fromTo(q("[data-line2]"), { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.1 }, 0.82)
-          .to({}, { duration: 0.05 }); // a short rest at the end before the page moves on
+          .fromTo(q("[data-gold]"), { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.24, stagger: 0.05 }, 0.66)
+          .fromTo(q("[data-kayu-line]"), { autoAlpha: 0, y: 40 }, { autoAlpha: 1, y: 0, duration: 0.12 }, 0.8)
+          .to({}, { duration: 0.06 });
 
-        // Positions depend on layout: recompute once the fonts have loaded.
         document.fonts?.ready.then(() => ScrollTrigger.refresh());
-
         return () => section.classList.remove("is-live");
       });
     },
@@ -102,90 +113,91 @@ export function WindScene() {
   return (
     <section
       ref={root}
-      aria-label="The wind carries a book through a carved panel"
+      aria-label="The wind carries the pages through a carved panel"
       className="scene"
       style={{ "--hold": 3 } as React.CSSProperties}
     >
       <div className="scene-stage bg-sky-light text-ink">
-        {/* Sky layer: wind lines and the reader's open book. */}
-        <svg
-          viewBox={ART_VIEWBOX}
-          preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 h-full w-full"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <g strokeWidth={2} opacity={0.55}>
-            {WIND_LINES.map((d) => (
-              <path key={d} d={d} data-wind="" />
-            ))}
-          </g>
-          <g strokeWidth={2}>
-            <path d={BOOK_LEFT} fill="#f1efea" />
-            <path d={BOOK_RIGHT} fill="#f1efea" />
-            {[0, 1, 2].map((i) => (
-              <path key={i} d={BOOK_RIGHT} fill="#ffffff" data-page="" />
-            ))}
-          </g>
-        </svg>
+        {/* Sky: the line of copy before the window opens. */}
+        <div className="absolute inset-x-0 top-[8vh] z-10 mx-auto w-full max-w-[1400px] px-4 sm:px-8">
+          <p
+            data-sky-line=""
+            className="invisible max-w-[22ch] font-display text-[clamp(1.75rem,3.4vw,2.75rem)] leading-[1.12] font-medium opacity-0"
+          >
+            Your finished book still has places to go.
+          </p>
+        </div>
 
-        {/* Kayu layer: opens outward from the panel. Finished state = fully open. */}
-        <div data-kayu="" className="absolute inset-0 bg-kayu" style={{ clipPath: "circle(150% at 50% 50%)" }}>
+        {/* The kayu world, revealed through the arch. Finished state: fully open. */}
+        <div data-kayu="" className="absolute inset-0 bg-kayu">
           <svg
             viewBox={ART_VIEWBOX}
             preserveAspectRatio="xMidYMid slice"
             className="absolute inset-0 h-full w-full"
             fill="none"
             stroke="#c9a24a"
-            strokeWidth={1.8}
+            strokeWidth={2}
             strokeLinecap="round"
-            opacity={0.6}
+            opacity={0.7}
             aria-hidden="true"
           >
             {GOLD_LINES.map((d) => (
               <path key={d} d={d} data-gold="" />
             ))}
           </svg>
-        </div>
-
-        {/* Panel and the flying book sit above both worlds. */}
-        <svg
-          viewBox={ART_VIEWBOX}
-          preserveAspectRatio="xMidYMid slice"
-          className="absolute inset-0 h-full w-full"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d={FLIGHT_PATH} data-flight="" stroke="none" />
-          <g data-panel="" stroke="#c9a24a" strokeWidth={2.4}>
-            <CarvedPanel />
-          </g>
-          <g data-flyer="" stroke="#2b2a28" strokeWidth={2} transform="translate(980 132) rotate(-12)">
-            <FlyingBook />
-          </g>
-        </svg>
-
-        {/* Copy. Line 1 belongs to the sky; line 2 (the finished state) to the kayu. */}
-        <div className="pointer-events-none absolute inset-x-0 top-[9vh] mx-auto w-full max-w-[1312px] px-4 sm:px-8 lg:top-auto lg:bottom-[14vh]">
-          <div className="relative max-w-[26rem]">
+          <svg
+            viewBox={ART_VIEWBOX}
+            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-0 h-full w-full"
+            fill="none"
+            stroke="#c9a24a"
+            strokeWidth={2.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <g data-panel="" opacity={0.18}>
+              <CarvedPanel />
+            </g>
+          </svg>
+          <div className="absolute inset-x-0 bottom-[12vh] mx-auto w-full max-w-[1400px] px-4 sm:px-8">
             <p
-              data-line1=""
-              className="invisible absolute inset-x-0 top-0 font-display text-[clamp(1.6rem,4.4vw,2.25rem)] leading-[1.2] font-medium text-ink opacity-0"
-            >
-              Your finished book still has places to go.
-            </p>
-            <p
-              data-line2=""
-              className="font-display text-[clamp(1.6rem,4.4vw,2.25rem)] leading-[1.2] font-medium text-bone"
+              data-kayu-line=""
+              className="max-w-[18ch] font-display text-[clamp(2.25rem,5.6vw,5rem)] leading-[1.02] font-medium tracking-[-0.02em] text-songket"
             >
               Like the bayu, a book only stops by.
             </p>
           </div>
+        </div>
+
+        {/* The wind lines (drawn over everything) and the loose pages riding them. */}
+        <svg
+          viewBox={ART_VIEWBOX}
+          preserveAspectRatio="xMidYMid slice"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          fill="none"
+          stroke="#c9a24a"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          opacity={0.55}
+          aria-hidden="true"
+        >
+          {WIND_LINES.map((d) => (
+            <path key={d} d={d} data-wind="" data-wind-path="" />
+          ))}
+        </svg>
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          {Array.from({ length: PAGE_COUNT }, (_, i) => (
+            <span
+              key={i}
+              data-loose-page=""
+              className="invisible absolute top-1/2 left-1/2 block h-[44px] w-[34px] rounded-[2px] bg-[#fbfaf6] opacity-0 md:h-[64px] md:w-[48px]"
+            >
+              <span className="absolute top-[22%] left-[16%] block h-[2px] w-[64%] bg-ink/25" />
+              <span className="absolute top-[40%] left-[16%] block h-[2px] w-[56%] bg-ink/25" />
+              <span className="absolute top-[58%] left-[16%] block h-[2px] w-[62%] bg-ink/25" />
+            </span>
+          ))}
         </div>
       </div>
     </section>
