@@ -4,6 +4,27 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-10-30 (late night): Week 1 foundation
+
+**Done**
+- Next.js 16 app in `web/` (TypeScript strict, Tailwind 4, Bayu tokens, self-hosted fonts, themed focus and selection).
+- Supabase sign-in: magic link + Google, `/auth/callback`, `/auth/signout`, protected `/welcome`, session refresh in `src/proxy.ts`.
+- Redirect safety (`safeRedirectPath`) with 12 Vitest tests, so sign-in can't send people to other websites.
+- **Landing page, full version**: hero, scene 1 (wind through the carved panel, kayu world opens), credits card, shelf preview (sample books), scene 2 (a book's rantau), safety + FAQ, close. Phone layouts, reduced-motion finished states, works without JavaScript.
+- PWA manifest + icons; GitHub Actions CI (lint, typecheck, test, build).
+- Verified: build, lint, typecheck, tests pass; screenshots at 1440 and 390 px through every scroll beat; no console errors, no horizontal scroll.
+
+**Decisions**
+- App lives in `web/` (room for Python services later); Vercel root directory = `web`.
+- Kept Next 16 defaults (Cache Components, Partial Prefetching): session reads sit inside `<Suspense>`.
+- Hero load animation is pure CSS (readable on the first frame, no JS dependency); scenes use GSAP with sticky stages, not scroll-jacking.
+- Supabase **publishable** key naming (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`).
+
+**Next**
+- [ ] Zarith: create Supabase + Vercel projects (README → One-time setup), then try signing in
+- [ ] Zarith: approve rules R10-R13 ([user-flow.md](docs/user-flow.md))
+- [ ] Week 2: profile, add-a-book with barcode scan, shelf, browse
+
 ## 2026-10-30 (night)
 
 **Done**
