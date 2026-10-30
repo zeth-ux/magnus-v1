@@ -115,7 +115,7 @@ export const SHELF: ShelfCopy[] = [
     colour: "#e9e2d0",
     ink: "#2f7a4d",
     text: "#1d1a16",
-    flood: "#2f7a4d",
+    flood: "#1f5535",
     floodText: "#f3efe3",
     pattern: "pelikat",
   },

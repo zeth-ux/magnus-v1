@@ -2,9 +2,7 @@
 
 import Lenis from "lenis";
 import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
-
-/** The live Lenis instance (null on touch or reduced motion), so a dialog can pause it. */
-export const smooth: { lenis: Lenis | null } = { lenis: null };
+import { smooth } from "@/lib/smooth";
 
 /**
  * Weighted, smooth wheel scrolling (Lenis), kept in sync with ScrollTrigger.

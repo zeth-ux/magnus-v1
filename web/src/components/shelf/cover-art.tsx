@@ -1,3 +1,4 @@
+import { useId } from "react";
 import type { CoverPattern, ShelfCopy } from "@/content/shelf";
 
 /**
@@ -144,7 +145,8 @@ function Sun({ ink, cx, cy, r }: { ink: string; cx: number; cy: number; r: numbe
 
 /** Spine art: a strip of the book's pattern filling the right part of the spine. */
 export function SpineArt({ copy }: { copy: ShelfCopy }) {
-  const id = `sp-${copy.slug}`;
+  // useId: the same book renders twice (shelf and dialog), and pattern ids must be unique.
+  const id = `sp-${useId().replace(/:/g, "")}`;
   return (
     <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -163,7 +165,7 @@ export function SpineArt({ copy }: { copy: ShelfCopy }) {
 
 /** Cover art for the front board, drawn landscape (spine length x cover width). */
 export function CoverArt({ copy }: { copy: ShelfCopy }) {
-  const id = `cv-${copy.slug}`;
+  const id = `cv-${useId().replace(/:/g, "")}`;
   return (
     <svg viewBox="0 0 300 192" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>

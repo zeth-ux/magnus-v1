@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 import { Shelf } from "@/components/shelf/shelf";
+import { SiteHeader } from "@/components/landing/site-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { SafetyFaq } from "@/components/landing/safety-faq";
 import { Closing } from "@/components/landing/closing";
@@ -17,10 +18,11 @@ export const viewport: Viewport = {
 
 export default function LandingPage() {
   return (
-    <div className="bg-malam">
+    <div className="page-malam bg-malam">
       <SmoothScroll />
-      <Shelf />
+      <SiteHeader />
       <main>
+        <Shelf />
         <HowItWorks />
         <SafetyFaq />
       </main>

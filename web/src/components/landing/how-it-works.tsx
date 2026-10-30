@@ -101,7 +101,7 @@ export function HowItWorks() {
         >
           {HOW_STAGES.map((stage, i) => {
             const isOpen = !live || open === i;
-            const dark = stage.ink !== "#2a1a0c";
+            const dark = stage.dark;
             return (
               <div
                 key={stage.name}

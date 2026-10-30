@@ -11,6 +11,7 @@ export const HOW_STAGES = [
     stamp: "+1 starter",
     bg: "#1f4d3a",
     ink: "#f3ecdc",
+    dark: true,
   },
   {
     name: "Request",
@@ -18,6 +19,7 @@ export const HOW_STAGES = [
     stamp: "Requested",
     bg: "#1b2a6b",
     ink: "#eef0fb",
+    dark: true,
   },
   {
     name: "Meet up",
@@ -25,6 +27,7 @@ export const HOW_STAGES = [
     stamp: "Handed over",
     bg: "#5a1f4a",
     ink: "#fbe9f0",
+    dark: true,
   },
   {
     name: "Credits",
@@ -32,6 +35,7 @@ export const HOW_STAGES = [
     stamp: "+1 · −1",
     bg: "#f0b429",
     ink: "#2a1a0c",
+    dark: false,
   },
 ] as const;
 

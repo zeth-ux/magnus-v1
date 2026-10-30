@@ -29,11 +29,18 @@
 }
 
 html {
+  scrollbar-gutter: stable;
   background: var(--color-bone);
   color: var(--color-ink);
   font-family: var(--font-text);
   -webkit-text-size-adjust: 100%;
   scrollbar-color: var(--color-kopi) var(--color-bone);
+}
+
+/* The landing is dark end to end, including overscroll bounce. */
+html:has(.page-malam) {
+  background: var(--color-malam);
+  scrollbar-color: var(--color-songket) var(--color-malam);
 }
 
 body {
@@ -160,8 +167,10 @@ a {
 .shelf-stack [data-lift] {
   transform-style: preserve-3d;
 }
-.shelf-stack [data-lift] {
-  transition: transform 0.45s var(--ease-out);
+@media (prefers-reduced-motion: no-preference) {
+  .shelf-stack [data-lift] {
+    transition: transform 0.45s var(--ease-out);
+  }
 }
 @media (hover: hover) {
   .shelf-stack [data-book]:hover [data-lift],

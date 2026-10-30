@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { BayuMark } from "@/components/bayu-mark";
+import { useEffect, useRef, useState } from "react";
 import { SHELF } from "@/content/shelf";
-import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
+import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { Book3D } from "./book-3d";
 import { ShelfDialog } from "./shelf-dialog";
 
@@ -20,6 +19,15 @@ export function Shelf() {
   const root = useRef<HTMLElement>(null);
   const [open, setOpen] = useState<{ index: number; x: number; y: number } | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
+  // The breeze rests while a book is open (the dialog covers the stack).
+  const resting = useRef(false);
+
+  useEffect(() => {
+    resting.current = open !== null;
+    // Back on the shelf: focus the book you were last looking at. Runs after the
+    // dialog's cleanup has lifted `inert`, so the focus always lands.
+    if (!open) opener.current?.focus({ preventScroll: true });
+  }, [open]);
 
   useGSAP(
     () => {
@@ -32,12 +40,12 @@ export function Shelf() {
         const drops = gsap.utils.toArray<HTMLElement>("[data-drop]", section);
         const floats = gsap.utils.toArray<HTMLElement>("[data-float]", section);
 
-        // Load: the stack builds itself, books falling into place from the top.
+        // Load: the stack builds itself, books falling into place from above.
+        // Transforms only: opacity would flatten the 3D books mid-fall.
         gsap.from(drops, {
           y: () => -window.innerHeight * 0.8,
           rotationX: -70,
           rotationZ: () => gsap.utils.random(-14, 14),
-          autoAlpha: 0,
           duration: 1.2,
           ease: "expo.out",
           stagger: { each: 0.06, from: "end" },
@@ -50,22 +58,43 @@ export function Shelf() {
           ry: gsap.quickSetter(el, "rotationY", "deg"),
         }));
 
+        // Where the stack sits on the page, re-measured whenever ScrollTrigger refreshes.
+        let stackTop = 0;
+        let stackHeight = 0;
+        const measure = () => {
+          const r = stack.getBoundingClientRect();
+          stackTop = r.top + window.scrollY;
+          stackHeight = r.height;
+        };
+        measure();
+        ScrollTrigger.addEventListener("refresh", measure);
+
         let lastY = window.scrollY;
+        let lastOrigin = "";
         let breeze = 0;
         let dir = 1;
         const tick = (time: number) => {
+          if (resting.current) return;
+          const y = window.scrollY;
+          const top = stackTop - y;
+          if (top + stackHeight < -200 || top > window.innerHeight + 200) {
+            lastY = y;
+            return;
+          }
+
           // The camera stays at the middle of the screen as the stack scrolls past.
-          const r = stack.getBoundingClientRect();
-          stack.style.perspectiveOrigin = `50% ${window.innerHeight / 2 - r.top}px`;
-          if (r.bottom < -200 || r.top > window.innerHeight + 200) return;
+          const origin = `50% ${Math.round(window.innerHeight / 2 - top)}px`;
+          if (origin !== lastOrigin) stack.style.perspectiveOrigin = lastOrigin = origin;
 
           // Scroll speed becomes wind: books drift and turn, then settle (with a faint idle sway).
-          const y = window.scrollY;
-          const v = y - lastY;
+          // deltaRatio keeps the feel the same on 60 Hz and 120 Hz screens.
+          const ratio = gsap.ticker.deltaRatio(60);
+          const v = (y - lastY) / ratio;
           lastY = y;
           if (Math.abs(v) > 0.5) dir = Math.sign(v);
           const target = Math.min(Math.abs(v) / 28, 1);
-          breeze += (target - breeze) * (target > breeze ? 0.18 : 0.05);
+          const ease = (target > breeze ? 0.18 : 0.05) * ratio;
+          breeze += (target - breeze) * Math.min(ease, 1);
           const w = window.innerWidth;
           set.forEach((s, i) => {
             const idle = Math.sin(time * 0.6 + i * 1.7);
@@ -75,7 +104,11 @@ export function Shelf() {
           });
         };
         gsap.ticker.add(tick);
-        return () => gsap.ticker.remove(tick);
+        return () => {
+          gsap.ticker.remove(tick);
+          ScrollTrigger.removeEventListener("refresh", measure);
+          gsap.set(floats, { clearProps: "transform" });
+        };
       });
 
       // Reduced motion: a fixed camera a little above the stack, nothing moves.
@@ -86,49 +119,28 @@ export function Shelf() {
     { scope: root },
   );
 
+  function bookButton(index: number) {
+    return root.current?.querySelectorAll<HTMLButtonElement>("[data-book]")[index] ?? null;
+  }
+
   function choose(index: number, button: HTMLButtonElement) {
     const r = button.getBoundingClientRect();
     opener.current = button;
     setOpen({ index, x: r.left + r.width / 2, y: r.top + r.height / 2 });
   }
 
-  function close() {
-    setOpen(null);
-    // After the dialog unmounts and the page is no longer inert, return focus to the book.
-    window.setTimeout(() => opener.current?.focus({ preventScroll: true }), 30);
+  function navigate(index: number) {
+    opener.current = bookButton(index);
+    setOpen((o) => (o ? { ...o, index } : o));
   }
 
   return (
-    <header ref={root} className="relative bg-malam text-paper">
-      <nav aria-label="Main" className="relative z-20 mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-3 text-paper no-underline">
-          <BayuMark className="h-8 w-8" />
-          <span className="flex flex-col leading-tight">
-            <span className="font-display text-[17px] font-semibold">Bayu</span>
-            <span className="font-display text-[15px] italic opacity-80">Books that breeze through</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-6 text-[15px]">
-          <a href="#how" className="hidden text-paper no-underline hover:underline sm:inline">
-            How it works
-          </a>
-          <a href="#faq" className="hidden text-paper no-underline hover:underline sm:inline">
-            Questions
-          </a>
-          <Link
-            href="/login"
-            className="rounded-full border border-paper/60 px-4 py-2 font-semibold text-paper no-underline transition-colors duration-200 hover:bg-paper hover:text-malam"
-          >
-            Join the pilot
-          </Link>
-        </div>
-      </nav>
-
+    <section ref={root} aria-labelledby="shelf-title" className="relative bg-malam text-paper">
       <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-10 px-4 pb-32 sm:px-8 lg:grid-cols-12 lg:gap-6">
         {/* Intro: sticks beside the stack on a wide screen. */}
-        <div className="pt-[8vh] lg:col-span-4 lg:pt-0">
+        <div className="pt-[8vh] lg:col-span-4 lg:pt-[6vh]">
           <div className="flex flex-col gap-6 lg:sticky lg:top-[22vh]">
-            <h1 className="font-display text-[clamp(2.6rem,4.6vw,4.4rem)] leading-[1] font-medium tracking-[-0.02em]">
+            <h1 id="shelf-title" className="font-display text-[clamp(2.6rem,4.6vw,4.4rem)] leading-[1] font-medium tracking-[-0.02em]">
               Your next book is on a friend&rsquo;s shelf.
             </h1>
             <p className="max-w-[24rem] text-[17px] leading-relaxed text-paper/80">
@@ -182,10 +194,10 @@ export function Shelf() {
         <ShelfDialog
           index={open.index}
           origin={{ x: open.x, y: open.y }}
-          onNavigate={(index) => setOpen({ index, x: window.innerWidth / 2, y: window.innerHeight / 2 })}
-          onClose={close}
+          onNavigate={navigate}
+          onClose={() => setOpen(null)}
         />
       ) : null}
-    </header>
+    </section>
   );
 }
