@@ -49,9 +49,13 @@ The landing page works without Supabase keys; sign-in needs them.
 ## One-time setup (Supabase + Vercel)
 1. **Supabase** (free): create a project at supabase.com. In **Project Settings → API**, copy the Project URL and the **publishable** key into `web/.env.local`.
 2. **Auth URLs:** in **Authentication → URL Configuration**, set *Site URL* to your Vercel address and add `http://localhost:3000/auth/callback` and `https://<your-vercel-domain>/auth/callback` to *Redirect URLs*.
-3. **Email limit:** Supabase's built-in email only sends a few sign-in emails per hour. Before the pilot, connect a free SMTP sender (e.g. Resend) in **Authentication → Emails → SMTP**.
-4. **Google sign-in (optional):** create an OAuth client in Google Cloud, then enable the Google provider in **Authentication → Providers**. Email sign-in works without it.
-5. **Vercel** (free): import the GitHub repo, set **Root Directory = `web`**, and add the three variables from `.env.example` (with `NEXT_PUBLIC_SITE_URL` = your Vercel URL). Every PR then gets a preview link.
+3. **Magic-link email template** (important on phones): in **Authentication → Emails → Magic Link**, set the link to
+   `<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email">Sign in to Bayu</a>`.
+   This makes the link work in any browser (e.g. when Gmail opens it in its own app). Keep the Redirect URLs list exact, with no wildcards.
+4. **Email limit:** Supabase's built-in email only sends a few sign-in emails per hour. Before the pilot, connect a free SMTP sender (e.g. Resend) in **Authentication → Emails → SMTP**.
+5. **Google sign-in (optional):** create an OAuth client in Google Cloud, then enable the Google provider in **Authentication → Providers**. Email sign-in works without it.
+6. **Vercel** (free): import the GitHub repo, set **Root Directory = `web`**, and add the three variables from `.env.example` (with `NEXT_PUBLIC_SITE_URL` = your Vercel URL). Every PR then gets a preview link.
+   Note: `NEXT_PUBLIC_*` values are fixed at build time, so sign-in emails sent from a *preview* deployment link to production. Test sign-in on production (or locally).
 
 ## Development workflow (Claude Code)
 This repo is set up so Claude Code can do most of the build work with guardrails.

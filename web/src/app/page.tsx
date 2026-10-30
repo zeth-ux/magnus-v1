@@ -14,8 +14,8 @@ import { Closing } from "@/components/landing/closing";
 export default function LandingPage() {
   return (
     <>
-      <Hero />
       <main>
+        <Hero />
         <WindScene />
         <Credits />
         <ShelfPreview />

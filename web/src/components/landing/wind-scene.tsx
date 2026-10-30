@@ -33,11 +33,11 @@ export function WindScene() {
       const mm = gsap.matchMedia();
 
       mm.add(MOTION_OK, () => {
-        section.classList.add("is-live");
         const q = gsap.utils.selector(section);
         const flight = section.querySelector<SVGPathElement>("[data-flight]");
         const flyer = section.querySelector<SVGGElement>("[data-flyer]");
         if (!flight || !flyer) return;
+        section.classList.add("is-live");
         // The flyer's markup puts it at the end of its flight (the finished
         // picture). Reset to identity so MotionPath's alignment starts clean.
         gsap.set(flyer, { x: 0, y: 0, rotation: 0 });

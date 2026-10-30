@@ -85,7 +85,7 @@ export function ShelfPreview() {
           </ul>
         </div>
 
-        <figure className="hidden flex-col gap-4 self-center lg:col-span-4 lg:col-start-9 lg:flex" aria-live="polite">
+        <figure className="hidden flex-col gap-4 self-center lg:col-span-4 lg:col-start-9 lg:flex" aria-hidden="true">
           <div
             className="flex h-[26rem] flex-col justify-between rounded-[4px] p-8 transition-colors duration-300"
             style={{ background: book.cover }}
