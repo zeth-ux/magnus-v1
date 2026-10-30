@@ -11,6 +11,8 @@ Instructions for Claude Code working in this repo.
 - Key rules live in decision records. Read them before touching related code:
   - `docs/decisions/003-credit-system.md`: credits, lending, limits (R1-R9). **The ledger is append-only.**
   - `docs/decisions/002-swap-first-korea-pilot.md`: pilot scope (what's in and out).
+  - `docs/user-flow.md`: the user journey, request lifecycle and systems.
+  - `docs/landing.md`: the landing page story, scroll scenes and motion rules (follow the GSAP skills in `.claude/skills/`).
   - `docs/brand.md`: name, colours, voice, and feature words (**Warkah** = pass-it-on note, **Rantau** = book journey, **Penglipur** = contributor badge).
 - Use these terms in code and UI: `copy` (a physical book someone owns), `book` (title metadata by ISBN), `give`, `lend`, `credit`, `handover`.
 
