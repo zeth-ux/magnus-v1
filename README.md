@@ -3,7 +3,7 @@
 A side project by Zarith Imran (AI major, Hanyang University ERICA).
 
 > **Status:** idea picked: a **book swap + book club community** for Malaysia (KL first) and Korea, built as a **mobile-first PWA**. Now validating with organizers and readers.
-> Docs: [MARKET.md](MARKET.md) (market analysis) · [docs/decisions/](docs/decisions/) (decision records) · [IDEAS.md](IDEAS.md) (shortlist) · [PROGRESS.md](PROGRESS.md) (running log)
+> Docs: [ROADMAP.md](ROADMAP.md) (MVP plan) · [MARKET.md](MARKET.md) (market analysis) · [docs/decisions/](docs/decisions/) (decision records) · [IDEAS.md](IDEAS.md) (shortlist) · [PROGRESS.md](PROGRESS.md) (running log)
 
 ## Goal
 Ship a real, deployed product that:
