@@ -15,7 +15,7 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 **Decisions**
 - One motif (the arch) carries the page: buttons, windows, tabs, postcards, wordmark.
-- No content waits on a reveal to be visible (scrubbed motion instead of fade-ins), so a missed trigger never leaves a blank page.
+- Every section reads without JavaScript or with reduced motion (FAQ is native `<details>`, the accordion shows all four steps until hydrated). The close section uses scrubbed motion, not a fade-in.
 
 **Next**
 - [ ] Zarith: test locally (`git switch feat/landing-redo`, `npm run dev`), then merge the PR if happy

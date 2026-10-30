@@ -1,32 +1,32 @@
 "use client";
 
-import { useEffect } from "react";
 import Lenis from "lenis";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 /**
  * Weighted, smooth wheel scrolling (Lenis), kept in sync with ScrollTrigger.
- * Off for touch screens (native touch scrolling is better) and for anyone who
- * prefers reduced motion. Native scroll stays the truth: no scroll-jacking,
- * the scrollbar and keyboard work as usual.
+ * Only for a fine pointer (mouse/trackpad) and when motion is OK; native touch
+ * scrolling is better. gsap.matchMedia() tears it down if either setting
+ * changes while the page is open. Native scroll stays the truth: no
+ * scroll-jacking, the scrollbar and keyboard work as usual.
  */
 export function SmoothScroll() {
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const touch = window.matchMedia("(pointer: coarse)").matches;
-    if (reduce || touch) return;
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add(`${MOTION_OK} and (pointer: fine)`, () => {
+      const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
+      lenis.on("scroll", ScrollTrigger.update);
+      const tick = (time: number) => lenis.raf(time * 1000);
+      gsap.ticker.add(tick);
+      gsap.ticker.lagSmoothing(0);
 
-    const lenis = new Lenis({ lerp: 0.12, smoothWheel: true });
-    lenis.on("scroll", ScrollTrigger.update);
-    const tick = (time: number) => lenis.raf(time * 1000);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
-
-    return () => {
-      gsap.ticker.remove(tick);
-      lenis.destroy();
-    };
-  }, []);
+      return () => {
+        gsap.ticker.remove(tick);
+        gsap.ticker.lagSmoothing(500, 33); // GSAP's default
+        lenis.destroy();
+      };
+    });
+  });
 
   return null;
 }

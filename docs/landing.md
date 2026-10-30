@@ -37,7 +37,7 @@ tabs, the rantau postcards and the letters of the closing wordmark.
 - **Native scroll.** Lenis smoothing on desktop wheel only (`smooth-scroll.tsx`); off for touch and reduced motion.
 - Animate only **transform, opacity, clip-path** (+ SVG stroke).
 - **Reduced motion / no JS:** every section's default markup *is* its finished picture. Scenes only get `.is-live` (tall + sticky) when their script runs.
-- Content is never hidden waiting for a reveal: the close section's motion is a scrubbed tilt, not a fade-in.
+- Every section reads without JavaScript: the FAQ is native `<details>`, the accordion shows all four steps until hydrated, and the close section uses a scrubbed tilt rather than a fade-in.
 - taste-skill house rules: no eyebrow labels, no monospace, no 01/02 numbering, no thin rules, no gradients, no resting shadows (the dialog is a real UI fragment, so it keeps one), two-line headlines.
 
 ## Verified (2026-10-31)

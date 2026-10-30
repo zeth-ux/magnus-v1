@@ -24,8 +24,13 @@ export function Showcase() {
           scrollTrigger: { trigger: root.current, start: "top 70%", once: true },
           defaults: { ease: "expo.out" },
         });
-        tl.from("[data-show-arch]", { clipPath: "inset(100% 0% 0% 0% round 999px 999px 0 0)", duration: 1.3 })
-          .from("[data-show-cover]", { yPercent: -40, rotation: -14, autoAlpha: 0, duration: 1.1 }, 0.35)
+        tl.fromTo(
+          "[data-show-arch]",
+          { clipPath: "inset(100% 0% 0% 0% round 999px 999px 0 0)" },
+          { clipPath: "inset(0% 0% 0% 0% round 999px 999px 0 0)", duration: 1.3 },
+        )
+          // The cover drops in on its own element; the sway below owns the wrapper's rotation.
+          .from("[data-show-drop]", { yPercent: -40, rotation: -14, autoAlpha: 0, duration: 1.1 }, 0.35)
           .from("[data-show-item]", { y: 30, autoAlpha: 0, duration: 0.7, stagger: 0.06 }, 0.2);
 
         // While the section passes, the cover sways gently in the breeze.
@@ -39,6 +44,10 @@ export function Showcase() {
           },
         );
       });
+      return () => {
+        const face = root.current?.querySelector("[data-show-face]");
+        if (face) gsap.killTweensOf(face);
+      };
     },
     { scope: root },
   );
@@ -50,7 +59,7 @@ export function Showcase() {
     gsap.fromTo(
       root.current?.querySelector("[data-show-face]") ?? null,
       { rotationY: -90, autoAlpha: 0.4 },
-      { rotationY: 0, autoAlpha: 1, duration: 0.55, ease: "expo.out" },
+      { rotationY: 0, autoAlpha: 1, duration: 0.55, ease: "expo.out", overwrite: "auto" },
     );
   }
 
@@ -69,6 +78,7 @@ export function Showcase() {
             data-show-cover=""
             className="absolute top-[-6%] left-1/2 w-[min(52vw,270px)] -translate-x-1/2 [perspective:1000px] lg:left-[min(220px,25vw)]"
           >
+            <div data-show-drop="">
             <div
               data-show-face=""
               className="flex aspect-[2/3] flex-col justify-between rounded-[4px] p-6 transition-colors duration-300"
@@ -79,8 +89,9 @@ export function Showcase() {
               </span>
               <span className="text-[15px] tracking-[0.02em]">{book.author}</span>
             </div>
+            </div>
           </div>
-          <p className="absolute bottom-6 hidden max-w-[13rem] text-[17px] leading-snug lg:left-[calc(min(86vw,440px)+32px)] lg:block">
+          <p aria-live="polite" className="absolute bottom-6 hidden max-w-[13rem] text-[17px] leading-snug lg:left-[calc(min(86vw,440px)+32px)] lg:block">
             <strong>{book.mode === "give" ? "Give" : `Lend · ${book.lendFor}`}</strong>
             <br />
             {book.owner}
@@ -107,7 +118,7 @@ export function Showcase() {
               <li key={b.title} data-show-item="">
                 <button
                   type="button"
-                  aria-pressed={active === i}
+                  aria-current={active === i ? "true" : undefined}
                   onClick={() => choose(i)}
                   onMouseEnter={() => choose(i)}
                   onFocus={() => choose(i)}
@@ -123,7 +134,7 @@ export function Showcase() {
               </li>
             ))}
           </ul>
-          <p className="mt-6 text-[17px] lg:hidden">
+          <p aria-live="polite" className="mt-6 text-[17px] lg:hidden">
             <strong>{book.mode === "give" ? "Give" : `Lend · ${book.lendFor}`}</strong> · {book.owner}
           </p>
           <p className="mt-8 max-w-[30rem] text-[15px] leading-relaxed text-muted">

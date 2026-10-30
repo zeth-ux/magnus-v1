@@ -22,10 +22,10 @@ export function RantauScene() {
       const mm = gsap.matchMedia();
 
       mm.add(MOTION_OK, () => {
-        section.classList.add("is-live");
         const q = gsap.utils.selector(section);
         const track = q("[data-track]")[0] as HTMLElement | undefined;
         if (!track) return;
+        section.classList.add("is-live");
 
         const travel = gsap.timeline({
           defaults: { ease: "none" },
@@ -46,8 +46,8 @@ export function RantauScene() {
           const stamp = card.querySelector("[data-pass-stamp]");
           const arch = card.querySelector("[data-card-arch]");
           if (arch) {
-            gsap.from(arch, {
-              clipPath: "inset(100% 0% 0% 0% round 999px 999px 0 0)",
+            gsap.fromTo(arch, { clipPath: "inset(100% 0% 0% 0% round 999px 999px 0 0)" }, {
+              clipPath: "inset(0% 0% 0% 0% round 999px 999px 0 0)",
               duration: 0.9,
               ease: "expo.out",
               scrollTrigger: { trigger: card, containerAnimation: travel, start: "left 70%", toggleActions: "play none none reverse" },

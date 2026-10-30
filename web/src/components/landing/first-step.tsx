@@ -25,7 +25,7 @@ export function FirstStep() {
           scrollTrigger: { trigger: root.current, start: "top bottom", end: "top 25%", scrub: 0.6 },
           defaults: { ease: "power2.out" },
         });
-        tl.from("[data-close-line] > *", { yPercent: 40, stagger: 0.1 })
+        tl.from("[data-close-line] > * > *", { yPercent: 40, stagger: 0.1 })
           .from("[data-dialog]", { y: 140, rotation: 5 }, 0);
         // The songket band slides sideways as you scroll past, like cloth on a loom.
         gsap.fromTo(
@@ -67,17 +67,22 @@ export function FirstStep() {
 
         <div className="flex lg:col-span-5 lg:col-start-7">
           {/* taste-skill-ignore: a real dialog fragment (data-ui) keeps its own shadow */}
-          <form
+          {/* A preview, not a real form: nothing here is submitted or sent anywhere. */}
+          <div
+            role="group"
+            aria-labelledby="first-book-title"
             data-ui=""
             data-dialog=""
-            action="/login"
             className="flex w-full max-w-[440px] flex-col gap-5 rounded-[10px] bg-bone p-7 text-ink dialog-shadow"
           >
-            <p className="font-display text-2xl font-semibold">List your first book</p>
+            <h3 id="first-book-title" className="font-display text-2xl font-semibold">
+              List your first book
+            </h3>
             <label className="flex flex-col gap-2 text-[15px] font-semibold">
               Book title
               <input
                 value={title}
+                maxLength={120}
                 onChange={(e) => setTitle(e.target.value)}
                 className="h-12 rounded-lg border border-bone-deep bg-white px-4 text-[17px] font-normal outline-none focus-visible:border-pandan"
               />
@@ -100,7 +105,7 @@ export function FirstStep() {
             </fieldset>
             <p className="text-[15px] leading-relaxed text-muted">
               {mode === "give"
-                ? `${title || "Your book"} becomes the next reader's. You earn 1 credit.`
+                ? `${title || "Your book"} becomes the next reader's. You earn 1 credit once you both confirm the handover.`
                 : `${title || "Your book"} comes back to you. The borrower's credit is held until it does.`}
             </p>
             <Link
@@ -109,7 +114,7 @@ export function FirstStep() {
             >
               Join the pilot to list it
             </Link>
-          </form>
+          </div>
         </div>
       </div>
     </section>
