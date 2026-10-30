@@ -4,6 +4,24 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-10-30 (evening)
+
+**Done**
+- Fixed the nested-clone mix-up (deleted the empty `magnus-v1/` clone; the `Magnus/` folder is the real repo) and pushed all setup docs.
+- Installed the Claude GitHub app. Claude can now push branches and open PRs on `zeth-ux/magnus-v1`.
+- Drafted the MVP plan → [ROADMAP.md](ROADMAP.md): 6 phases from validation to a pilot with 2 clubs (mid-Jan 2027).
+
+**Decisions**
+- Git workflow: branch per issue → PR → Steve reviews → **Zarith merges** (Claude doesn't merge).
+- Validation (interviews) and the walking skeleton run in parallel during weeks 1-2.
+- MVP scope: clubs & events first, swap table second. Payments, chat and native apps are out of scope.
+
+**Next**
+- [ ] Review and merge the roadmap PR
+- [ ] Confirm defaults: ~10 h/week, pilot in person at ERICA/Seoul, credits before cycles
+- [ ] Send the first organizer DMs
+- [ ] Start Phase 1: walking skeleton
+
 ## 2026-10-30
 
 **Done**
