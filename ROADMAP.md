@@ -29,12 +29,12 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 
 ## Week 1: Walking skeleton + friends (Nov 2-8)
 **Build**
-- [ ] Next.js + TypeScript (strict) + Tailwind app, mobile-first, Bayu colour tokens
-- [ ] Supabase project + Auth (email magic link + Google)
+- [x] Next.js + TypeScript (strict) + Tailwind app, mobile-first, Bayu colour tokens
+- [x] Supabase project + Auth (email magic link + Google)
 - [ ] Deploy to Vercel. Every PR gets a preview URL.
-- [ ] GitHub Actions CI: lint + typecheck + tests on every PR
-- [ ] PWA basics: manifest, icon, installable
-- [ ] Static landing page: hero, how credits work, join (frames L1, L4, L8 in [landing.md](docs/landing.md)). Scroll scenes come in week 4
+- [x] GitHub Actions CI: lint + typecheck + tests on every PR
+- [x] PWA basics: manifest, icon, installable
+- [x] Landing page, full version with both scroll scenes (moved up from week 4) ([landing.md](docs/landing.md))
 
 **Talk**
 - [ ] Ask the 5 friends: how many physical English books do you have here? Which would you give, and which only lend?
@@ -79,7 +79,7 @@ racing for the last credit.
 - [ ] Return confirmation → credit unlocks. Not returned after +14 days → lender reports → forfeit (R4)
 - [ ] **Wishlist** + "a book you want is available" email
 - [ ] Polish: empty states, loading states, errors, install prompt
-- [ ] **Landing scroll scenes:** wind through the carved panel (L2-L3) + the live shelf (L5); rantau scene (L6) if time allows; safety + FAQ + delete account ([landing.md](docs/landing.md))
+- [ ] Landing: swap the sample shelf for the real pilot shelf (Supabase), add real account deletion
 - [ ] **Seed:** you + 5 friends list ~5 books each before launch (25+ books)
 - [ ] Ask Steve for a full review and fix every Blocking item
 

@@ -30,6 +30,12 @@ Instructions for Claude Code working in this repo.
 - Add an entry to the top of `PROGRESS.md`: what was done, decisions, next steps.
 - Update `README.md` when features, setup steps or architecture change.
 
+## Working in web/ (the Next.js app)
+- **Next.js 16 differs from older versions.** Read `web/AGENTS.md` and the guides in `web/node_modules/next/dist/docs/` before writing Next code. Key changes: `middleware` is now `proxy` (`web/src/proxy.ts`); with Cache Components on, anything that reads cookies/headers/searchParams must sit inside `<Suspense>`.
+- Supabase clients: `web/src/lib/supabase/` (server, browser, env). Always create a new server client per request.
+- Animations: import from `web/src/lib/gsap.ts` (plugins registered there); wrap motion in `gsap.matchMedia()` with `MOTION_OK` so reduced-motion users get the finished state.
+- Checks: `cd web && npm run lint && npm run typecheck && npm test && npm run build`.
+
 ## Stack defaults (until decided otherwise)
 - Frontend: Next.js + TypeScript + Tailwind, mobile-first PWA
 - Backend/DB: Supabase (Postgres, auth, storage); FastAPI for Python services
