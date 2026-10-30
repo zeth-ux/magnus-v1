@@ -51,5 +51,5 @@ Build a **book-sharing PWA first** and pilot it with English readers in Ansan:
 ## What happens to the organizer idea
 Not dropped, just moved later. Clubs, events, RSVPs and organizer tools are
 **"coming soon"** features to add after the pilot, if the data supports it. A
-**weekly swap hour** at a fixed spot keeps the "swap table at events" idea in
+**group swap meet-up** during the pilot keeps the "swap table at events" idea in
 a lightweight form.

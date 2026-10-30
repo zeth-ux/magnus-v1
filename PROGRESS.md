@@ -4,6 +4,27 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-10-30 (night)
+
+**Done**
+- Designed the 6 core app screens and an 8-frame landing storyboard on the "Bayu v0.1 Screens" design canvas (claude.ai).
+- Wrote [docs/user-flow.md](docs/user-flow.md): journey, request lifecycle, systems, BookSwap features worth borrowing.
+- Studied 3 design repos (gsap-skills, impeccable, taste-skill) and bookswapapp.com → [docs/landing.md](docs/landing.md).
+- Vendored the official GSAP skills into `.claude/skills/gsap-*` (MIT).
+- Updated [docs/brand.md](docs/brand.md) with the Malay palette (kayu, songket, merah hati, bone).
+
+**Decisions**
+- Landing metaphor: **wind through a carved Malay panel** carries a book; the kayu world unfolds. Malay touches **subtle** (palette + linework). Drawn linework now, real photos after the pilot.
+- **Meet-ups arranged per request** (people agree the place themselves), no fixed weekly swap hour.
+- **WhatsApp after acceptance** for the pilot; in-app messages in v0.2.
+- Paper changes from cream to **bone** to avoid the generic "AI cream + brown" look.
+- Borrowed from BookSwap: "N readers have this", trust & safety section, FAQ, delete account.
+
+**Next**
+- [ ] Zarith: approve or change rules R10-R13 in [user-flow.md](docs/user-flow.md)
+- [ ] Review the landing storyboard on the canvas and comment
+- [ ] Week 1 build: walking skeleton + static landing
+
 ## 2026-10-30 (evening)
 
 **Done**

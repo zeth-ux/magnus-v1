@@ -21,7 +21,7 @@ Nov 2 ─ Nov 8     Week 1  Walking skeleton + talk to friends
 Nov 9 ─ Nov 15    Week 2  Shelf: add books, give/lend, browse
 Nov 16 ─ Nov 22   Week 3  Requests, handover, credits ledger
 Nov 23 ─ Nov 29   Week 4  Lending lifecycle, wishlist, polish, seed books
-Nov 30 ─ Dec 13   Pilot   2 weeks, ~15 readers, weekly swap hour
+Nov 30 ─ Dec 13   Pilot   2 weeks, ~15 readers, meet-ups per request
 Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 ```
 
@@ -34,12 +34,12 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 - [ ] Deploy to Vercel. Every PR gets a preview URL.
 - [ ] GitHub Actions CI: lint + typecheck + tests on every PR
 - [ ] PWA basics: manifest, icon, installable
-- [ ] Landing page: "Bayu: books that breeze through" + early-access sign-up
+- [ ] Static landing page: hero, how credits work, join (frames L1, L4, L8 in [landing.md](docs/landing.md)). Scroll scenes come in week 4
 
 **Talk**
 - [ ] Ask the 5 friends: how many physical English books do you have here? Which would you give, and which only lend?
 - [ ] Create the pilot WhatsApp group
-- [ ] Pick the **swap spot + weekly swap hour** (e.g. a café near ERICA, Fridays 6pm)
+- [ ] Ask friends for 2-3 favourite **public meet-up spots** (shown as suggestions on the meet-up card)
 - [ ] Check the Bayu domain and handles ([brand.md](docs/brand.md))
 
 **Done when:** a friend opens the link on their phone and signs up, and CI is green.
@@ -51,7 +51,7 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 - [ ] Each copy: condition, **give or lend**, max lend period (2w / 4w / 2m / flexible), short note
 - [ ] My shelf: edit, pause, remove
 - [ ] **Browse + search** all available books (title, author, give/lend filter)
-- [ ] Book detail page
+- [ ] Book detail page, with **"N readers have this"**
 - [ ] Database: `profiles`, `books`, `copies` + Row Level Security
 
 **Done when:** you can scan a real book on your phone and a friend sees it in browse.
@@ -59,10 +59,11 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 
 ## Week 3: Requests, handover and credits (Nov 16-22)
 - [ ] **Request** a copy (for a lend: propose a return date within the max)
-- [ ] Owner **accepts or declines**. Accepted → pick the swap hour or another meet-up time.
+- [ ] Owner **accepts or declines**. Accepted → WhatsApp numbers revealed (R13) → **meet-up card**: one proposes place + time, the other confirms or counters
 - [ ] **Both confirm "handed over"** → credits move ([ADR 003](docs/decisions/003-credit-system.md) R1-R3)
 - [ ] `credit_ledger` (append-only) + Postgres functions for every credit move
 - [ ] Starter credit on the first listing (R5), limits: 3 borrowed, 3 open requests (R7)
+- [ ] Credit hold on accept, 3-day request expiry, 3-day handover auto-confirm (R10-R12, once approved; see [user-flow.md](docs/user-flow.md))
 - [ ] Credits page styled as a library card: balance, locked, history
 - [ ] Email notifications: new request, accepted, handover confirmed
 - [ ] After each handover: quick 👍/👎 and a report button
@@ -78,6 +79,7 @@ racing for the last credit.
 - [ ] Return confirmation → credit unlocks. Not returned after +14 days → lender reports → forfeit (R4)
 - [ ] **Wishlist** + "a book you want is available" email
 - [ ] Polish: empty states, loading states, errors, install prompt
+- [ ] **Landing scroll scenes:** wind through the carved panel (L2-L3) + the live shelf (L5); rantau scene (L6) if time allows; safety + FAQ + delete account ([landing.md](docs/landing.md))
 - [ ] **Seed:** you + 5 friends list ~5 books each before launch (25+ books)
 - [ ] Ask Steve for a full review and fix every Blocking item
 
@@ -85,7 +87,7 @@ racing for the last credit.
 
 ## Pilot (Nov 30-Dec 13)
 - [ ] Launch to the 5 friends; each invites 2 more readers (~15 total)
-- [ ] Run **2 weekly swap hours** in person
+- [ ] Optional: one **group swap meet-up** so readers meet each other
 - [ ] Note every confusion or complaint in `docs/pilot-notes.md`
 - [ ] Short chat with each user at the end (what did you like, what annoyed you, would you miss it?)
 
@@ -105,9 +107,10 @@ racing for the last credit.
 | Candidate | When it makes sense |
 |---|---|
 | **Warkah** (pass-it-on notes) + **Rantau** (book journey via QR bookplate) | Users love the community feel |
+| **In-app messages** per request (replace WhatsApp) | Strangers join, or people dislike sharing numbers |
 | **Penglipur** badges, lending rewards | Lending is rare (ADR 003 R9) |
 | **GS25 반값택배 parcels** | Readers in other cities want in |
-| **Clubs, events, organizer tools** ("coming soon") | Swap hours are the highlight |
+| **Clubs, events, organizer tools** ("coming soon") | The group meet-up is the highlight |
 | **Malaysia** (KL launch) | Pilot works, and friends take it home over the break |
 | Native app (Expo) | [ADR 001](docs/decisions/001-pwa-first.md) triggers |
 
