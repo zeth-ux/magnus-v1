@@ -4,6 +4,25 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-10-31: Landing page redo (bolder motion)
+
+**Done**
+- Rebuilt the landing from scratch after feedback that v1 looked "AI generated, too plain". New sections: hero with blow-away letters and turning pages, wind scene (loose pages ride the wind, fly through the carved panel), how-it-works accordion with stamp slams, shelf showcase with cover flips, horizontal rantau journey with passport stamps, FAQ index cards, a working "list your first book" dialog on songket gold, and a B-a-y-u block wordmark.
+- Actually ran the design repos' tools this time: taste-skill direction (`one-motif`, the carved-panel arch), its lint (0 FAIL, 0 WARN) and its page inspector (down from 7 FAIL to 1 FAIL, which is "no real photos yet").
+- Added SplitText, Lenis (desktop wheel only), the pucuk rebung band. Removed the old credits card, shelf preview and reveal components.
+- Bone is now `#EEEEEA` (the inspector still read `#F1EFEA` as cream). Icons regenerated.
+- Verified: lint, typecheck, 12 tests, build; screenshots at 1440/390 px in normal and reduced motion; no console errors, no horizontal scroll.
+
+**Decisions**
+- One motif (the arch) carries the page: buttons, windows, tabs, postcards, wordmark.
+- No content waits on a reveal to be visible (scrubbed motion instead of fade-ins), so a missed trigger never leaves a blank page.
+
+**Next**
+- [ ] Zarith: test locally (`git switch feat/landing-redo`, `npm run dev`), then merge the PR if happy
+- [ ] Zarith: add 4+ real photos to `web/public/images/` (clears the last inspector FAIL)
+- [ ] Sign-in on Vercel: Deployment Protection off, `NEXT_PUBLIC_SITE_URL`, Supabase URLs + email templates, then domain + Resend
+- [ ] Zarith: approve rules R10-R13; then Week 2 (profile, add book with barcode, shelf, browse)
+
 ## 2026-10-30 (late night): Week 1 foundation
 
 **Done**
