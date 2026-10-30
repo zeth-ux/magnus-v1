@@ -1,118 +1,125 @@
-# Roadmap: Magnus MVP
+# Roadmap: Bayu pilot (v0.1)
 
-*Drafted 2026-10-30. Assumes **~10 hours/week** alongside classes. Stretch
-the dates if needed (e.g. around finals), but keep the order.*
+*Updated 2026-10-30. Assumes **~10 hours/week** alongside classes. If weeks
+get busy, cut scope (wishlist, extensions) before moving the pilot past finals.*
 
-**Goal for this roadmap:** by mid-January 2027, **2 real book clubs have run
-real events on Magnus**, with RSVPs and a swap table, and we have numbers to
-decide what comes next.
+**Goal:** by mid-December 2026, about **15 English readers in Ansan** have been
+giving and lending real books on **Bayu** for 2 weeks, and we have the numbers
+to decide what comes next.
 
-**Positioning** (from [MARKET.md](MARKET.md)): *the home for book clubs:
-events, RSVPs and a swap table, in one link.* Organizers are the wedge.
+**Why this plan:** [ADR 002](docs/decisions/002-swap-first-korea-pilot.md)
+(swap-first pilot in Korea) · [ADR 003](docs/decisions/003-credit-system.md)
+(credit system) · [ADR 001](docs/decisions/001-pwa-first.md) (PWA) ·
+[Brand](docs/brand.md)
 
 ---
 
 ## Overview
 
 ```
-Nov 2 ─ Nov 15    Phase 0  Validate (talk)        ┐ run in parallel
-Nov 2 ─ Nov 15    Phase 1  Walking skeleton (build)┘
-Nov 16 ─ Nov 22   Phase 2  Spec + schema
-Nov 23 ─ Dec 13   Phase 3  Clubs & events  ← the wedge
-Dec 14 ─ Jan 3    Phase 4  Swap table      (lighter weeks, finals)
-Jan 4 ─ Jan 17    Phase 5  Pilot with 2 clubs → decide v2
+Nov 2 ─ Nov 8     Week 1  Walking skeleton + talk to friends
+Nov 9 ─ Nov 15    Week 2  Shelf: add books, give/lend, browse
+Nov 16 ─ Nov 22   Week 3  Requests, handover, credits ledger
+Nov 23 ─ Nov 29   Week 4  Lending lifecycle, wishlist, polish, seed books
+Nov 30 ─ Dec 13   Pilot   2 weeks, ~15 readers, weekly swap hour
+Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 ```
 
 ---
 
-## Phase 0: Validate (Weeks 1-2, talking, not coding)
-**Why:** the cheapest way to avoid building the wrong thing.
-
-- [ ] DM organizers: KL Reads (+ Cheras/Cyberjaya chapters), Flipside, Rish's Book Club, The Badass Book Club, Eat Books Club, Seoul Silent Book Club
-- [ ] Find readers: ERICA international students, Malaysian students in Korea, friends in KL
-- [ ] Interview **5 organizers + 5 readers** (script: [MARKET.md §6](MARKET.md#6-validation-plan-before-writing-code))
-- [ ] Write findings to `docs/interviews.md` (no names without permission)
-
-**Done when:** 10 interviews are written up, and **≥ 2 organizers say "yes, I'll run
-one real event on it"**.
-
-**If fewer than 2 say yes after ~10 organizer conversations:** stop and rethink before
-Phase 3. Options: readers-first, the Korea expat niche, or a different pain.
-
-## Phase 1: Walking skeleton (Weeks 1-2, in parallel)
-**Why:** get every piece of the stack deployed end-to-end while it's still tiny.
-
-- [ ] Next.js + TypeScript (strict) + Tailwind app, mobile-first
-- [ ] Supabase project: Auth (email magic link + Google)
+## Week 1: Walking skeleton + friends (Nov 2-8)
+**Build**
+- [ ] Next.js + TypeScript (strict) + Tailwind app, mobile-first, Bayu colour tokens
+- [ ] Supabase project + Auth (email magic link + Google)
 - [ ] Deploy to Vercel. Every PR gets a preview URL.
 - [ ] GitHub Actions CI: lint + typecheck + tests on every PR
-- [ ] PWA basics: manifest, icons, installable
-- [ ] Landing page + **organizer early-access form** (saved to Supabase). Doubles as validation: link it in your DMs.
+- [ ] PWA basics: manifest, icon, installable
+- [ ] Landing page: "Bayu: books that breeze through" + early-access sign-up
 
-**Done when:** a friend opens the URL on their phone, signs up, and CI is green.
+**Talk**
+- [ ] Ask the 5 friends: how many physical English books do you have here? Which would you give, and which only lend?
+- [ ] Create the pilot WhatsApp group
+- [ ] Pick the **swap spot + weekly swap hour** (e.g. a café near ERICA, Fridays 6pm)
+- [ ] Check the Bayu domain and handles ([brand.md](docs/brand.md))
+
+**Done when:** a friend opens the link on their phone and signs up, and CI is green.
 **You'll learn:** deploy pipeline, CI, auth, environment variables and secrets.
 
-## Phase 2: Spec + schema (Week 3)
-- [ ] `docs/spec-mvp.md`: user stories built from the interview findings
-- [ ] Database schema + Row Level Security policies as SQL migrations
-- [ ] ADR 002: swap model (credits now, cycle matching later)
+## Week 2: Shelf (Nov 9-15)
+- [ ] Profile: display name, city, languages
+- [ ] **Add a book:** scan the ISBN barcode (ZXing) or search, then look it up on Google Books (Open Library as fallback)
+- [ ] Each copy: condition, **give or lend**, max lend period (2w / 4w / 2m / flexible), short note
+- [ ] My shelf: edit, pause, remove
+- [ ] **Browse + search** all available books (title, author, give/lend filter)
+- [ ] Book detail page
+- [ ] Database: `profiles`, `books`, `copies` + Row Level Security
 
-**Draft data model** (to be confirmed by the spec):
-`profiles` · `clubs` · `club_members (role: organizer/member)` · `events` ·
-`rsvps (going / waitlist / cancelled / attended)` · `books (isbn, title, cover)` ·
-`shelf_items (owner, book, condition, status)` · `swap_listings (event, shelf_item)` ·
-`reservations` · `credit_ledger`
+**Done when:** you can scan a real book on your phone and a friend sees it in browse.
+**You'll learn:** camera APIs, external APIs, RLS.
 
-## Phase 3: Clubs & events, the wedge (Weeks 4-6)
-- [ ] Create a club; invite co-organizers
-- [ ] Create an event: time, place, capacity, description
-- [ ] Shareable event page with **rich WhatsApp/Instagram link previews** (OG images)
-- [ ] RSVP with capacity + **waitlist that auto-promotes** when someone cancels
-- [ ] Email reminders (24h before) and organizer announcements
-- [ ] Organizer view: attendee list, check-in at the door
+## Week 3: Requests, handover and credits (Nov 16-22)
+- [ ] **Request** a copy (for a lend: propose a return date within the max)
+- [ ] Owner **accepts or declines**. Accepted → pick the swap hour or another meet-up time.
+- [ ] **Both confirm "handed over"** → credits move ([ADR 003](docs/decisions/003-credit-system.md) R1-R3)
+- [ ] `credit_ledger` (append-only) + Postgres functions for every credit move
+- [ ] Starter credit on the first listing (R5), limits: 3 borrowed, 3 open requests (R7)
+- [ ] Credits page styled as a library card: balance, locked, history
+- [ ] Email notifications: new request, accepted, handover confirmed
+- [ ] After each handover: quick 👍/👎 and a report button
 
-**Must-have tests:** capacity and waitlist logic, including two people grabbing
-the last seat at the same time. This needs a Postgres function with row locking.
-**You'll learn:** RLS, transactions and race conditions, background jobs and email.
+**Must-have tests:** every test listed in ADR 003, including two requests
+racing for the last credit.
+**Done when:** you and a friend complete a real give and a real lend in person.
+**You'll learn:** transactions, row locking, designing a ledger, idempotency.
 
-## Phase 4: Swap table (Weeks 7-9, lighter around finals)
-- [ ] My shelf: add books by **ISBN barcode scan** (ZXing) → lookup via Open Library (Google Books as fallback)
-- [ ] Bring books to an event: list shelf items on the event's swap table
-- [ ] Reserve books before the meetup (with a per-person limit)
-- [ ] At the event, both people tap "handed over" → credits move in the ledger
-- [ ] Credits: give 1 → earn 1; spend 1 to reserve
+## Week 4: Lending lifecycle + launch prep (Nov 23-29)
+- [ ] Due dates styled as a library stamp, reminder email 3 days before
+- [ ] Extension request → lender approves or declines
+- [ ] Return confirmation → credit unlocks. Not returned after +14 days → lender reports → forfeit (R4)
+- [ ] **Wishlist** + "a book you want is available" email
+- [ ] Polish: empty states, loading states, errors, install prompt
+- [ ] **Seed:** you + 5 friends list ~5 books each before launch (25+ books)
+- [ ] Ask Steve for a full review and fix every Blocking item
 
-**Must-have tests:** credit ledger (it can never go negative, and every move has two
-sides), no double reservations.
-**You'll learn:** camera APIs, external APIs, designing a ledger.
+**Done when:** a stranger could use Bayu without you explaining anything.
 
-## Phase 5: Pilot (Weeks 10-11)
-- [ ] Run **2 real events** with partner organizers. Be there in person for at least one, at ERICA or in Seoul.
-- [ ] Track the numbers below and gather feedback
+## Pilot (Nov 30-Dec 13)
+- [ ] Launch to the 5 friends; each invites 2 more readers (~15 total)
+- [ ] Run **2 weekly swap hours** in person
+- [ ] Note every confusion or complaint in `docs/pilot-notes.md`
+- [ ] Short chat with each user at the end (what did you like, what annoyed you, would you miss it?)
 
-| Metric | Target |
+| Signal | Good sign |
 |---|---|
-| Organizers who run an event on Magnus | ≥ 2 |
-| RSVP → actually attended | ≥ 60% |
-| Attendees who list ≥ 1 book on the swap table | ≥ 30% |
-| Completed swaps | ≥ 10 |
-| Organizers who want to use it again | 2 of 2 |
+| Books listed per user | ≥ 3 |
+| Users who request at least 1 book | ≥ 50% |
+| Completed handovers (gives + lends) | ≥ 10 |
+| Lends returned on time | ≥ 80% |
+| Users who invite someone without being asked | Any |
+| "Would you be sad if Bayu disappeared?" | Most say yes |
 
-**Then decide v2 based on the data:** paid ticketing (Malaysian payment
-gateway with FPX/DuitNow), club discovery map, multi-party swap cycles, BM/Korean
-language support, reading streaks, or going native ([ADR 001](docs/decisions/001-pwa-first.md) triggers).
-If events work but swaps don't, drop swapping and lean into events.
+## Finals + decide v0.2 (Dec 14-Jan 3)
+- [ ] Write `docs/pilot-report.md`: numbers, quotes, surprises
+- [ ] Decide what's next based on the data. Candidates:
+
+| Candidate | When it makes sense |
+|---|---|
+| **Warkah** (pass-it-on notes) + **Rantau** (book journey via QR bookplate) | Users love the community feel |
+| **Penglipur** badges, lending rewards | Lending is rare (ADR 003 R9) |
+| **GS25 반값택배 parcels** | Readers in other cities want in |
+| **Clubs, events, organizer tools** ("coming soon") | Swap hours are the highlight |
+| **Malaysia** (KL launch) | Pilot works, and friends take it home over the break |
+| Native app (Expo) | [ADR 001](docs/decisions/001-pwa-first.md) triggers |
 
 ---
 
-## Out of scope for the MVP (on purpose)
-Payments · in-app chat (use WhatsApp links) · courier delivery · recommendations ·
-native apps · multi-language UI (strings ready for translation, English only for now)
-
----
+## Out of scope for v0.1 (on purpose)
+Textbooks · parcels · clubs/events/organizer tools · payments · in-app chat
+(use WhatsApp) · Warkah/Rantau/Penglipur · recommendations · Korean-language
+books · native apps
 
 ## How we work
-- Each phase is a **GitHub milestone**, and each checkbox above is an **issue**.
-- One branch per issue (`feat/rsvp-waitlist`) → PR → **Steve reviews** → **Zarith merges**.
-- Every PR gets a Vercel preview link, so you can test on your phone before merging.
-- End of each session: `/wrap-up` (when working locally in Claude Code).
+- Each week is a **GitHub milestone**, and each checkbox is an **issue**.
+- One branch per issue (`feat/shelf-isbn-scan`) → PR → **Steve reviews** → **Zarith merges**.
+- Test every PR on your phone using its Vercel preview link before merging.
+- End each local session with `/wrap-up`.

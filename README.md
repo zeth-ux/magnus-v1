@@ -1,9 +1,21 @@
-# Magnus
+# Bayu 🍃 *(code name: Magnus)*
+
+**Books that breeze through.** A place for readers to give and lend physical
+books to each other. *Bayu* is Malay for a gentle breeze: it stops by for a
+while, then moves on, just like a borrowed book.
 
 A side project by Zarith Imran (AI major, Hanyang University ERICA).
 
-> **Status:** idea picked: a **book swap + book club community** for Malaysia (KL first) and Korea, built as a **mobile-first PWA**. Now validating with organizers and readers.
-> Docs: [ROADMAP.md](ROADMAP.md) (MVP plan) · [MARKET.md](MARKET.md) (market analysis) · [docs/decisions/](docs/decisions/) (decision records) · [IDEAS.md](IDEAS.md) (shortlist) · [PROGRESS.md](PROGRESS.md) (running log)
+> **Status:** building **v0.1**, a mobile-first PWA for a pilot with ~15 English readers in Ansan, Korea (Nov 30-Dec 13, 2026).
+> Docs: [ROADMAP.md](ROADMAP.md) (pilot plan) · [docs/decisions/](docs/decisions/) (decision records) · [docs/brand.md](docs/brand.md) (name, vibe, words) · [MARKET.md](MARKET.md) (market analysis) · [IDEAS.md](IDEAS.md) (shortlist) · [PROGRESS.md](PROGRESS.md) (running log)
+
+## How Bayu works (v0.1)
+1. **List** your books: scan the barcode, then mark each one **give** or **lend**.
+2. **Browse** what other readers near you are sharing, and request a book.
+3. **Meet up** (e.g. at the weekly swap hour) and both tap "handed over".
+4. **Credits** keep it fair: give a book → +1 credit; take a book → −1. Borrowing
+   locks 1 credit until you return the book. Everyone gets 1 starter credit after
+   listing their first book. ([Full rules](docs/decisions/003-credit-system.md))
 
 ## Goal
 Ship a real, deployed product that:
@@ -28,9 +40,7 @@ Hooks need **Node.js** on your PATH. Personal overrides go in `.claude/settings.
 
 Typical loop: start a feature in plan mode (Shift+Tab), approve the plan, let Claude build, then run `/wrap-up`.
 
-## Sections to fill in once the idea is picked
-- Problem and who it's for
-- Features (MVP vs later)
+## Sections to fill in as we build
 - Architecture diagram
 - Tech stack and why
 - Installation guide

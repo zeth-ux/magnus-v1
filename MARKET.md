@@ -4,6 +4,11 @@
 and that's flagged where it matters. Treat every number as something to
 re-check in user interviews, not as truth.*
 
+> **Update (same day):** the first step changed. We're running a
+> **swap-first pilot with English readers in Ansan, Korea** before the
+> organizer-first plan below. See [ADR 002](docs/decisions/002-swap-first-korea-pilot.md).
+> This analysis still guides the later phases (clubs, events, Malaysia).
+
 ---
 
 ## TL;DR
