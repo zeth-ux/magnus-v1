@@ -29,7 +29,7 @@ Ship a real, deployed product that:
 |---|---|---|
 | App | **Next.js 16** (App Router, Cache Components) + **TypeScript** (strict) | One codebase for the landing page and the app; static where possible, streamed where personal |
 | Styling | **Tailwind CSS 4** with Bayu tokens in `web/src/app/globals.css` | Tokens mirror [docs/brand.md](docs/brand.md) |
-| Motion | **GSAP** (ScrollTrigger, DrawSVG, MotionPath, SplitText) via `useGSAP`, **Lenis** for wheel smoothing | Scroll scenes on the landing page; reduced-motion safe |
+| Motion | **GSAP** (ScrollTrigger) via `useGSAP`, **CSS 3D** books, **Lenis** for wheel smoothing | The landing shelf (Stripe Press style); reduced-motion safe |
 | Auth + DB | **Supabase** (`@supabase/ssr`) | Magic link + Google sign-in; Postgres with Row Level Security next |
 | Fonts | Literata + Plus Jakarta Sans, self-hosted via Fontsource | No third-party font calls |
 | Tests | **Vitest** | Core logic tests (redirect safety now; credit ledger next) |

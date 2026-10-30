@@ -28,13 +28,13 @@ learn the words as they go.
 
 Warkah, Rantau and Penglipur are **v0.2+ features**. The pilot uses credits only.
 
-## Vibe: airy above, kayu within
+## Vibe: a night shelf of bright books
 Two moods, one brand:
 - **The app** (where people get things done): calm, light and airy. Like a friend
   handing you a book on a breezy afternoon, not a marketplace.
-- **The landing page** (where people decide to join): opens airy, then the
-  breeze blows through a carved panel and the **warm traditional Malay world**
-  unfolds: carved timber, songket-gold linework, oxblood. See [landing.md](landing.md).
+- **The landing page** (where people decide to join, updated 2026-10-31): a warm
+  near-black **malam** ground where the books themselves bring the colour, each
+  with a bold cover patterned from Malay craft (after Stripe Press). See [landing.md](landing.md).
 
 Malay touches stay **subtle**: palette and linework, not costume.
 
@@ -51,7 +51,14 @@ Malay touches stay **subtle**: palette and linework, not costume.
 | `kayu` | Full fields on the landing (carved cengal timber) | `#3B2618` |
 | `kayu-muted` | Secondary text on kayu | `#CDBFA8` |
 | `songket` | Gold linework, large text and buttons on kayu | `#C9A24A` |
-| `merah-hati` | Oxblood field (rantau chapter), stamps | `#6E1F1F` |
+| `merah-hati` | Oxblood, stamps | `#6E1F1F` |
+| `malam` | Landing ground (night) | `#1C1614` |
+| `paper` | Text on malam | `#EFE9DF` |
+
+**Book colours (landing):** each sample book has a spine colour, a pattern ink,
+a text colour and a flood colour for its open page, in `web/src/content/shelf.ts`.
+Text contrast: spines 5.4 to 13.4, open pages 4.6 to 13.4 (all ≥ 4.5). Paper on
+malam 14.8.
 
 **Why bone, not cream:** a yellow-cream ground with a brown or terracotta accent
 is now the most recognisable "AI-generated" look (taste-skill research). Our warmth
