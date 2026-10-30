@@ -2,9 +2,9 @@
 
 Filter: would I actually download this and use it every week?
 
-## 1. Book swap + book club app (Malaysia) — ✅ PICKED (2026-10-30)
+## 1. Book swap + book club app — ✅ PICKED (2026-10-30) → now **Bayu**
 > Full market analysis in [MARKET.md](MARKET.md). Platform decision: [PWA first](docs/decisions/001-pwa-first.md).
-> Updated positioning: organizers are the wedge; swapping happens at events (swap table + credits). Multi-party cycle matching moves to v2.
+> **Current direction:** swap-first pilot (give + lend with credits) with English readers in Ansan, Korea. See [ADR 002](docs/decisions/002-swap-first-korea-pilot.md) and [ADR 003](docs/decisions/003-credit-system.md). Clubs and organizer tools are "coming soon". Multi-party cycle matching stays a v2 idea.
 
 - Profile with your shelf (ISBN barcode scan), swap books, organize and RSVP to book club meetups.
 - **Competition:** no dominant app in Malaysia. KL Book Exchange (monthly offline meetup), KL Book Exchange Club (Facebook, 4,000+ members), clubs like Flipside Social Club and The Badass Book Club. Global apps: BookMooch, PaperbackSwap, Browzly (Dubai), Pasaj.

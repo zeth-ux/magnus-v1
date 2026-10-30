@@ -8,19 +8,23 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 **Done**
 - Fixed the nested-clone mix-up (deleted the empty `magnus-v1/` clone; the `Magnus/` folder is the real repo) and pushed all setup docs.
-- Installed the Claude GitHub app. Claude can now push branches and open PRs on `zeth-ux/magnus-v1`.
-- Drafted the MVP plan → [ROADMAP.md](ROADMAP.md): 6 phases from validation to a pilot with 2 clubs (mid-Jan 2027).
+- Installed the Claude GitHub app. Claude can now push branches and open PRs. Default branch renamed `master` → `main`.
+- Drafted an organizer-first roadmap, then **pivoted** after brainstorming (see Decisions).
+- Wrote [ADR 002](docs/decisions/002-swap-first-korea-pilot.md) (swap-first Korea pilot), [ADR 003](docs/decisions/003-credit-system.md) (credit system), [docs/brand.md](docs/brand.md) (Bayu), and rewrote [ROADMAP.md](ROADMAP.md) around a 4-week build + 2-week pilot.
 
 **Decisions**
+- **Pilot first in Ansan, Korea**, with 5 Malaysian friends who read English books (same city), growing to ~15 through invites. Swapping first; clubs and organizer tools are "coming soon".
+- **Give + lend with credits** (ADR 003): starter credit after the first listing, borrowing locks 1 credit, max 3 borrowed and 3 open requests. Lend period agreed by lender (max) + borrower (date).
+- Meet-ups only (weekly swap hour). Open to everyone. English books only. No textbooks.
+- **Name: Bayu** (Malay: gentle breeze), with Malay feature words: Warkah (notes), Rantau (book journey), Penglipur (badge). Repo keeps the code name Magnus.
 - Git workflow: branch per issue → PR → Steve reviews → **Zarith merges** (Claude doesn't merge).
-- Validation (interviews) and the walking skeleton run in parallel during weeks 1-2.
-- MVP scope: clubs & events first, swap table second. Payments, chat and native apps are out of scope.
 
 **Next**
-- [ ] Review and merge the roadmap PR
-- [ ] Confirm defaults: ~10 h/week, pilot in person at ERICA/Seoul, credits before cycles
-- [ ] Send the first organizer DMs
-- [ ] Start Phase 1: walking skeleton
+- [ ] Review and merge PR #1 (roadmap + decisions + brand)
+- [ ] Ask friends for their English book counts, create the pilot WhatsApp group
+- [ ] Pick the swap spot + weekly swap hour
+- [ ] Check the Bayu domain and handles
+- [ ] Week 1 build: walking skeleton (Claude turns the roadmap into GitHub issues first)
 
 ## 2026-10-30
 
