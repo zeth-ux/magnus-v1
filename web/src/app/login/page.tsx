@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { LoginForm } from "./login-form";
+import { LoginForm, LoginFormPlaceholder } from "./login-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { BayuMark } from "@/components/bayu-mark";
 
 export const metadata: Metadata = { title: "Join the pilot" };
+
+/** Plain-language explanations for /login?error=… (set by /auth/callback). */
+const NOTICES: Record<string, string> = {
+  link: "That sign-in link has expired or was already used. Send yourself a new one below.",
+};
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
@@ -22,15 +27,21 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
         </p>
       </div>
       {/* searchParams are request data, so the form streams in behind a boundary. */}
-      <Suspense fallback={<LoginForm next="/welcome" />}>
-        <LoginFormWithNext searchParams={searchParams} />
+      <Suspense fallback={<LoginFormPlaceholder />}>
+        <LoginFormWithParams searchParams={searchParams} />
       </Suspense>
     </main>
   );
 }
 
-async function LoginFormWithNext({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
+async function LoginFormWithParams({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
   const params = await searchParams;
-  const raw = Array.isArray(params.next) ? params.next[0] : params.next;
-  return <LoginForm next={safeRedirectPath(raw)} />;
+  const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const errorKey = first(params.error);
+  return (
+    <LoginForm
+      next={safeRedirectPath(first(params.next))}
+      notice={errorKey ? NOTICES[errorKey] : undefined}
+    />
+  );
 }

@@ -3,7 +3,11 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 
 /** Pages that need a signed-in user. */
-const PROTECTED_PREFIXES = ["/welcome"];
+const PROTECTED_PATHS = ["/welcome"];
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
 
 /**
  * Runs before matching requests (Next 16 renamed "middleware" to "proxy").
@@ -16,11 +20,10 @@ export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname === "/") return NextResponse.next();
 
   const env = getSupabaseEnv();
-  const isProtected = PROTECTED_PREFIXES.some((p) => request.nextUrl.pathname.startsWith(p));
+  const isProtected = isProtectedPath(request.nextUrl.pathname);
 
   if (!env) {
-    if (!isProtected) return NextResponse.next();
-    return redirectToLogin(request);
+    return isProtected ? redirectToLogin(request) : NextResponse.next();
   }
 
   let response = NextResponse.next({ request });
@@ -47,15 +50,26 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const signedIn = Boolean(data?.claims?.sub);
 
-  if (isProtected && !signedIn) return redirectToLogin(request);
+  if (isProtected && !signedIn) return redirectToLogin(request, response);
   return response;
 }
 
-function redirectToLogin(request: NextRequest) {
+/**
+ * Sends the visitor to /login, remembering where they were going.
+ * Copies any cookies Supabase just set (e.g. clearing a dead session) onto the
+ * redirect, so a rejected refresh token isn't retried on every request.
+ */
+function redirectToLogin(request: NextRequest, from?: NextResponse) {
   const url = request.nextUrl.clone();
+  const next = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   url.pathname = "/login";
-  url.search = `?next=${encodeURIComponent(request.nextUrl.pathname)}`;
-  return NextResponse.redirect(url);
+  url.search = `?next=${encodeURIComponent(next)}`;
+  const redirect = NextResponse.redirect(url);
+  from?.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+  from?.headers.forEach((value, key) => {
+    if (["cache-control", "expires", "pragma"].includes(key)) redirect.headers.set(key, value);
+  });
+  return redirect;
 }
 
 export const config = {

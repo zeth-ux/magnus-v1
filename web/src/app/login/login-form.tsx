@@ -1,15 +1,22 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { sendMagicLink, type MagicLinkState } from "./actions";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 
 const initial: MagicLinkState = { status: "idle" };
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, notice }: { next: string; notice?: string }) {
   const [state, formAction, pending] = useActionState(sendMagicLink, initial);
   const [googleError, setGoogleError] = useState<string | null>(null);
+  const sentHeading = useRef<HTMLHeadingElement>(null);
+
+  // When the form is replaced by "Check your inbox", move focus to the new
+  // heading so keyboard and screen-reader users land on the confirmation.
+  useEffect(() => {
+    if (state.status === "sent") sentHeading.current?.focus();
+  }, [state.status]);
 
   async function signInWithGoogle() {
     setGoogleError(null);
@@ -31,16 +38,27 @@ export function LoginForm({ next }: { next: string }) {
   if (state.status === "sent") {
     return (
       <div role="status" className="flex flex-col gap-3 rounded-md bg-sky-light p-6">
-        <p className="font-display text-2xl">Check your inbox.</p>
+        <h2 ref={sentHeading} tabIndex={-1} className="font-display text-2xl font-medium outline-none">
+          Check your inbox.
+        </h2>
         <p className="text-base leading-relaxed">
-          We sent a sign-in link to <strong>{state.email}</strong>. Open it on this phone or computer.
+          We sent a sign-in link to <strong>{state.email}</strong>. It works on any phone or
+          computer, and expires in an hour.
         </p>
       </div>
     );
   }
 
+  const error = state.status === "error" ? state : null;
+
   return (
     <div className="flex flex-col gap-6">
+      {notice ? (
+        <p role="alert" className="rounded-md bg-bone-deep px-4 py-3 text-[15px] leading-relaxed">
+          {notice}
+        </p>
+      ) : null}
+
       <button
         type="button"
         onClick={signInWithGoogle}
@@ -65,20 +83,25 @@ export function LoginForm({ next }: { next: string }) {
         <label htmlFor="email" className="text-sm font-semibold">
           Email
         </label>
+        {/* React resets the form after each action; re-mount with the typed
+            email on error so people don't have to retype it. */}
         <input
+          key={error ? `err-${error.email}` : "fresh"}
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           inputMode="email"
           required
+          defaultValue={error?.email}
           placeholder="you@example.com"
-          aria-describedby={state.status === "error" ? "email-error" : undefined}
-          className="h-13 rounded-xl border border-bone-deep bg-white px-4 text-base outline-none focus-visible:border-pandan"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? "email-error" : undefined}
+          className="h-13 rounded-xl border border-bone-deep bg-white px-4 text-base outline-none focus-visible:border-pandan aria-invalid:border-merah"
         />
-        {state.status === "error" ? (
+        {error ? (
           <p id="email-error" role="alert" className="text-sm text-merah">
-            {state.message}
+            {error.message}
           </p>
         ) : null}
         <button
@@ -89,6 +112,21 @@ export function LoginForm({ next }: { next: string }) {
           {pending ? "Sending…" : "Email me a sign-in link"}
         </button>
       </form>
+    </div>
+  );
+}
+
+/** Shown while the real form streams in: looks the same, but can't be typed into. */
+export function LoginFormPlaceholder() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true">
+      <div className="h-13 rounded-full border-[1.5px] border-bone-deep" />
+      <div className="h-px" />
+      <div className="flex flex-col gap-3">
+        <span className="text-sm font-semibold text-muted">Email</span>
+        <div className="h-13 rounded-xl border border-bone-deep bg-white" />
+        <div className="mt-2 h-13 rounded-full bg-pandan/60" />
+      </div>
     </div>
   );
 }
