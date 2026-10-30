@@ -28,23 +28,47 @@ learn the words as they go.
 
 Warkah, Rantau and Penglipur are **v0.2+ features**. The pilot uses credits only.
 
-## Vibe: airy paper and breeze
-Calm, warm and light. It should feel like a friend handing you a book on a
-breezy afternoon, not like a marketplace.
+## Vibe: airy above, kayu within
+Two moods, one brand:
+- **The app** (where people get things done): calm, light and airy. Like a friend
+  handing you a book on a breezy afternoon, not a marketplace.
+- **The landing page** (where people decide to join): opens airy, then the
+  breeze blows through a carved panel and the **warm traditional Malay world**
+  unfolds: carved timber, songket-gold linework, oxblood. See [landing.md](landing.md).
 
-**Colour tokens (draft)**
-| Token | Use | Hex (draft) |
+Malay touches stay **subtle**: palette and linework, not costume.
+
+**Colour tokens** (updated 2026-10-30)
+| Token | Use | Hex |
 |---|---|---|
-| `paper` | Background | `#FBF7EF` (cream) |
-| `ink` | Text | `#2B2A28` (warm near-black) |
-| `sky` | Brand / headers | `#9CC9E3` (soft sky blue) |
-| `pandan` | Primary buttons | `#2F7A4D` (pandan green) |
-| `kopi` | Secondary accents | `#7A5838` (kopi brown) |
+| `bone` | Paper ground (replaces the old cream `#FBF7EF`) | `#F1EFEA` |
+| `ink` | Text | `#2B2A28` |
+| `sky` | Airy backgrounds, decoration only | `#9CC9E3` (light: `#DCEEF7`) |
+| `pandan` | Primary buttons on light grounds | `#2F7A4D` |
+| `kopi` | Secondary accents in the app | `#7A5838` |
+| `kayu` | Full fields on the landing (carved cengal timber) | `#3B2618` |
+| `kayu-muted` | Secondary text on kayu | `#CDBFA8` |
+| `songket` | Gold linework, large text and buttons on kayu | `#C9A24A` |
+| `merah-hati` | Oxblood field (rantau chapter), stamps | `#6E1F1F` |
 
-Contrast checked (WCAG AA needs ≥ 4.5 for text): ink on paper 13.4 ·
-white on pandan 5.2 · paper on pandan 4.9 · kopi on paper 6.0 · ink on sky 8.1.
-Sky blue is too light for text on cream, so use it only for backgrounds and
-decoration.
+**Why bone, not cream:** a yellow-cream ground with a brown or terracotta accent
+is now the most recognisable "AI-generated" look (taste-skill research). Our warmth
+comes from **real materials used as full fields** (timber, songket gold, oxblood),
+and the paper is a low-saturation bone (20% vs the old cream's 60%).
+
+Contrast checked (WCAG AA needs ≥ 4.5 for text): ink on bone 12.5 · bone on kayu
+12.4 · songket on kayu 5.9 · kayu on songket (button text) 5.9 · kayu-muted on
+kayu 7.9 · bone on merah hati 9.7 · songket on merah hati 4.7 · white on pandan
+5.2 · kopi on bone 6.0 · ink on sky 8.1. Sky is too light for text on bone; use
+it only for backgrounds and decoration.
+
+**Malay motifs (linework only)**
+- **Awan larat** ("drifting clouds"): the flowing spiral motif from Malay
+  woodcarving and songket. Used as the wind lines.
+- **Ukiran tebuk tembus**: the pierced carved panels of a Malay house that let
+  the breeze through. The landing's signature moment.
+- No Quranic verses or religious calligraphy as decoration. No invented Jawi;
+  any Jawi is checked by a native reader first.
 
 **Details**
 - **Logo idea:** a book with a few pages lifted by the wind.
