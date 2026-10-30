@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/*
+  Bayu design tokens. Source of truth: docs/brand.md.
+  Every colour here was contrast-checked (WCAG AA) in brand.md.
+*/
+@theme {
+  --color-bone: #f1efea;
+  --color-bone-deep: #e7e3da;
+  --color-ink: #2b2a28;
+  --color-muted: #5c574e;
+  --color-sky: #9cc9e3;
+  --color-sky-light: #dceef7;
+  --color-pandan: #2f7a4d;
+  --color-pandan-deep: #276843;
+  --color-kopi: #7a5838;
+  --color-kayu: #3b2618;
+  --color-kayu-muted: #cdbfa8;
+  --color-songket: #c9a24a;
+  --color-merah: #6e1f1f;
+
+  --font-display: "Literata Variable", Georgia, serif;
+  --font-text: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  background: var(--color-bone);
+  color: var(--color-ink);
+  font-family: var(--font-text);
+  -webkit-text-size-adjust: 100%;
+  scrollbar-color: var(--color-kopi) var(--color-bone);
+}
+
+body {
+  margin: 0;
+  caret-color: var(--color-pandan);
+}
+
+/* Browser surfaces carry the design too. */
+::selection {
+  background: var(--color-songket);
+  color: var(--color-kayu);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-pandan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.on-dark :focus-visible {
+  outline-color: var(--color-songket);
+}
+
+a {
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+/* Hero load sequence: CSS only, over by ~1.2s. Off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .wind-drift {
+    animation: wind-drift 9s ease-in-out infinite alternate;
+  }
+  .line-rise {
+    animation: line-rise 0.9s var(--ease-expo) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 80ms);
+  }
+  .fade-in {
+    animation: fade-in 0.6s var(--ease-out) 0.55s both;
+  }
+}
+
+@keyframes line-rise {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wind-drift {
+  from {
+    transform: translateX(-12px);
+  }
+  to {
+    transform: translateX(12px);
+  }
+}
+
+/*
+  Scroll scenes. Without JavaScript (or with reduced motion) a scene is an
+  ordinary section showing its finished composition. When the scene's script
+  runs, it adds .is-live: the section becomes tall and the stage sticks.
+*/
+.scene {
+  position: relative;
+}
+
+.scene-stage {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+.scene.is-live {
+  height: calc(var(--hold, 3) * 100svh + 100svh);
+}
+
+.scene.is-live .scene-stage {
+  position: sticky;
+  top: 0;
+}
