@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "Bash(vercel:*)",
+      "Bash(npx vercel:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(supabase db push:*)",
+      "Bash(npx supabase db reset:*)",
+      "Bash(npx supabase db push:*)",
+      "Bash(docker push:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-secrets.js\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-on-edit.js\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

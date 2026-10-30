@@ -1,0 +1,43 @@
+# Secrets: never commit. Keep placeholder names in .env.example instead.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Claude Code personal settings (shared settings.json IS committed)
+.claude/settings.local.json
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Supabase local
+supabase/.temp/
+supabase/.branches/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
