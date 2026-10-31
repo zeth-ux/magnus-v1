@@ -4,6 +4,25 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-10-31 (night): Landing v3, the Stripe Press-style shelf
+
+**Done**
+- Zarith still found v2 generic and plain, and pointed at press.stripe.com. Studied it live in the browser: a dark ground, a stack of 3D books seen by a camera at mid-screen, and a colour flood when you pick one.
+- Rebuilt the landing around **the Ansan shelf**: 9 sample books as real CSS 3D boxes with drawn Malay-craft covers (songket, awan larat, pucuk rebung, pelikat, tikar, bunga, ombak). On load they fall into place; scrolling makes the bayu blow through the stack (books drift and turn with scroll speed, then settle). Picking a book floods the page with its colour, turns it to its cover, and shows owner, give/lend and the owner's warkah.
+- How it works, safety + FAQ and the footer restyled on the dark ground in the book colours. Removed the hero, wind scene, showcase, rantau scene and first-step sections (the shelf replaces them).
+- Fixed: scroll triggers re-measure after fonts load and after the accordion hydrates (sections no longer stay blank).
+- Verified: lint, typecheck, 12 tests, build; screenshots at 1440 and 390 px, reduced motion, keyboard (Tab to a book, Enter, Esc returns focus), no console errors, no sideways scroll.
+
+**Decisions**
+- Dark ground plus colourful books instead of bone and timber: the books carry the colour.
+- CSS 3D instead of WebGL: no new dependency, crisp text, works without a GPU canvas.
+
+**Next**
+- [ ] Zarith: test locally and say if this is the direction; then merge PR #5
+- [ ] Restyle /login and /welcome to match the dark shelf
+- [ ] Replace the sample shelf with real books from Supabase in Week 2
+- [ ] Sign-in on Vercel, domain + Resend, R10-R13 (unchanged)
+
 ## 2026-10-31: Landing page redo (bolder motion)
 
 **Done**

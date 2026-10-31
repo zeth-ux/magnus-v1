@@ -1,32 +1,32 @@
-import { Hero } from "@/components/landing/hero";
-import { WindScene } from "@/components/landing/wind-scene";
+import type { Viewport } from "next";
+import { Shelf } from "@/components/shelf/shelf";
+import { SiteHeader } from "@/components/landing/site-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { Showcase } from "@/components/landing/showcase";
-import { RantauScene } from "@/components/landing/rantau-scene";
 import { SafetyFaq } from "@/components/landing/safety-faq";
-import { FirstStep } from "@/components/landing/first-step";
 import { Closing } from "@/components/landing/closing";
 import { SmoothScroll } from "@/components/landing/smooth-scroll";
 
 /**
  * The landing page. Story and rules: docs/landing.md.
- * One motif runs the page: the arch of a carved Malay panel (the hero's giant
- * window, the scene you fly through, cover stages, buttons, tabs, the footer).
+ * The shelf comes first and is the page's main event: a stack of 3D books you
+ * scroll through and pick from (after Stripe Press).
  */
+export const viewport: Viewport = {
+  themeColor: "#1c1614",
+  colorScheme: "dark",
+};
+
 export default function LandingPage() {
   return (
-    <>
+    <div className="page-malam bg-malam">
       <SmoothScroll />
+      <SiteHeader />
       <main>
-        <Hero />
-        <WindScene />
+        <Shelf />
         <HowItWorks />
-        <Showcase />
-        <RantauScene />
         <SafetyFaq />
-        <FirstStep />
       </main>
       <Closing />
-    </>
+    </div>
   );
 }

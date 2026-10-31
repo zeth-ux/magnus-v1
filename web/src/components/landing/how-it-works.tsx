@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
-import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { HOW_STAGES } from "@/content/landing";
 
 /**
- * How it works, as a horizontal accordion of four stages that read dark to
- * light: kayu timber through to songket gold. Open a stage and its library
+ * How it works, as a horizontal accordion of four stages, each in the colour
+ * of a book on the shelf. Open a stage and its library
  * stamp slams onto it. On a phone the accordion stacks vertically.
  *
  * Without JavaScript (and during server render) every stage is shown open in a
@@ -21,6 +21,11 @@ export function HowItWorks() {
   const [open, setOpen] = useState(0);
   // false on the server and during hydration, true after: no mismatch.
   const live = useSyncExternalStore(noop, () => true, () => false);
+
+  // Becoming an accordion changes this section's height: re-measure every scroll trigger below it.
+  useEffect(() => {
+    if (live) ScrollTrigger.refresh();
+  }, [live]);
 
   // The stamp lands hard: big and tilted, then pressed flat with a little jolt.
   function slam(index: number) {
@@ -43,16 +48,18 @@ export function HowItWorks() {
     () => {
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: "[data-accordion]", start: "top 80%", once: true },
+        gsap.from("[data-how-heading] > *", {
+          y: 40,
+          autoAlpha: 0,
+          duration: 0.9,
+          ease: "expo.out",
+          stagger: 0.1,
+          scrollTrigger: { trigger: "[data-how-heading]", start: "top 92%", once: true },
         });
-        tl.from("[data-how-heading] > *", { y: 40, autoAlpha: 0, duration: 0.9, ease: "expo.out", stagger: 0.1 })
-          .from(
-            "[data-stage]",
-            { yPercent: 30, autoAlpha: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 },
-            0.15,
-          )
-          .add(() => slam(0), 0.75);
+        gsap
+          .timeline({ scrollTrigger: { trigger: "[data-accordion]", start: "top 88%", once: true } })
+          .from("[data-stage]", { yPercent: 30, autoAlpha: 0, duration: 0.9, ease: "expo.out", stagger: 0.08 })
+          .add(() => slam(0), 0.6);
       });
       // Click tweens and the pending stamp timer live outside this context: clear them on unmount.
       return () => {
@@ -73,7 +80,7 @@ export function HowItWorks() {
   }
 
   return (
-    <section ref={root} id="how" aria-labelledby="how-heading" className="scroll-mt-0 bg-bone text-ink">
+    <section ref={root} id="how" aria-labelledby="how-heading" className="scroll-mt-0 bg-malam text-paper">
       <div className="mx-auto w-full max-w-[1400px] px-4 py-28 sm:px-8 lg:py-40">
         <div data-how-heading="" className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <h2
@@ -82,7 +89,7 @@ export function HowItWorks() {
           >
             Four steps, one fair rule.
           </h2>
-          <p className="max-w-[34rem] text-[17px] leading-relaxed lg:col-span-5 lg:col-start-7">
+          <p className="max-w-[34rem] text-[17px] leading-relaxed text-paper/80 lg:col-span-5 lg:col-start-7">
             Give a book and you earn a credit; spend it on any book on the shelf. Nobody needs a
             perfect one-for-one match. Open each step to see how it works.
           </p>
@@ -94,7 +101,7 @@ export function HowItWorks() {
         >
           {HOW_STAGES.map((stage, i) => {
             const isOpen = !live || open === i;
-            const dark = stage.ink !== "#3b2618";
+            const dark = stage.dark;
             return (
               <div
                 key={stage.name}
@@ -110,7 +117,7 @@ export function HowItWorks() {
                     aria-controls={`stage-${i}`}
                     disabled={!live}
                     onClick={() => choose(i)}
-                    className={`flex h-16 w-full items-center justify-between px-6 text-left disabled:cursor-default ${dark ? "" : "focus-visible:outline-kayu"} ${live ? "lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7" : ""}`}
+                    className={`flex h-16 w-full items-center justify-between px-6 text-left disabled:cursor-default ${dark ? "" : "focus-visible:outline-malam"} ${live ? "lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7" : ""}`}
                   >
                     <span
                       className={`font-display font-medium ${isOpen ? "text-[clamp(1.75rem,2.6vw,2.5rem)]" : "text-[17px] lg:absolute lg:bottom-7 lg:left-7 lg:origin-bottom-left lg:-rotate-90 lg:text-xl lg:whitespace-nowrap"}`}
