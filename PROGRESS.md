@@ -11,6 +11,7 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - `/me`: "Stamps on your card", one stamp per credit movement (+1 gave, −1 took, held, freed, starter credit), with the book's title and date.
 - Phones get a bottom tab bar (Browse · Shelf · Add · Activity · Me); wide screens keep the top bar.
 - No database changes.
+- Decision: pausing a book leaves waiting requests waiting (they can't be accepted until it's back on the shelf); the owner is told so.
 
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 

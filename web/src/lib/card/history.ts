@@ -13,7 +13,7 @@ export type LedgerRow = {
 
 export type Stamp = { id: number; amount: string; text: string; date: string; tone: "plus" | "minus" | "held" };
 
-export function describe(row: LedgerRow, title: string | null): Omit<Stamp, "id" | "date"> {
+export function stampFor(row: LedgerRow, title: string | null): Omit<Stamp, "id" | "date"> {
   const book = title ? `“${title}”` : "a book";
   switch (row.kind) {
     case "starter_grant":
@@ -28,15 +28,18 @@ export function describe(row: LedgerRow, title: string | null): Omit<Stamp, "id"
       return { amount: "Freed 1", text: `Returned ${book}`, tone: "plus" };
     case "lend_forfeit":
       return row.delta > 0
-        ? { amount: "+1", text: `Kept the deposit: ${book} wasn't returned`, tone: "plus" }
+        ? { amount: "+1", text: `Got the deposit: ${book} wasn't returned`, tone: "plus" }
         : { amount: "−1", text: `Deposit went to the lender: ${book} wasn't returned`, tone: "minus" };
+    default:
+      // A ledger kind added later still shows up, plainly, until it gets its own words.
+      return { amount: row.delta > 0 ? "+1" : row.delta < 0 ? "−1" : "·", text: "Credit change", tone: "held" };
   }
 }
 
-/** "1 Nov" in Seoul time. */
+/** "1 Nov 2026" in Seoul time. */
 export const stampDate = (iso: string) =>
-  new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", day: "numeric", month: "short" }).format(new Date(iso));
+  new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Seoul", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
 
 export function toStamps(rows: LedgerRow[], titleOf: (row: LedgerRow) => string | null): Stamp[] {
-  return rows.map((r) => ({ id: r.id, date: stampDate(r.created_at), ...describe(r, titleOf(r)) }));
+  return rows.map((r) => ({ id: r.id, date: stampDate(r.created_at), ...stampFor(r, titleOf(r)) }));
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { useAnnounce } from "../activity/announcer";
 import { updateCopy, type CopyState } from "./actions";
 import { CONDITIONS, LEND_MAX } from "@/lib/books/validate";
 import { inputClass } from "@/components/app/field";
@@ -17,10 +18,24 @@ type Copy = {
 
 /** Pause / put back / take off the shelf, and edit the note, condition and lend period. */
 export function CopyControls({ copy }: { copy: Copy }) {
-  const [state, action, pending] = useActionState<CopyState, FormData>(updateCopy, { status: "idle" });
+  const announce = useAnnounce();
+  // Results go to the page's status region too: after taking a book off, this row moves away.
+  const [state, action, pending] = useActionState<CopyState, FormData>(async (prev, form) => {
+    const next = await updateCopy(prev, form);
+    if (next.status === "done") announce(`${copy.title}: ${next.message}`);
+    return next;
+  }, { status: "idle" });
   const [editing, setEditing] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
+  const keepButton = useRef<HTMLButtonElement>(null);
   const canToggle = copy.status === "available" || copy.status === "paused";
+  const toggleText = copy.status === "available" ? "Pause" : "Put back on the shelf";
+  const editText = editing ? "Close" : "Edit";
+
+  // When the confirmation opens, the safe choice gets focus.
+  useEffect(() => {
+    if (confirmWithdraw) keepButton.current?.focus();
+  }, [confirmWithdraw]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -32,47 +47,63 @@ export function CopyControls({ copy }: { copy: Copy }) {
             name="op"
             value={copy.status === "available" ? "pause" : "resume"}
             disabled={pending}
-            aria-label={`${copy.status === "available" ? "Pause" : "Put back"}: ${copy.title}`}
+            aria-label={`${toggleText}: ${copy.title}`}
             className="h-11 rounded-full border-[1.5px] border-paper/60 px-5 text-[15px] font-semibold disabled:opacity-60"
           >
-            {copy.status === "available" ? "Pause" : "Put back on the shelf"}
+            {toggleText}
           </button>
         ) : null}
         <button
           type="button"
           onClick={() => setEditing((e) => !e)}
           aria-expanded={editing}
-          aria-label={`Edit details: ${copy.title}`}
+          aria-label={`${editText}: ${copy.title}`}
           className="h-11 rounded-full border-[1.5px] border-paper/60 px-5 text-[15px] font-semibold"
         >
-          {editing ? "Close" : "Edit"}
+          {editText}
         </button>
-        {canToggle ? (
-          confirmWithdraw ? (
+        {canToggle && !confirmWithdraw ? (
+          <button
+            key="ask-withdraw"
+            type="button"
+            onClick={() => setConfirmWithdraw(true)}
+            aria-label={`Take off the shelf: ${copy.title}`}
+            className="h-11 px-2 text-[15px] font-semibold text-merah-light underline underline-offset-4"
+          >
+            Take off the shelf
+          </button>
+        ) : null}
+      </form>
+      {/* A separate form, so no double-click on the first button can land on "Yes". */}
+      {confirmWithdraw && canToggle ? (
+        <form action={action} className="flex flex-col gap-2 rounded-[8px] border border-merah-light/60 p-4">
+          <input type="hidden" name="copy" value={copy.id} />
+          <p id={`withdraw-warning-${copy.id}`} className="text-[15px] text-paper/80">
+            It disappears from the shelf for good and open requests for it are cancelled. Your credits don&apos;t change.
+          </p>
+          <div className="flex flex-wrap gap-3">
             <button
+              ref={keepButton}
+              type="button"
+              onClick={() => setConfirmWithdraw(false)}
+              className="h-11 rounded-full border-[1.5px] border-paper/60 px-5 text-[15px] font-semibold"
+            >
+              Keep it
+            </button>
+            <button
+              key="confirm-withdraw"
               type="submit"
               name="op"
               value="withdraw"
               disabled={pending}
-              aria-label={`Yes, take it off the shelf: ${copy.title}`}
+              aria-describedby={`withdraw-warning-${copy.id}`}
+              aria-label={`Yes, take it off: ${copy.title}`}
               className="h-11 rounded-full bg-merah-light px-5 text-[15px] font-semibold text-malam disabled:opacity-60"
             >
               Yes, take it off
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmWithdraw(true)}
-              aria-label={`Take off the shelf: ${copy.title}`}
-              className="h-11 px-2 text-[15px] font-semibold text-merah-light underline underline-offset-4"
-            >
-              Take off the shelf
-            </button>
-          )
-        ) : null}
-      </form>
-      {confirmWithdraw ? (
-        <p className="text-[15px] text-paper/80">It disappears from the shelf and open requests for it are cancelled. Your credits don&apos;t change.</p>
+          </div>
+        </form>
       ) : null}
 
       {editing ? (

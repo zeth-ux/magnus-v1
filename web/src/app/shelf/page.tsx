@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/supabase/user";
 import { LEND_MAX, CONDITIONS } from "@/lib/books/validate";
 import { pretty } from "@/lib/activity/steps";
 import { CopyControls } from "./copy-controls";
+import { Announcer } from "../activity/announcer";
 
 export const metadata: Metadata = { title: "My shelf" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -44,9 +45,11 @@ export default function ShelfPage() {
             Add a book
           </Link>
         </div>
-        <Suspense fallback={<p className="text-paper/70">Dusting the shelf…</p>}>
-          <Shelf />
-        </Suspense>
+        <Announcer>
+          <Suspense fallback={<p className="text-paper/70">Dusting the shelf…</p>}>
+            <Shelf />
+          </Suspense>
+        </Announcer>
       </div>
     </AppShell>
   );
@@ -102,7 +105,12 @@ async function Shelf() {
                       </Link>
                     </p>
                     <p className="text-[15px] text-paper/80">
-                      {c.mode === "give" ? "To give" : `To lend · up to ${LEND_MAX[c.lend_max ?? "flexible"].toLowerCase()}`} · {CONDITIONS[c.condition]}
+                      {c.mode === "give"
+                        ? "To give"
+                        : c.lend_max === "flexible" || !c.lend_max
+                          ? "To lend · flexible period"
+                          : `To lend · up to ${LEND_MAX[c.lend_max].toLowerCase()}`}{" "}
+                      · {CONDITIONS[c.condition]}
                     </p>
                     <p className="text-[15px] font-semibold">{STATUS[c.status]}</p>
                   </div>

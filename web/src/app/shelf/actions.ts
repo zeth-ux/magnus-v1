@@ -15,12 +15,11 @@ export async function updateCopy(_prev: CopyState, form: FormData): Promise<Copy
   const { supabase, user } = await requireUser("/shelf");
   const id = str(form, "copy");
   const op = str(form, "op");
-  if (!UUID.test(id)) return { status: "error", message: "That didn't work. Refresh and try again." };
+  if (!UUID.test(id) || !["withdraw", "pause", "resume", "save"].includes(op)) {
+    return { status: "error", message: "That didn't work. Refresh and try again." };
+  }
 
-  const { data: copy } = await supabase.from("copies").select("id, mode, status").eq("id", id).eq("owner_id", user.id).maybeSingle();
-  if (!copy) return { status: "error", message: "That book isn't on your shelf." };
-  const c = copy as { id: string; mode: "give" | "lend"; status: string };
-
+  // withdraw_copy() locks the copy and checks ownership itself.
   if (op === "withdraw") {
     const { error } = await supabase.rpc("withdraw_copy", { p_copy: id });
     if (error) return { status: "error", message: friendlyError(error, "Couldn't take it off the shelf. Try again.", "shelf:withdraw") };
@@ -28,13 +27,21 @@ export async function updateCopy(_prev: CopyState, form: FormData): Promise<Copy
     return { status: "done", message: "Taken off the shelf. Open requests for it were cancelled." };
   }
 
+  const { data: copy, error: readError } = await supabase.from("copies").select("id, mode, status").eq("id", id).eq("owner_id", user.id).maybeSingle();
+  if (readError) return { status: "error", message: friendlyError(readError, "Couldn't reach your shelf. Try again.", "shelf:read") };
+  if (!copy) return { status: "error", message: "That book isn't on your shelf." };
+  const c = copy as { id: string; mode: "give" | "lend"; status: string };
+
   let patch: Record<string, unknown>;
   let done: string;
+  let expectStatus: string | null = null;
   if (op === "pause" || op === "resume") {
     const from = op === "pause" ? "available" : "paused";
     if (c.status !== from) return { status: "error", message: "Refresh the page: this book has changed." };
     patch = { status: op === "pause" ? "paused" : "available" };
-    done = op === "pause" ? "Paused. Nobody can request it until you put it back." : "Back on the shelf.";
+    expectStatus = from;
+    // Requests already waiting stay waiting (they can't be accepted while paused).
+    done = op === "pause" ? "Paused. Nobody new can request it, and waiting requests wait until you put it back." : "Back on the shelf.";
   } else if (op === "save") {
     const noteRaw = form.get("note");
     const note = typeof noteRaw === "string" ? noteRaw.trim().replace(/\r\n/g, "\n") : "";
@@ -49,9 +56,12 @@ export async function updateCopy(_prev: CopyState, form: FormData): Promise<Copy
     return { status: "error", message: "That didn't work. Refresh and try again." };
   }
 
-  const { data, error } = await supabase.from("copies").update(patch).eq("id", id).eq("owner_id", user.id).select("id");
+  let update = supabase.from("copies").update(patch).eq("id", id).eq("owner_id", user.id);
+  // Only flip the status if nothing changed it since we looked (e.g. a handover).
+  if (expectStatus) update = update.eq("status", expectStatus);
+  const { data, error } = await update.select("id");
   if (error) return { status: "error", message: friendlyError(error, "Couldn't save that. Try again.", `shelf:${op}`) };
-  if (!data?.length) return { status: "error", message: "That book isn't on your shelf." };
+  if (!data?.length) return { status: "error", message: "Refresh the page: this book has changed." };
   refresh();
   return { status: "done", message: done };
 }

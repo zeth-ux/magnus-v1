@@ -91,15 +91,18 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
 
 /** Every credit movement, as stamps on the card (newest first). */
 async function CardHistory() {
-  const { supabase } = await requireUser("/me");
+  const { supabase, user } = await requireUser("/me");
   const { data, error } = await supabase
     .from("credit_ledger")
     .select("id, kind, delta, locked_delta, ref_id, created_at")
-    .order("created_at", { ascending: false })
-    .limit(40);
+    .eq("user_id", user.id)
+    .order("id", { ascending: false }) // identity: insert order, unique
+    .limit(41);
   if (error) return <p className="text-[15px] text-paper/70">Couldn&apos;t load your history just now.</p>;
-  const rows = (data ?? []) as LedgerRow[];
-  if (rows.length === 0) return null;
+  const all = (data ?? []) as LedgerRow[];
+  if (all.length === 0) return null;
+  const more = all.length > 40;
+  const rows = all.slice(0, 40);
 
   // Titles: a starter grant points at the copy; everything else at the request.
   const copyIds = rows.filter((r) => r.kind === "starter_grant").map((r) => r.ref_id);
@@ -114,7 +117,8 @@ async function CardHistory() {
     if (r.copy?.books) titles.set(r.id, r.copy.books.title);
 
   const stamps = toStamps(rows, (r) => titles.get(r.ref_id) ?? null);
-  const tone = { plus: "border-pandan text-pandan", minus: "border-merah text-merah", held: "border-kopi text-kopi" } as const;
+  // All at least 4.5:1 on paper (pandan-deep 5.5, merah 9.3, kopi 5.3).
+  const tone = { plus: "border-pandan-deep text-pandan-deep", minus: "border-merah text-merah", held: "border-kopi text-kopi" } as const;
 
   return (
     <section aria-labelledby="history-heading" className="rounded-[10px] bg-paper p-7 text-malam">
@@ -132,6 +136,7 @@ async function CardHistory() {
           </li>
         ))}
       </ol>
+      {more ? <p className="mt-3 text-[15px] text-muted">Showing your 40 most recent stamps.</p> : null}
     </section>
   );
 }
