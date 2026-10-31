@@ -35,7 +35,9 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
   const { supabase, user } = await requireUser("/me");
   const profile = await getProfile(supabase, user.id);
   const { data: contact } = await supabase.from("profile_contacts").select("whatsapp").eq("id", user.id).maybeSingle();
-  const { data: credits } = await supabase.rpc("my_credits").maybeSingle<{ balance: number; locked: number; available: number }>();
+  const { data: credits, error: creditsError } = await supabase
+    .rpc("my_credits")
+    .maybeSingle<{ balance: number; locked: number; available: number }>();
 
   return (
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
@@ -52,6 +54,9 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
       {profile ? (
         <aside aria-label="Your credits" className="h-fit rounded-[10px] bg-paper p-7 text-malam lg:col-span-4 lg:col-start-9">
           <p className="font-display text-xl font-semibold">Credits</p>
+          {creditsError ? (
+            <p className="mt-4 text-[15px]">Couldn&apos;t load your credits just now. Refresh to try again.</p>
+          ) : (
           <dl className="mt-4 grid grid-cols-3 gap-3 text-center">
             {(
               [
@@ -66,6 +71,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
               </div>
             ))}
           </dl>
+          )}
           <p className="mt-5 text-[15px] leading-relaxed">
             Give a book: +1. Take one: −1. Borrowing holds 1 until the book is back. Your first listed book earns a starter credit.
           </p>
