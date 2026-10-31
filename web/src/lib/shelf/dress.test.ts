@@ -9,7 +9,6 @@ const row = (i: number, extra: Partial<PublicShelfRow> = {}): PublicShelfRow => 
   mode: "lend",
   lend_max: "4_weeks",
   area: "Gojan-dong",
-  note: null,
   ...extra,
 });
 
@@ -34,6 +33,6 @@ describe("dressing real copies for the shelf", () => {
     expect(shelf).toHaveLength(9);
     expect(shelf.slice(0, 2).every((c) => c.sample === false)).toBe(true);
     expect(shelf.slice(2).every((c) => c.sample === true)).toBe(true);
-    expect(composeShelf(Array.from({ length: 12 }, (_, i) => row(i % 10)), 9)).toHaveLength(12);
+    expect(composeShelf(Array.from({ length: 12 }, (_, i) => row(i % 10)), 9)).toHaveLength(9);
   });
 });

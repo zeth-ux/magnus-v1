@@ -11,10 +11,11 @@ export function SpineRow({ copy, href, owner, mine }: { copy: ShelfCopy; href: s
     <li>
       <Link
         href={href}
+        aria-label={`${copy.title} by ${copy.author}. ${copy.mode === "give" ? "To give" : `To lend for up to ${copy.lendFor}`}, from ${mine ? "you" : owner} in ${copy.area}`}
         className="group flex flex-col gap-2 no-underline sm:flex-row sm:items-center sm:gap-6"
       >
         <span
-          className="relative block h-14 w-full shrink-0 overflow-hidden rounded-[3px] motion-safe:transition-transform motion-safe:duration-300 group-hover:translate-x-2 sm:w-[min(560px,60%)]"
+          className="relative block h-14 w-full shrink-0 overflow-hidden rounded-[3px] motion-safe:transition-transform motion-safe:duration-300 group-hover:translate-x-2 group-focus-visible:translate-x-2 sm:w-[min(560px,60%)]"
           style={{ background: copy.colour, color: copy.text }}
         >
           <SpineArt copy={copy} />

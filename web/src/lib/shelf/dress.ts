@@ -10,7 +10,6 @@ export type PublicShelfRow = {
   mode: "give" | "lend";
   lend_max: keyof typeof LEND_MAX | null;
   area: string;
-  note: string | null;
 };
 
 /** A small, stable hash so the same book always gets the same look. */
@@ -41,7 +40,7 @@ export function dressCopy(row: PublicShelfRow): ShelfCopy {
     lendFor: row.mode === "lend" && row.lend_max ? LEND_MAX[row.lend_max] : undefined,
     owner: "A reader",
     area: row.area,
-    note: row.note ?? "",
+    note: "",
     thick: 40 + ((h >>> 8) % 48),
     length: 0.82 + ((h >>> 16) % 19) / 100,
     colour: look.colour,
@@ -55,7 +54,7 @@ export function dressCopy(row: PublicShelfRow): ShelfCopy {
 
 /** Real copies first; samples fill the stack up to `size` so the landing never looks empty. */
 export function composeShelf(rows: PublicShelfRow[], size = 9): ShelfCopy[] {
-  const real = rows.map(dressCopy);
+  const real = rows.slice(0, size).map(dressCopy);
   if (real.length >= size) return real;
   return [...real, ...SHELF.slice(0, size - real.length)];
 }

@@ -8,18 +8,20 @@ import { requireUser } from "@/lib/supabase/user";
 import { dressCopy } from "@/lib/shelf/dress";
 import { CONDITIONS } from "@/lib/books/validate";
 import { RequestForm } from "./request-form";
+import { seoulDate } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "A book on the shelf" };
 export const viewport: Viewport = APP_VIEWPORT;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const LEND_DAYS = { "2_weeks": 14, "4_weeks": 28, "2_months": 61, flexible: 183 } as const;
+// Mirrors public.lend_max_days(); "flexible" reads the max_flexible_lend_days setting.
+const LEND_DAYS = { "2_weeks": 14, "4_weeks": 28, "2_months": 61 } as const;
 
 type CopyRow = {
   id: string;
   isbn: string;
   mode: "give" | "lend";
-  lend_max: keyof typeof LEND_DAYS | null;
+  lend_max: keyof typeof LEND_DAYS | "flexible" | null;
   condition: keyof typeof CONDITIONS;
   note: string | null;
   status: string;
@@ -28,11 +30,6 @@ type CopyRow = {
   profiles: { display_name: string; area: string } | null;
 };
 
-/** Today in Ansan (the database checks dates in Asia/Seoul too). */
-function seoulDate(offsetDays = 0) {
-  const d = new Date(Date.now() + offsetDays * 86_400_000);
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(d);
-}
 
 export default function CopyPage({ params }: PageProps<"/browse/[id]">) {
   return (
@@ -52,24 +49,31 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
   if (!UUID.test(id)) notFound();
   const { supabase, user } = await requireUser(`/browse/${id}`);
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("copies")
-    .select("id, isbn, mode, lend_max, condition, note, status, owner_id, books(title, authors, published_year), profiles(display_name, area)")
+    .select(
+      "id, isbn, mode, lend_max, condition, note, status, owner_id, books(title, authors, published_year), profiles!copies_owner_id_fkey(display_name, area)",
+    )
     .eq("id", id)
     .maybeSingle();
+  // A failure is not a missing book: let the error page offer a retry.
+  if (error) throw new Error(`copy ${id} could not be loaded (${error.code})`);
   const copy = data as CopyRow | null;
   if (!copy || !copy.books || !copy.profiles) notFound();
 
-  const [{ count: readers }, { data: mine }] = await Promise.all([
-    supabase.from("copies").select("id", { count: "exact", head: true }).eq("isbn", copy.isbn).neq("status", "withdrawn"),
+  const [{ count: copies }, { data: mine }, { data: flexibleDays }] = await Promise.all([
+    supabase.from("copies").select("id", { count: "exact", head: true }).eq("isbn", copy.isbn).eq("status", "available"),
     supabase
       .from("requests")
       .select("id, status")
       .eq("copy_id", copy.id)
       .eq("requester_id", user.id)
       .in("status", ["requested", "accepted", "on_loan"])
-      .maybeSingle(),
+      .order("created_at", { ascending: false })
+      .limit(1),
+    supabase.rpc("setting", { p_key: "max_flexible_lend_days" }),
   ]);
+  const lendDays = copy.lend_max === "flexible" || copy.lend_max === null ? Number(flexibleDays ?? 183) : LEND_DAYS[copy.lend_max];
 
   const look = dressCopy({
     copy_id: copy.id,
@@ -79,10 +83,9 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
     mode: copy.mode,
     lend_max: copy.lend_max,
     area: copy.profiles.area,
-    note: copy.note,
   });
   const isMine = copy.owner_id === user.id;
-  const myRequest = mine as { id: string; status: string } | null;
+  const myRequest = (mine?.[0] ?? null) as { id: string; status: string } | null;
 
   return (
     <div className="mt-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-6">
@@ -123,8 +126,8 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             </blockquote>
           </figure>
         ) : null}
-        {readers && readers > 1 ? (
-          <p className="text-[15px] text-paper/80">{readers} readers on the shelf have this book.</p>
+        {copies && copies > 1 ? (
+          <p className="text-[15px] text-paper/80">{copies} copies of this book are on the shelf.</p>
         ) : null}
 
         {isMine ? (
@@ -144,7 +147,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             copyId={copy.id}
             mode={copy.mode}
             minDate={seoulDate(1)}
-            maxDate={seoulDate(copy.lend_max ? LEND_DAYS[copy.lend_max] : 183)}
+            maxDate={seoulDate(lendDays)}
           />
         )}
       </div>
