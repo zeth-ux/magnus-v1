@@ -55,9 +55,50 @@ describe.skipIf(!POSTGRES_URL)("concurrent credit spending (real Postgres)", () 
     }
     const results = await Promise.allSettled([r1, r2].map((id) => db.as(reader, "select public.confirm_handover($1)", [id])));
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
-    const c = await credits(db, reader);
-    expect(c.available).toBe(0);
-    expect(c.available).toBeGreaterThanOrEqual(0);
+    expect((await credits(db, reader)).available).toBe(0);
+  });
+
+  it("both people confirming the handover at the same moment moves credits once", async () => {
+    for (let round = 0; round < 5; round++) {
+      const owner = await makeUser(db, `SameMomentOwner${round}`);
+      const reader = await makeUser(db, `SameMomentReader${round}`);
+      const copy = await listCopy(db, owner);
+      await listCopy(db, reader);
+      const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1)", [copy]);
+      await db.as(owner, "select public.respond_request($1, true)", [id]);
+      await Promise.all([owner, reader].map((u) => db.as(u, "select public.confirm_handover($1)", [id])));
+      expect(await credits(db, owner)).toMatchObject({ balance: 2 });
+      expect(await credits(db, reader)).toMatchObject({ balance: 0 });
+    }
+  });
+
+  // Smoke test: the timing that triggered a deadlock with FOR UPDATE is hard to hit on purpose,
+  // so this checks the common case; the fix itself is FOR NO KEY UPDATE in lock_person().
+  it("a new request during someone's handover goes through", async () => {
+    for (let round = 0; round < 5; round++) {
+      const owner = await makeUser(db, `DeadOwner${round}`);
+      const reader = await makeUser(db, `DeadReader${round}`);
+      const first = await listCopy(db, owner);
+      const second = await listCopy(db, owner);
+      await listCopy(db, reader);
+      for (let i = 0; i < 2; i++) {
+        const f = await makeUser(db, `DeadFriend${round}${i}`);
+        await listCopy(db, f);
+        const mine = await listCopy(db, reader);
+        const [{ request_copy: gid }] = await db.as(f, "select public.request_copy($1)", [mine]);
+        await db.as(reader, "select public.respond_request($1, true)", [gid]);
+        await db.as(reader, "select public.confirm_handover($1)", [gid]);
+        await db.as(f, "select public.confirm_handover($1)", [gid]);
+      }
+      const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1)", [first]);
+      await db.as(owner, "select public.respond_request($1, true)", [id]);
+      await db.as(owner, "select public.confirm_handover($1)", [id]);
+      const results = await Promise.allSettled([
+        db.as(reader, "select public.confirm_handover($1)", [id]),
+        db.as(reader, "select public.request_copy($1)", [second]),
+      ]);
+      expect(results.map((r) => (r.status === "rejected" ? String(r.reason) : "ok"))).toEqual(["ok", "ok"]);
+    }
   });
 
   it("racing requests can't get past the 3 open requests limit", async () => {
