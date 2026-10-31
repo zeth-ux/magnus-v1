@@ -153,11 +153,11 @@ export function SpineArt({ copy }: { copy: ShelfCopy }) {
         <PatternDef id={id} pattern={copy.pattern} ink={copy.ink} base={copy.colour} scale={0.8} />
       </defs>
       {copy.pattern === "matahari" ? (
-        <svg x="58%" width="42%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="xMidYMid slice">
+        <svg x="64%" width="36%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="xMidYMid slice">
           <Sun ink={copy.ink} cx={50} cy={20} r={9} />
         </svg>
       ) : (
-        <rect x="58%" y="0" width="42%" height="100%" fill={`url(#${id})`} />
+        <rect x="64%" y="0" width="36%" height="100%" fill={`url(#${id})`} />
       )}
     </svg>
   );

@@ -185,3 +185,36 @@ a {
   outline: 3px solid var(--color-songket);
   outline-offset: 4px;
 }
+
+/* Sign-in pages: a few shelf books, seen from above, drifting on the breeze. */
+.auth-book {
+  transform-style: preserve-3d;
+  transform: rotateZ(calc((var(--i) - 1.5) * 3deg)) translateX(calc((var(--i) - 1.5) * 18px));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .auth-book {
+    animation: auth-drift 7s ease-in-out infinite alternate;
+    animation-delay: calc(var(--i) * -1.7s);
+  }
+}
+@keyframes auth-drift {
+  from {
+    transform: rotateZ(calc((var(--i) - 1.5) * 3deg)) translateX(calc((var(--i) - 1.5) * 18px)) rotateY(-4deg);
+  }
+  to {
+    transform: rotateZ(calc((var(--i) - 1.5) * -2deg)) translateX(calc((var(--i) - 1.5) * -10px)) translateY(-8px) rotateY(5deg);
+  }
+}
+
+/* Form fields on the night ground. */
+.field-dark {
+  background: rgb(239 233 223 / 0.08);
+  border: 1px solid rgb(239 233 223 / 0.35);
+  color: var(--color-paper);
+}
+.field-dark::placeholder {
+  color: rgb(239 233 223 / 0.55);
+}
+.field-dark:focus-visible {
+  border-color: var(--color-songket);
+}

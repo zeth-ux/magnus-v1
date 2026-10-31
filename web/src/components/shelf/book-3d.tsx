@@ -29,8 +29,8 @@ export function Book3D({
       <div className="f f-spine overflow-hidden" style={{ background: copy.colour }}>
         <SpineArt copy={copy} />
         <div className="relative flex h-full items-center pr-[2.5%] pl-[3%]">
-          <div className="flex w-[54%] min-w-0 items-center gap-[5%]">
-            <span className="w-[34%] shrink-0 truncate text-[clamp(8px,0.95vw,12px)] font-semibold tracking-[0.02em]">
+          <div className="flex w-[61%] min-w-0 items-center gap-[4%]">
+            <span className="w-[30%] shrink-0 truncate text-[clamp(8px,0.95vw,12px)] font-semibold tracking-[0.02em]">
               {copy.author}
             </span>
             <span className="min-w-0 flex-1 truncate font-display text-[clamp(11px,1.45vw,19px)] font-medium">
