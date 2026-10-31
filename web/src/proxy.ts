@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 
 /** Pages that need a signed-in user. */
-const PROTECTED_PATHS = ["/welcome", "/me", "/add", "/browse", "/activity"];
+const PROTECTED_PATHS = ["/welcome", "/me", "/add", "/browse", "/activity", "/wishlist"];
 
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

@@ -62,8 +62,30 @@ async function Requests() {
     incoming.filter((r) => r.status !== "requested" || (r.copy && r.copy.status !== "available")).map((r) => r.copy?.id),
   );
 
+  const { data: wishedData } = await supabase.rpc("wished_and_available");
+  const wished = (wishedData ?? []) as { copy_id: string; title: string; mode: "give" | "lend"; owner_name: string; area: string }[];
+
   return (
     <div className="flex flex-col gap-14">
+      {wished.length > 0 ? (
+        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 rounded-[10px] border border-songket/60 p-5">
+          <h2 id="wished-heading" className="font-display text-2xl font-semibold text-songket">
+            From your wishlist, on the shelf now
+          </h2>
+          <ul className="flex flex-col gap-2 text-[17px]">
+            {wished.map((w) => (
+              <li key={w.copy_id}>
+                <Link href={`/browse/${w.copy_id}`} className="font-semibold underline underline-offset-4">
+                  {w.title}
+                </Link>{" "}
+                <span className="text-paper/80">
+                  · {w.mode === "give" ? "to give" : "to lend"} · {w.owner_name}, {w.area}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <Section title="Asked of you" empty="Nobody has asked for your books yet.">
         {incoming.map((r) => (
           <Item
