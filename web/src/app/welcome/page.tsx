@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getProfile } from "@/lib/supabase/user";
 import { AUTH_VIEWPORT, AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = { title: "You're in" };
@@ -31,6 +33,10 @@ async function Welcome() {
   if (!data.user) redirect("/login?next=/welcome");
 
   const email = data.user.email ?? "you";
+  const profile = await getProfile(supabase, data.user.id);
+  const step = profile
+    ? { href: "/add", label: "Add your first book" }
+    : { href: "/me?next=/add", label: "Make your library card" };
 
   return (
     <div className="flex flex-col gap-8">
@@ -39,17 +45,22 @@ async function Welcome() {
           You&apos;re in.
         </h1>
         <p className="text-[17px] leading-relaxed text-paper/80">
-          Signed in as <strong className="text-paper">{email}</strong>. The shelf opens on{" "}
-          <strong className="text-paper">9 November</strong>: that&apos;s when you can scan your first
-          book and get your starter credit.
+          Signed in as <strong className="text-paper">{email}</strong>. Put a few books on the shelf
+          now; the pilot opens for requests on <strong className="text-paper">9 November</strong>.
         </p>
       </div>
+      <Link
+        href={step.href}
+        className="self-start rounded-full bg-paper px-7 py-3.5 text-[17px] font-semibold text-malam no-underline motion-safe:transition-transform motion-safe:hover:scale-[1.02]"
+      >
+        {step.label}
+      </Link>
       {/* A library card, stamped with the day the shelf opens. */}
       <div className="relative rounded-[10px] bg-paper p-7 text-malam">
-        <p className="font-display text-xl font-semibold">While you wait</p>
+        <p className="font-display text-xl font-semibold">Before 9 November</p>
         <p className="mt-2 max-w-[30ch] text-[17px] leading-relaxed">
-          Pick 3 to 5 English books you&apos;d give or lend, and think of a café or station near you
-          that&apos;s easy for meet-ups.
+          List 3 to 5 English books you&apos;d give or lend, and think of a café or station near you
+          that&apos;s easy for meet-ups. Your first book earns a starter credit.
         </p>
         <span
           aria-hidden="true"
