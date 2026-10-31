@@ -7,6 +7,7 @@ export const APP_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "dar
 const NAV = [
   { href: "/browse", label: "Browse" },
   { href: "/add", label: "Add a book" },
+  { href: "/activity", label: "Activity" },
   { href: "/me", label: "Me" },
 ];
 

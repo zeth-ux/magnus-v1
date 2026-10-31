@@ -4,6 +4,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Activity page (request lifecycle)
+
+**Done**
+- `/activity`: requests made to you (accept / decline, "I handed it over", "I got it back", report not returned after due + 14 days) and your own requests (cancel, "I've got the book", "I returned it"), plus recent history. Each button calls exactly one database function; the database still enforces every rule.
+- The steps per status live in `lib/activity/steps.ts`, with tests.
+
+**Open**
+- Meet-ups are agreed outside the app for now (the WhatsApp reveal is R13, waiting for approval).
+
 ## 2026-11-01 (overnight): Real shelf and browse
 
 **Done**

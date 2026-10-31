@@ -131,13 +131,13 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
         ) : null}
 
         {isMine ? (
-          <p className="text-[17px] text-paper/80">This is your book. You&apos;ll see requests for it here soon.</p>
+          <p className="text-[17px] text-paper/80">This is your book. Requests for it appear in Activity.</p>
         ) : myRequest ? (
           <p role="status" className="rounded-[10px] bg-paper p-6 text-[17px] text-malam">
             {myRequest.status === "requested"
               ? "You've asked for this book. Waiting for the owner to answer."
               : myRequest.status === "accepted"
-                ? "The owner accepted. Agree where and when to meet; confirming the handover in the app comes next."
+                ? "The owner accepted. Agree where and when to meet, then confirm the handover in Activity."
                 : "You're borrowing this book."}
           </p>
         ) : copy.status !== "available" ? (
