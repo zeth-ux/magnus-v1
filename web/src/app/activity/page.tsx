@@ -6,7 +6,7 @@ import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
 import { Announcer } from "./announcer";
 import { MeetupCard, type Meetup } from "./meetup-card";
-import { seoulPickerMin } from "@/lib/activity/meetup-time";
+import { formatSeoul, isPast, seoulPickerMax, seoulPickerMin } from "@/lib/activity/meetup-time";
 import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -57,17 +57,27 @@ async function Requests() {
   const openRows = (open.data ?? []) as unknown as Row[];
   // The live meet-up card for each open request.
   const meetupIds = openRows.filter((r) => r.status !== "requested").map((r) => r.id);
-  const { data: meetupRows } = meetupIds.length
+  const { data: meetupRows, error: meetupError } = meetupIds.length
     ? await supabase
         .from("meetups")
-        .select("id, request_id, proposed_by, place, meet_at, note, status")
+        .select("id, request_id, purpose, proposed_by, place, meet_at, note, status")
         .in("request_id", meetupIds)
         .in("status", ["proposed", "agreed"])
-    : { data: [] };
-  const meetups = new Map(((meetupRows ?? []) as (Meetup & { request_id: string })[]).map((m) => [m.request_id, m]));
+    : { data: [], error: null };
+  type MeetupRow = Omit<Meetup, "when" | "expired"> & { request_id: string; purpose: "handover" | "return"; meet_at: string };
+  // A card counts only for the step it was made for (an agreed handover card is not the return card).
+  const meetups = new Map(
+    ((meetupRows ?? []) as MeetupRow[])
+      .filter((m) => {
+        const row = openRows.find((r) => r.id === m.request_id);
+        return row && m.purpose === (row.status === "accepted" ? "handover" : "return");
+      })
+      .map((m) => [m.request_id, { ...m, when: formatSeoul(m.meet_at), expired: isPast(m.meet_at) }]),
+  );
   const pastRows = (past.data ?? []) as unknown as Row[];
   const today = seoulToday();
   const minAt = seoulPickerMin();
+  const maxAt = seoulPickerMax();
   const incoming = openRows.filter((r) => r.owner_id === user.id);
   const outgoing = openRows.filter((r) => r.requester_id === user.id);
   // Copies already promised to someone (or not on the shelf): their other requests can't be accepted.
@@ -85,7 +95,7 @@ async function Requests() {
             who={r.requester?.display_name ?? "A reader"}
             line={ownerLine(r, { today, copyBusy: busy.has(r.copy?.id) })}
             ops={ownerOps(r, { today, copyBusy: busy.has(r.copy?.id) })}
-            meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt }}
+            meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }}
           />
         ))}
       </Section>
@@ -98,7 +108,7 @@ async function Requests() {
         }
       >
         {outgoing.map((r) => (
-          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt }} />
+          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }} />
         ))}
       </Section>
       {pastRows.length > 0 ? (
@@ -138,7 +148,7 @@ function Item({
   who: string;
   line: string;
   ops: Op[];
-  meetup?: { me: string; card: Meetup | null; minAt: string };
+  meetup?: { me: string; card: Meetup | null; minAt: string; maxAt: string; unavailable: boolean };
 }) {
   const title = row.copy?.books?.title ?? "A book";
   return (
@@ -160,7 +170,11 @@ function Item({
       </div>
       <div className="flex flex-col gap-4 sm:max-w-[26rem]">
         <RequestActions request={row.id} title={title} ops={ops} />
-        {meetup && (row.status === "accepted" || (row.status === "on_loan" && !row.owner_got_back && !row.requester_returned)) ? (
+        {meetup?.unavailable ? (
+          <p className="text-[15px] text-paper/70">Couldn&apos;t load the meet-up just now. Refresh to try again.</p>
+        ) : meetup &&
+          ((row.status === "accepted" && !(row.mode === "lend" && row.return_by !== null && row.return_by <= seoulToday())) ||
+            (row.status === "on_loan" && !row.owner_got_back && !row.requester_returned)) ? (
           <MeetupCard
             key={meetup.card?.id ?? "none"}
             request={row.id}
@@ -170,6 +184,7 @@ function Item({
             title={title}
             purpose={row.status === "accepted" ? "handover" : "return"}
             minAt={meetup.minAt}
+            maxAt={meetup.maxAt}
           />
         ) : null}
       </div>

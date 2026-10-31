@@ -22,10 +22,11 @@ export async function proposeMeetup(_prev: MeetupState, form: FormData): Promise
   const note = str(form, "note").trim();
   const values = { place, at, note };
   if (!UUID.test(request)) return { status: "error", message: "That didn't work. Refresh and try again.", values };
-  if (place.length < 2 || place.length > 80) return { status: "error", message: "Say where to meet (2 to 80 characters).", values };
+  // Count characters the way Postgres does (emoji are one character, not two).
+  if ([...place].length < 2 || [...place].length > 80) return { status: "error", message: "Say where to meet (2 to 80 characters).", values };
   const iso = seoulLocalToIso(at);
   if (!iso) return { status: "error", message: "Pick a day and time.", values };
-  if (note.length > 200) return { status: "error", message: "Keep the note to 200 characters.", values };
+  if ([...note].length > 200) return { status: "error", message: "Keep the note to 200 characters.", values };
 
   const { error } = await supabase.rpc("propose_meetup", { p_request: request, p_place: place, p_at: iso, p_note: note || null });
   if (error) return { status: "error", message: friendlyError(error, "Couldn't send that. Try again in a moment.", "meetup:propose"), values };

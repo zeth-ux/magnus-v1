@@ -59,6 +59,46 @@ describe("meet-up cards", () => {
     await expect(db.as(owner, "select public.propose_meetup($1, 'Cafe', $2::timestamptz)", [id, inHours(2)])).rejects.toThrow(/accepted requests/);
   });
 
+  it("an agreed handover card doesn't become the return card when the loan starts", async () => {
+    const owner = await makeUser(db, "LoanOwner");
+    const reader = await makeUser(db, "LoanReader");
+    const copy = await listCopy(db, owner, "lend", "4_weeks");
+    await listCopy(db, reader);
+    const due = new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10);
+    const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1, $2::date)", [copy, due]);
+    await db.as(owner, "select public.respond_request($1, true)", [id]);
+    const [{ propose_meetup: m }] = await db.as(owner, "select public.propose_meetup($1, 'Gojan', $2::timestamptz)", [id, inHours(3)]);
+    await db.as(reader, "select public.agree_meetup($1)", [m]);
+    await db.as(owner, "select public.confirm_handover($1)", [id]);
+    await db.as(reader, "select public.confirm_handover($1)", [id]);
+
+    const live = await db.as(reader, "select purpose from public.meetups where request_id = $1 and status in ('proposed', 'agreed')", [id]);
+    expect(live).toEqual([{ purpose: "handover" }]); // the page only shows cards whose purpose matches the request
+    const [{ propose_meetup: back }] = await db.as(reader, "select public.propose_meetup($1, 'ERICA library', $2::timestamptz)", [id, inHours(48)]);
+    const [card] = await db.as(owner, "select purpose, status from public.meetups where id = $1", [back]);
+    expect(card).toEqual({ purpose: "return", status: "proposed" });
+  });
+
+  it("a handover suggestion can't be agreed once the loan has started, nor a time that has passed", async () => {
+    const owner = await makeUser(db, "StaleOwner");
+    const reader = await makeUser(db, "StaleReader");
+    const copy = await listCopy(db, owner, "lend", "4_weeks");
+    await listCopy(db, reader);
+    const due = new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10);
+    const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1, $2::date)", [copy, due]);
+    await db.as(owner, "select public.respond_request($1, true)", [id]);
+    const [{ propose_meetup: m }] = await db.as(owner, "select public.propose_meetup($1, 'Gojan', $2::timestamptz)", [id, inHours(3)]);
+    await db.as(owner, "select public.confirm_handover($1)", [id]);
+    await db.as(reader, "select public.confirm_handover($1)", [id]);
+    await expect(db.as(reader, "select public.agree_meetup($1)", [m])).rejects.toThrow(/out of date/);
+
+    const { id: other, reader: r2 } = await acceptedRequest("Past");
+    const [{ propose_meetup: m2 }] = await db.as(r2, "select public.propose_meetup($1, 'Cafe', $2::timestamptz)", [other, inHours(2)]);
+    await db.admin("update public.meetups set meet_at = now() - interval '1 hour' where id = $1", [m2]);
+    const [{ owner_id: o2 }] = await db.admin("select owner_id from public.requests where id = $1", [other]);
+    await expect(db.as(o2 as string, "select public.agree_meetup($1)", [m2])).rejects.toThrow(/time has passed/);
+  });
+
   it("can't be written directly", async () => {
     const { owner, id } = await acceptedRequest("Direct");
     await expect(

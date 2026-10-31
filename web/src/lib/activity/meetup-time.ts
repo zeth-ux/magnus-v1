@@ -29,8 +29,17 @@ export function formatSeoul(iso: string): string {
   }).format(new Date(iso));
 }
 
+/** The latest value for the picker: 60 days ahead in Seoul (the database's limit). */
+export function seoulPickerMax(now: Date = new Date()): string {
+  const seoul = new Date(now.getTime() + 9 * 3_600_000 + 60 * 86_400_000 - 3_600_000);
+  return `${seoul.toISOString().slice(0, 13)}:00`;
+}
+
 /** The earliest value for the picker: the next full hour in Seoul. */
 export function seoulPickerMin(now: Date = new Date()): string {
   const seoul = new Date(now.getTime() + 9 * 3_600_000 + 3_600_000);
   return `${seoul.toISOString().slice(0, 13)}:00`;
 }
+
+/** Whether an instant has passed (read on the server, per request). */
+export const isPast = (iso: string, now: Date = new Date()) => new Date(iso).getTime() <= now.getTime();
