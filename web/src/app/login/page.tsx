@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { LoginForm, LoginFormPlaceholder } from "./login-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AUTH_VIEWPORT, AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = { title: "Join the pilot" };
-export const viewport: Viewport = { themeColor: "#1c1614", colorScheme: "dark" };
+export const viewport: Viewport = AUTH_VIEWPORT;
 
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */
 const NOTICES: Record<string, string> = {

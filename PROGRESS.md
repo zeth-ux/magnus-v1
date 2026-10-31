@@ -4,6 +4,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Dark sign-in pages
+
+**Done**
+- `/login` and `/welcome` now use the dark shelf look: a shared `AuthShell` with a small stack of shelf books that drifts once and settles (CSS, off for reduced motion), restyled fields and errors, and a stamped "library card" on the welcome page.
+- Steve's review: field borders at 3.4:1, error border visible (custom CSS moved into `@layer components`), a stamp with its own background, the drift no longer loops forever, the books render on the server (no extra JavaScript on /login), and a new `merah-light` error colour token.
+
+**Next**
+- [ ] Merge order: #5 (landing), then this PR (#6)
+
 ## 2026-10-31 (night): Landing v3, the Stripe Press-style shelf
 
 **Done**

@@ -20,6 +20,7 @@
   --color-merah: #6e1f1f;
   --color-malam: #1c1614;
   --color-paper: #efe9df;
+  --color-merah-light: #ff9e8f;
 
   --font-display: "Literata Variable", Georgia, serif;
   --font-text: "Plus Jakarta Sans Variable", system-ui, sans-serif;
@@ -193,8 +194,9 @@ a {
 }
 @media (prefers-reduced-motion: no-preference) {
   .auth-book {
-    animation: auth-drift 7s ease-in-out infinite alternate;
-    animation-delay: calc(var(--i) * -1.7s);
+    /* Drifts once and comes to rest within 5 seconds (WCAG 2.2.2). */
+    animation: auth-drift 2.4s ease-in-out 2 alternate both;
+    animation-delay: calc(var(--i) * 0.08s);
   }
 }
 @keyframes auth-drift {
@@ -206,15 +208,23 @@ a {
   }
 }
 
-/* Form fields on the night ground. */
-.field-dark {
-  background: rgb(239 233 223 / 0.08);
-  border: 1px solid rgb(239 233 223 / 0.35);
-  color: var(--color-paper);
+/* Form fields on the night ground. In a layer so Tailwind utilities
+   (aria-invalid:border-…) can still override them. */
+@layer components {
+  .field-dark {
+    background: rgb(239 233 223 / 0.08);
+    border: 1px solid rgb(239 233 223 / 0.4);
+    color: var(--color-paper);
+  }
+  .field-dark::placeholder {
+    color: rgb(239 233 223 / 0.55);
+  }
+  .field-dark:focus-visible {
+    border-color: var(--color-songket);
+  }
 }
-.field-dark::placeholder {
-  color: rgb(239 233 223 / 0.55);
-}
-.field-dark:focus-visible {
-  border-color: var(--color-songket);
+
+/* A light card on the dark ground keeps a dark focus ring. */
+.on-dark .bg-paper :focus-visible {
+  outline-color: var(--color-malam);
 }

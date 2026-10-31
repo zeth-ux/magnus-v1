@@ -1,6 +1,10 @@
+import type { Viewport } from "next";
 import Link from "next/link";
 import { BayuMark } from "@/components/bayu-mark";
 import { AuthBooks } from "./auth-books";
+
+/** Dark browser chrome for the sign-in pages (matches the malam token). */
+export const AUTH_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "dark" };
 
 /**
  * The frame for sign-in and the first signed-in page: the same night shelf as

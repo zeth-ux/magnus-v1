@@ -1,5 +1,3 @@
-"use client";
-
 import { Book3D } from "@/components/shelf/book-3d";
 import { SHELF } from "@/content/shelf";
 
