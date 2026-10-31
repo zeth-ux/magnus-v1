@@ -13,7 +13,7 @@ export function FeedbackForm() {
   if (state.status === "done") {
     return (
       <p ref={done} tabIndex={-1} role="status" className="max-w-[34rem] rounded-[10px] bg-paper p-6 text-[17px] text-malam outline-none">
-        Thank you! Zarith reads every one.
+        Thank you! The pilot team reads every one.
       </p>
     );
   }

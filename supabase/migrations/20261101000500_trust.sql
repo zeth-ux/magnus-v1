@@ -10,6 +10,7 @@ create table public.handover_ratings (
   ratee_id uuid not null references public.profiles (id),
   thumbs_up boolean not null,
   created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
   primary key (request_id, rater_id),
   constraint not_yourself check (rater_id <> ratee_id)
 );
@@ -35,13 +36,15 @@ begin
   end if;
   insert into public.handover_ratings (request_id, rater_id, ratee_id, thumbs_up)
   values (p_request, me, case when me = r.owner_id then r.requester_id else r.owner_id end, p_up)
-  on conflict (request_id, rater_id) do update set thumbs_up = excluded.thumbs_up, created_at = now();
+  on conflict (request_id, rater_id) do update set thumbs_up = excluded.thumbs_up, updated_at = now();
 end $$;
 
--- "N smooth handovers": thumbs up received. A count only (who gave them stays private).
+-- "N readers had a smooth handover with them": distinct readers who gave a
+-- thumbs up, so two friends passing a book back and forth can't inflate it.
+-- A count only (who gave them stays private).
 create function public.smooth_handovers(p_user uuid) returns integer
 language sql stable security definer set search_path = '' as $$
-  select count(*)::integer from public.handover_ratings where ratee_id = p_user and thumbs_up
+  select count(distinct rater_id)::integer from public.handover_ratings where ratee_id = p_user and thumbs_up
 $$;
 
 -- ---------------------------------------------------------------- blocks
@@ -58,7 +61,9 @@ create policy "unblock" on public.blocks for delete to authenticated using (bloc
 revoke insert, update, truncate on public.blocks from anon, authenticated;
 revoke all on public.blocks from anon;
 
--- Block a reader: no new requests either way, and open requests between you are cancelled.
+-- Block a reader: no new requests either way, and open (not yet handed over)
+-- requests between you are cancelled. A book already on loan still has to come
+-- back: returns and R4 are not affected by blocks.
 create function public.block_reader(p_user uuid) returns void
 language plpgsql security definer set search_path = '' as $$
 declare me uuid := public.require_user();
@@ -66,6 +71,10 @@ begin
   if p_user is null or p_user = me or not exists (select 1 from public.profiles where id = p_user) then
     raise exception 'reader not found' using errcode = 'no_data_found', hint = 'bayu';
   end if;
+  -- The same per-person locks as request_copy, so a request racing this block
+  -- either lands first (and is cancelled below) or sees the block.
+  perform public.lock_person(least(me, p_user));
+  perform public.lock_person(greatest(me, p_user));
   insert into public.blocks (blocker_id, blocked_id) values (me, p_user) on conflict do nothing;
   update public.requests set status = 'cancelled', updated_at = now()
    where status in ('requested', 'accepted')
@@ -73,15 +82,16 @@ begin
 end $$;
 
 -- Requests between readers where either has blocked the other are refused.
+-- The blocked reader gets the same neutral message as for any unavailable
+-- book, so they aren't told they were blocked.
 create function public.requests_respect_blocks() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
-  if exists (
-    select 1 from public.blocks
-    where (blocker_id = new.owner_id and blocked_id = new.requester_id)
-       or (blocker_id = new.requester_id and blocked_id = new.owner_id)
-  ) then
-    raise exception 'you can''t request books from this reader' using errcode = 'check_violation', hint = 'bayu';
+  if exists (select 1 from public.blocks where blocker_id = new.requester_id and blocked_id = new.owner_id) then
+    raise exception 'you blocked this reader: unblock them on your card (Me) to ask for their books' using errcode = 'check_violation', hint = 'bayu';
+  end if;
+  if exists (select 1 from public.blocks where blocker_id = new.owner_id and blocked_id = new.requester_id) then
+    raise exception 'that book is not available right now' using errcode = 'check_violation', hint = 'bayu';
   end if;
   return new;
 end $$;
@@ -89,6 +99,8 @@ create trigger requests_respect_blocks before insert on public.requests
   for each row execute function public.requests_respect_blocks();
 
 -- ---------------------------------------------------------------- reports and feedback
+create index if not exists blocks_blocked_idx on public.blocks (blocked_id);
+
 create table public.reports (
   id bigint generated always as identity primary key,
   reporter_id uuid not null references public.profiles (id),
@@ -109,8 +121,9 @@ create table public.feedback (
 alter table public.feedback enable row level security;
 revoke all on public.feedback from anon, authenticated;
 
--- Report a problem, optionally about a request (and so about the other reader in it).
-create function public.report_problem(p_reason text, p_request uuid default null) returns void
+-- Report a problem, optionally about a request (and so about the other reader
+-- in it), and optionally block that reader in the same transaction.
+create function public.report_problem(p_reason text, p_request uuid default null, p_block boolean default false) returns void
 language plpgsql security definer set search_path = '' as $$
 declare
   me uuid := public.require_user();
@@ -131,6 +144,12 @@ begin
     raise exception 'that''s a lot of reports today: message the pilot team instead' using errcode = 'check_violation', hint = 'bayu';
   end if;
   insert into public.reports (reporter_id, reported_id, request_id, reason) values (me, other, p_request, btrim(p_reason));
+  if coalesce(p_block, false) then
+    if other is null then
+      raise exception 'pick the request to block someone from it' using errcode = 'check_violation', hint = 'bayu';
+    end if;
+    perform public.block_reader(other);
+  end if;
 end $$;
 
 create function public.send_feedback(p_message text) returns void
@@ -148,6 +167,6 @@ end $$;
 
 -- New functions are executable by PUBLIC unless revoked explicitly.
 revoke execute on function public.rate_handover(uuid, boolean), public.smooth_handovers(uuid), public.block_reader(uuid),
-  public.requests_respect_blocks(), public.report_problem(text, uuid), public.send_feedback(text) from public, anon;
+  public.requests_respect_blocks(), public.report_problem(text, uuid, boolean), public.send_feedback(text) from public, anon;
 grant execute on function public.rate_handover(uuid, boolean), public.smooth_handovers(uuid), public.block_reader(uuid),
-  public.report_problem(text, uuid), public.send_feedback(text) to authenticated;
+  public.report_problem(text, uuid, boolean), public.send_feedback(text) to authenticated;

@@ -56,8 +56,9 @@ describe("blocking", () => {
     await db.as(owner, "select public.block_reader($1)", [pest]);
     const [row] = await db.admin("select status from public.requests where id = $1", [open]);
     expect(row.status).toBe("cancelled");
-    await expect(db.as(pest, "select public.request_copy($1)", [b])).rejects.toThrow(/can't request books from this reader/);
-    await expect(db.as(owner, "select public.request_copy($1)", [theirs])).rejects.toThrow(/can't request books from this reader/);
+    // The blocked reader isn't told why; the blocker is reminded they blocked.
+    await expect(db.as(pest, "select public.request_copy($1)", [b])).rejects.toThrow(/not available right now/);
+    await expect(db.as(owner, "select public.request_copy($1)", [theirs])).rejects.toThrow(/you blocked this reader/);
     expect(await db.as(pest, "select * from public.blocks")).toHaveLength(0); // the blocked reader can't see the block
     await db.as(owner, "delete from public.blocks where blocked_id = $1", [pest]);
     await db.as(pest, "select public.request_copy($1)", [b]);
@@ -67,6 +68,45 @@ describe("blocking", () => {
     const u = await makeUser(db, "Self");
     await expect(db.as(u, "select public.block_reader($1)", [u])).rejects.toThrow(/reader not found/);
     await expect(db.as(u, "select public.block_reader(gen_random_uuid())")).rejects.toThrow(/reader not found/);
+  });
+});
+
+describe("blocking and loans", () => {
+  it("a block doesn't end a loan: the book can still be returned, or reported after the grace period", async () => {
+    const owner = await makeUser(db, "LoanBlocker");
+    const borrower = await makeUser(db, "LoanBlocked");
+    const copy = await listCopy(db, owner, "lend", "4_weeks");
+    await listCopy(db, borrower);
+    const due = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
+    const [{ request_copy: id }] = await db.as(borrower, "select public.request_copy($1, $2::date)", [copy, due]);
+    await db.as(owner, "select public.respond_request($1, true)", [id]);
+    await db.as(owner, "select public.confirm_handover($1)", [id]);
+    await db.as(borrower, "select public.confirm_handover($1)", [id]);
+    await db.as(borrower, "select public.block_reader($1)", [owner]);
+    const [r] = await db.admin("select status from public.requests where id = $1", [id]);
+    expect(r.status).toBe("on_loan");
+    await db.admin("update public.requests set return_by = current_date - 15 where id = $1", [id]);
+    await db.as(owner, "select public.report_not_returned($1)", [id]);
+    const [after] = await db.admin("select status from public.requests where id = $1", [id]);
+    expect(after.status).toBe("forfeited");
+  });
+
+  it("two friends passing a book back and forth count once in each other's smooth handovers", async () => {
+    const a = await makeUser(db, "Farm1");
+    const b = await makeUser(db, "Farm2");
+    const book = await listCopy(db, a);
+    await listCopy(db, b);
+    for (let i = 0; i < 3; i++) {
+      const [from, to] = i % 2 === 0 ? [a, b] : [b, a];
+      if (i > 0) await db.as(from, "update public.copies set status = 'available' where id = $1", [book]);
+      const [{ request_copy: id }] = await db.as(to, "select public.request_copy($1)", [book]);
+      await db.as(from, "select public.respond_request($1, true)", [id]);
+      await db.as(from, "select public.confirm_handover($1)", [id]);
+      await db.as(to, "select public.confirm_handover($1)", [id]);
+      await db.as(to, "select public.rate_handover($1, true)", [id]);
+    }
+    const [{ smooth_handovers: n }] = await db.as(a, "select public.smooth_handovers($1)", [b]);
+    expect(Number(n)).toBe(1);
   });
 });
 
@@ -87,6 +127,20 @@ describe("reports and feedback", () => {
     const stranger = await makeUser(db, "Outsider");
     await expect(db.as(stranger, "select public.send_feedback('ok')")).rejects.toThrow(/a few words/);
     await expect(db.as(stranger, "select public.report_problem($1, $2)", ["Something bad happened", id])).rejects.toThrow(/not found/);
+  });
+
+  it("a report can block the other reader in the same step", async () => {
+    const { owner, reader, id } = await handedOver("ReportBlock");
+    await db.as(reader, "select public.report_problem($1, $2, true)", ["Rude at the meet-up", id]);
+    expect(await db.as(reader, "select blocked_id from public.blocks")).toEqual([{ blocked_id: owner }]);
+  });
+
+  it("have daily limits", async () => {
+    const u = await makeUser(db, "Chatty");
+    for (let i = 0; i < 20; i++) await db.as(u, "select public.send_feedback($1)", [`Idea number ${i}`]);
+    await expect(db.as(u, "select public.send_feedback('one more idea')")).rejects.toThrow(/plenty for today/);
+    for (let i = 0; i < 10; i++) await db.as(u, "select public.report_problem($1)", [`Problem number ${i}`]);
+    await expect(db.as(u, "select public.report_problem('another problem')")).rejects.toThrow(/a lot of reports/);
   });
 
   it("aren't open to anonymous visitors", async () => {

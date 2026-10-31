@@ -8,10 +8,17 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 **Done**
 - Migration `20261101000500_trust.sql`: `handover_ratings` (👍/👎 once per handover, changeable; `smooth_handovers()` gives the count, never who), `blocks` (no requests either way; blocking cancels open requests between the two), `reports` and `feedback` (written through functions with daily limits; readers can't read them back; the pilot team reads them in the Supabase dashboard).
-- Activity: "How was the handover?" 👍/👎 and "Report a problem" on finished handovers. `/report` (with "Also block this reader"), `/feedback`, and links to both under every app page. Book pages show the owner's "N smooth handovers".
+- Activity: "How was the handover?" 👍/👎 and "Report a problem" on finished handovers. `/report` (with "Also block this reader"), `/feedback`, and links to both under every app page. Book pages show "N readers had a smooth handover with them" (distinct readers, so two friends can't inflate it). Your card (`/me`) lists readers you've blocked, with Unblock.
+
+**Decisions**
+- A blocked reader sees the same "not available right now" as any taken book; only the blocker is told they blocked.
+- A block cancels requests that haven't changed hands yet, but a book on loan still has to come back (returns and R4 are unaffected; tested).
+- Report + block run in one database call (`report_problem(..., p_block)`), so a report is never sent without the block asked for.
+- `block_reader` takes the same per-person locks as `request_copy`, so a request racing a block can't slip through.
 
 **Next**
 - [ ] Zarith: run `20261101000500_trust.sql`; read reports and feedback in Supabase → Table Editor
+- [ ] Later: let the pilot team mark reports as handled (an admin view), once there are any
 
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 

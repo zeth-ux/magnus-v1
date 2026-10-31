@@ -60,7 +60,7 @@ async function Requests() {
   const { data: ratingRows } = changedHands.length
     ? await supabase.from("handover_ratings").select("request_id, thumbs_up").in("request_id", changedHands).eq("rater_id", user.id)
     : { data: [] };
-  const myRatings = new Map(((ratingRows ?? []) as { request_id: string; thumbs_up: boolean }[]).map((x) => [x.request_id, x.thumbs_up]));
+  const myRatings = new Map<string, boolean>(((ratingRows ?? []) as { request_id: string; thumbs_up: boolean }[]).map((x) => [x.request_id, x.thumbs_up]));
   const today = seoulToday();
   const incoming = openRows.filter((r) => r.owner_id === user.id);
   const outgoing = openRows.filter((r) => r.requester_id === user.id);
@@ -109,7 +109,7 @@ async function Requests() {
                     request={r.id}
                     title={r.copy?.books?.title ?? "A book"}
                     other={(r.owner_id === user.id ? r.requester : r.owner)?.display_name ?? "the other reader"}
-                    rated={myRatings.has(r.id) ? (myRatings.get(r.id) ?? null) : null}
+                    rated={myRatings.get(r.id) ?? null}
                   />
                 ) : null
               }

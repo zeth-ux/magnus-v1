@@ -50,7 +50,8 @@ export function ReportForm({ request, other }: { request: string | null; other: 
         <label className="flex items-start gap-3 text-[17px]">
           <input type="checkbox" name="block" className="mt-1 h-5 w-5 accent-songket" />
           <span>
-            Also block {other}: no more requests between you, and open ones are cancelled.
+            Also block {other}: no more requests between you, and open ones are cancelled. A book on loan between you
+            still needs to come back.
           </span>
         </label>
       ) : null}
