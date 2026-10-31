@@ -228,3 +228,10 @@ a {
 .on-dark .bg-paper :focus-visible {
   outline-color: var(--color-malam);
 }
+
+/* Phones: keep focused controls clear of the fixed tab bar (WCAG 2.4.11). */
+@media (max-width: 639px) {
+  html:has(.app-tabs) {
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}

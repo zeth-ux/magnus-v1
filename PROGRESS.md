@@ -4,6 +4,25 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): My shelf and the stamped library card
+
+**Done**
+- `/shelf`: your books with their status (on the shelf, paused, lent out), Pause / Put back, Edit (warkah, condition, lend period) and Take off the shelf (asks twice; cancels open requests). Books you're borrowing, with the due date. Books you took off, folded away.
+- `/me`: "Stamps on your card", one stamp per credit movement (+1 gave, −1 took, held, freed, starter credit), with the book's title and date.
+- Phones get a bottom tab bar (Browse · Shelf · Add · Activity · Me); wide screens keep the top bar.
+- No database changes.
+- Decision: pausing a book leaves waiting requests waiting (they can't be accepted until it's back on the shelf); the owner is told so.
+
+## 2026-11-01 (night 2): Meet-up cards
+
+**Done**
+- Migration `20261101000300_meetups.sql`: one live meet-up card per request (place, time, optional note). `propose_meetup()` replaces the live card; `agree_meetup()` is for the other reader only. Times must be in the next 60 days.
+- Activity shows the card on accepted requests (the handover) and on loans (the return): "Sounds good", "Suggest another", or "Change it" once agreed. Times are picked and shown in Korea time whatever the phone's timezone; common Ansan places are suggested.
+- 4 SQL tests and 4 time tests.
+
+**Next**
+- [ ] Zarith: run `20261101000300_meetups.sql` in the Supabase SQL Editor
+
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 
 **Done**
