@@ -73,6 +73,8 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
       .limit(1),
     supabase.rpc("setting", { p_key: "max_flexible_lend_days" }),
   ]);
+  const { data: smooth } = await supabase.rpc("smooth_handovers", { p_user: copy.owner_id });
+  const smoothCount = Number(smooth ?? 0);
   const lendDays = copy.lend_max === "flexible" || copy.lend_max === null ? Number(flexibleDays ?? 183) : LEND_DAYS[copy.lend_max];
 
   const look = dressCopy({
@@ -109,6 +111,11 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             <dt className="text-paper/70">From</dt>
             <dd className="text-[17px] font-semibold">
               {isMine ? "You" : copy.profiles.display_name}, {copy.profiles.area}
+              {smoothCount > 0 ? (
+                <span className="block text-[15px] font-normal text-paper/80">
+                  {smoothCount === 1 ? "1 smooth handover" : `${smoothCount} smooth handovers`}
+                </span>
+              ) : null}
             </dd>
           </div>
           <div>

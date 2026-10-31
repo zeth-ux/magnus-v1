@@ -4,6 +4,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): Trust and feedback
+
+**Done**
+- Migration `20261101000500_trust.sql`: `handover_ratings` (👍/👎 once per handover, changeable; `smooth_handovers()` gives the count, never who), `blocks` (no requests either way; blocking cancels open requests between the two), `reports` and `feedback` (written through functions with daily limits; readers can't read them back; the pilot team reads them in the Supabase dashboard).
+- Activity: "How was the handover?" 👍/👎 and "Report a problem" on finished handovers. `/report` (with "Also block this reader"), `/feedback`, and links to both under every app page. Book pages show the owner's "N smooth handovers".
+
+**Next**
+- [ ] Zarith: run `20261101000500_trust.sql`; read reports and feedback in Supabase → Table Editor
+
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 
 **Done**

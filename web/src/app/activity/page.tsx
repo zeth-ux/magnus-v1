@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
+import { RateHandover } from "./rate-handover";
 import { Announcer } from "./announcer";
 import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
@@ -54,6 +55,12 @@ async function Requests() {
   // Shape set by the select above (not generated types yet).
   const openRows = (open.data ?? []) as unknown as Row[];
   const pastRows = (past.data ?? []) as unknown as Row[];
+  // My ratings for finished handovers (a thumbs up or down, once each).
+  const changedHands = pastRows.filter((r) => ["handed_over", "returned", "forfeited"].includes(r.status)).map((r) => r.id);
+  const { data: ratingRows } = changedHands.length
+    ? await supabase.from("handover_ratings").select("request_id, thumbs_up").in("request_id", changedHands).eq("rater_id", user.id)
+    : { data: [] };
+  const myRatings = new Map(((ratingRows ?? []) as { request_id: string; thumbs_up: boolean }[]).map((x) => [x.request_id, x.thumbs_up]));
   const today = seoulToday();
   const incoming = openRows.filter((r) => r.owner_id === user.id);
   const outgoing = openRows.filter((r) => r.requester_id === user.id);
@@ -96,6 +103,16 @@ async function Requests() {
               who={(r.owner_id === user.id ? r.requester : r.owner)?.display_name ?? "A reader"}
               line={STATUS_WORDS[r.status]}
               ops={[]}
+              after={
+                ["handed_over", "returned", "forfeited"].includes(r.status) ? (
+                  <RateHandover
+                    request={r.id}
+                    title={r.copy?.books?.title ?? "A book"}
+                    other={(r.owner_id === user.id ? r.requester : r.owner)?.display_name ?? "the other reader"}
+                    rated={myRatings.has(r.id) ? (myRatings.get(r.id) ?? null) : null}
+                  />
+                ) : null
+              }
             />
           ))}
         </Section>
@@ -113,7 +130,7 @@ function Section({ title, empty, children }: { title: string; empty: React.React
   );
 }
 
-function Item({ row, who, line, ops }: { row: Row; who: string; line: string; ops: Op[] }) {
+function Item({ row, who, line, ops, after }: { row: Row; who: string; line: string; ops: Op[]; after?: React.ReactNode }) {
   const title = row.copy?.books?.title ?? "A book";
   return (
     <li className="flex flex-col gap-3 rounded-[10px] bg-paper/[0.06] p-5 sm:flex-row sm:items-start sm:justify-between">
@@ -133,6 +150,7 @@ function Item({ row, who, line, ops }: { row: Row; who: string; line: string; op
         <p className="text-[15px] text-paper">{line}</p>
       </div>
       <RequestActions request={row.id} title={title} ops={ops} />
+      {after}
     </li>
   );
 }
