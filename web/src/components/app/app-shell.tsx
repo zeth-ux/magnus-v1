@@ -5,6 +5,7 @@ import { BayuMark } from "@/components/bayu-mark";
 export const APP_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "dark" };
 
 const NAV = [
+  { href: "/browse", label: "Browse" },
   { href: "/add", label: "Add a book" },
   { href: "/me", label: "Me" },
 ];

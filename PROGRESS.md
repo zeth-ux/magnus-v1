@@ -4,6 +4,16 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Real shelf and browse
+
+**Done**
+- New migration `20261101000200_shelf.sql`: `public_shelf()` for the public landing (available copies with the area, never owners' names) and `search_shelf()` for signed-in readers (search by title or author, give/lend filter; row level security applies).
+- The landing shelf now shows real copies first, dressed in one of the drawn cover designs chosen by ISBN, and fills up with samples so it never looks empty. Cached for a minute, so `/` stays a static page. Picking a real book leads to it after sign-in.
+- `/browse`: the shelf as a list of spines, with search that works without JavaScript. `/browse/[id]`: the book posed in 3D, owner, condition, warkah, "N readers have this", and the request form (a return date within the owner's limit for a lend).
+
+**Next**
+- [ ] Activity page: incoming requests (accept / decline), handover and return buttons
+
 ## 2026-11-01 (overnight): Profile and add a book
 
 **Done**

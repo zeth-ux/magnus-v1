@@ -28,9 +28,13 @@ export type ShelfCopy = {
   flood: string;
   floodText: string;
   pattern: CoverPattern;
+  /** True for the illustrative books; false for a real copy on the pilot shelf. */
+  sample?: boolean;
+  /** For a real copy: its id, so "Join to borrow it" can lead straight to it. */
+  copyId?: string;
 };
 
-export const SHELF: ShelfCopy[] = [
+export const SHELF: ShelfCopy[] = ([
   {
     slug: "garden-of-evening-mists",
     title: "The Garden of Evening Mists",
@@ -189,4 +193,4 @@ export const SHELF: ShelfCopy[] = [
     floodText: "#e6efff",
     pattern: "tikar",
   },
-];
+] satisfies ShelfCopy[]).map((copy) => ({ ...copy, sample: true }));

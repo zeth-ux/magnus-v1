@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 import { Shelf } from "@/components/shelf/shelf";
+import { getLandingShelf } from "@/lib/shelf/landing-shelf";
 import { SiteHeader } from "@/components/landing/site-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { SafetyFaq } from "@/components/landing/safety-faq";
@@ -22,11 +23,17 @@ export default function LandingPage() {
       <SmoothScroll />
       <SiteHeader />
       <main>
-        <Shelf />
+        <LandingShelf />
         <HowItWorks />
         <SafetyFaq />
       </main>
       <Closing />
     </div>
   );
+}
+
+/** The shelf's books are cached data (getLandingShelf), so this stays in the static shell. */
+async function LandingShelf() {
+  const copies = await getLandingShelf();
+  return <Shelf copies={copies} />;
 }

@@ -25,9 +25,11 @@ Studied on 2026-10-31 at 1440 px:
 | **Safety + FAQ** | `components/landing/safety-faq.tsx` | Native `<details>` index cards in the books' light tints |
 | **Footer** | `components/landing/closing.tsx` | B-a-y-u arch blocks rise in |
 
-Books and their colours are SAMPLE data in `web/src/content/shelf.ts` (real
-titles, our own cover designs). Swap in the real pilot shelf from Supabase
-when friends list their books.
+Real copies come first (`public_shelf()`, newest first, owners anonymous),
+each dressed in one of the drawn designs picked by its ISBN
+(`web/src/lib/shelf/dress.ts`). SAMPLE books from `web/src/content/shelf.ts`
+fill the stack up to 9, labelled "sample" when opened. The data is cached for
+a minute, so the landing stays a static page.
 
 ## Rules
 - Native scroll; Lenis smoothing for mouse wheels only.

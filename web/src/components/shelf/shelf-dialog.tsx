@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { smooth } from "@/lib/smooth";
-import { SHELF } from "@/content/shelf";
+import type { ShelfCopy } from "@/content/shelf";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { Book3D } from "./book-3d";
 
@@ -15,18 +15,22 @@ import { Book3D } from "./book-3d";
  * of the page is inert while it is open.
  */
 export function ShelfDialog({
+  copies,
   index,
   origin,
   onNavigate,
   onClose,
 }: {
+  copies: ShelfCopy[];
   index: number;
   origin: { x: number; y: number };
   onNavigate: (index: number) => void;
   onClose: () => void;
 }) {
-  const copy = SHELF[index];
-  const next = (index + 1) % SHELF.length;
+  const copy = copies[index];
+  const next = (index + 1) % copies.length;
+  // A real copy leads straight to its page after signing in.
+  const joinHref = copy.copyId ? `/login?next=${encodeURIComponent(`/browse/${copy.copyId}`)}` : "/login";
   const root = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
   const firstRun = useRef(true);
@@ -146,7 +150,7 @@ export function ShelfDialog({
 
         <div className="flex flex-col gap-6 lg:col-span-5" key={`d-${copy.slug}`}>
           <p data-detail="" className="font-display text-[17px] italic opacity-90">
-            On the Ansan shelf · sample
+            {copy.sample ? "On the Ansan shelf · sample" : "On the Ansan shelf"}
           </p>
           <h2 id="shelf-dialog-title" tabIndex={-1} data-detail="" className="font-display text-[clamp(2.4rem,4.4vw,4rem)] leading-[1.02] font-semibold tracking-[-0.02em]">
             {copy.title}
@@ -166,15 +170,19 @@ export function ShelfDialog({
               </dd>
             </div>
           </dl>
-          <figure data-detail="" className="flex flex-col gap-2">
-            <figcaption className="text-[15px] font-semibold opacity-90">Warkah from {copy.owner}</figcaption>
-            <blockquote className="font-display text-[clamp(1.25rem,1.8vw,1.6rem)] leading-snug italic">
-              &ldquo;{copy.note}&rdquo;
-            </blockquote>
-          </figure>
+          {copy.note ? (
+            <figure data-detail="" className="flex flex-col gap-2">
+              <figcaption className="text-[15px] font-semibold opacity-90">
+                {copy.sample ? `Warkah from ${copy.owner}` : "The owner's warkah"}
+              </figcaption>
+              <blockquote className="font-display text-[clamp(1.25rem,1.8vw,1.6rem)] leading-snug whitespace-pre-line italic">
+                &ldquo;{copy.note}&rdquo;
+              </blockquote>
+            </figure>
+          ) : null}
           <div data-detail="" className="flex flex-wrap items-center gap-4 pt-2">
             <Link
-              href="/login"
+              href={joinHref}
               className="rounded-full px-6 py-3 text-[17px] font-semibold no-underline transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
               style={{ background: copy.floodText, color: copy.flood }}
             >
@@ -186,7 +194,7 @@ export function ShelfDialog({
               className="rounded-full border px-5 py-3 text-[15px] font-semibold"
               style={{ borderColor: `${copy.floodText}80` }}
             >
-              Next: {SHELF[next].title} &rarr;
+              Next: {copies[next].title} &rarr;
             </button>
           </div>
           <p data-detail="" className="text-[15px] opacity-90">
