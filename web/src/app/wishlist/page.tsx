@@ -5,12 +5,14 @@ import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
 import { AddWishForm } from "./add-wish-form";
 import { WishButton } from "./wish-button";
+import { Announcer } from "../activity/announcer";
 
 export const metadata: Metadata = { title: "Your wishlist" };
 export const viewport: Viewport = APP_VIEWPORT;
 
 type Wish = { isbn: string; books: { title: string; authors: string[] | null } | null };
 type Available = { copy_id: string; isbn: string; title: string; mode: "give" | "lend"; owner_name: string; area: string };
+
 
 export default function WishlistPage() {
   return (
@@ -22,10 +24,14 @@ export default function WishlistPage() {
             Books you&apos;d love to read. When someone puts one on the shelf, it shows up here and in Activity.
           </p>
         </div>
-        <AddWishForm />
-        <Suspense fallback={<p className="text-paper/70">Reading your wishlist…</p>}>
-          <Wishes />
-        </Suspense>
+        <Announcer>
+          <div className="flex flex-col gap-10">
+            <AddWishForm />
+            <Suspense fallback={<p className="text-paper/70">Reading your wishlist…</p>}>
+              <Wishes />
+            </Suspense>
+          </div>
+        </Announcer>
       </div>
     </AppShell>
   );
@@ -47,7 +53,7 @@ async function Wishes() {
   const rows = (wishes.data ?? []) as unknown as Wish[];
   const onShelf = new Map<string, Available>();
   for (const a of (available.data ?? []) as Available[]) if (!onShelf.has(a.isbn)) onShelf.set(a.isbn, a);
-  if (rows.length === 0) return <p className="text-[17px] text-paper/80">Nothing yet. Add a book above, or tap ☆ on any book page.</p>;
+  if (rows.length === 0) return <p className="text-[17px] text-paper/80">Nothing yet. Add a book above, or tap &ldquo;Add to wishlist&rdquo; on any book page.</p>;
 
   return (
     <ul className="flex flex-col gap-4">

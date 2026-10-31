@@ -2,12 +2,17 @@
 
 import { useActionState } from "react";
 import { toggleWish, type WishState } from "./actions";
+import { useAnnounce } from "../activity/announcer";
 import { inputClass } from "@/components/app/field";
 
-/** Add a book you'd love to read by its ISBN (asks for the title if nobody knows it). */
+/** Add a book you'd love to read by its ISBN. */
 export function AddWishForm() {
-  const [state, action, pending] = useActionState<WishState, FormData>(toggleWish, { status: "idle" });
-  const needTitle = state.status === "needTitle";
+  const announce = useAnnounce();
+  const [state, action, pending] = useActionState<WishState, FormData>(async (prev, form) => {
+    const next = await toggleWish(prev, form);
+    if (next.status === "done") announce(next.message);
+    return next;
+  }, { status: "idle" });
   return (
     <form action={action} className="flex max-w-[34rem] flex-col gap-3">
       <input type="hidden" name="op" value="add" />
@@ -22,7 +27,11 @@ export function AddWishForm() {
             inputMode="numeric"
             maxLength={20}
             required
-            defaultValue={needTitle ? state.isbn : ""}
+            // Keeps what was typed after an error (React resets forms after an action).
+            key={state.status === "error" ? `err-${state.isbn}` : "fresh"}
+            defaultValue={state.status === "error" ? state.isbn : ""}
+            aria-invalid={state.status === "error" ? true : undefined}
+            aria-describedby={state.status === "error" ? "wish-error" : undefined}
             placeholder="978…"
             className={inputClass}
           />
@@ -31,17 +40,11 @@ export function AddWishForm() {
           {pending ? "Adding…" : "Add"}
         </button>
       </div>
-      {needTitle ? (
-        <div className="flex flex-col gap-2">
-          <label htmlFor="wish-title" className="text-[15px] font-semibold">
-            We couldn&apos;t find it. What&apos;s the title?
-          </label>
-          <input id="wish-title" name="title" required maxLength={300} autoFocus className={inputClass} />
-        </div>
+      {state.status === "error" ? (
+        <p id="wish-error" role="alert" className="text-[15px] text-merah-light">
+          {state.message}
+        </p>
       ) : null}
-      <p role={state.status === "error" ? "alert" : "status"} className={`text-[15px] ${state.status === "error" ? "text-merah-light" : "text-paper/80"}`}>
-        {state.status === "error" || state.status === "done" ? state.message : ""}
-      </p>
     </form>
   );
 }

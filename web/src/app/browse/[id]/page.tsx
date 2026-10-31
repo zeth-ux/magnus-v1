@@ -134,7 +134,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
         ) : null}
         {wanted > 0 ? (
           <p className="text-[15px] text-paper/80">
-            {wanted === 1 ? "1 reader wants this book." : `${wanted} readers want this book.`}
+            {wanted === 1 ? "1 other reader wants this book." : `${wanted} other readers want this book.`}
           </p>
         ) : null}
         {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}

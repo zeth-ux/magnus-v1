@@ -34,7 +34,7 @@ export default function BrowsePage({ searchParams }: PageProps<"/browse">) {
             The Ansan shelf.
           </h1>
           <Link href="/wishlist" className="text-[17px] font-semibold text-paper underline underline-offset-4">
-            ☆ Your wishlist
+            Your wishlist
           </Link>
         </div>
         <Suspense fallback={<p className="text-paper/70">Reading the shelf…</p>}>
@@ -53,12 +53,14 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
   const wishOnly = modeParam === "wish";
   const { supabase, user } = await requireUser("/browse");
 
-  const { data, error } = await supabase.rpc("search_shelf", { p_query: q || null, p_mode: mode });
+  // "On my wishlist" asks the database directly (not a filter over the newest 100 listings).
+  const { data, error } = wishOnly
+    ? await supabase.rpc("wished_and_available")
+    : await supabase.rpc("search_shelf", { p_query: q || null, p_mode: mode });
   let rows = (data ?? []) as SearchRow[];
-  if (wishOnly) {
-    const { data: wishes } = await supabase.from("wishlist").select("isbn");
-    const wanted = new Set(((wishes ?? []) as { isbn: string }[]).map((w) => w.isbn));
-    rows = rows.filter((r) => wanted.has(r.isbn));
+  if (wishOnly && q) {
+    const needle = q.toLowerCase();
+    rows = rows.filter((r) => `${r.title} ${(r.authors ?? []).join(" ")}`.toLowerCase().includes(needle));
   }
 
   return (
@@ -93,7 +95,7 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
         </p>
       ) : rows.length === 0 ? (
         <p className="text-[17px] text-paper/80">
-          {wishOnly ? (
+          {wishOnly && !q ? (
             <>
               None of your wishlist books are on the shelf yet. <Link href="/wishlist" className="underline underline-offset-4">See your wishlist</Link>.
             </>

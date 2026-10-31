@@ -3,6 +3,7 @@
 import { requireUser } from "@/lib/supabase/user";
 import { normalizeIsbn } from "@/lib/books/isbn";
 import { cachedLookup } from "@/lib/books/cached-lookup";
+import { ensureBook } from "@/lib/books/ensure-book";
 import type { BookInfo } from "@/lib/books/lookup";
 import { parseCopy, type FieldErrors } from "@/lib/books/validate";
 
@@ -55,21 +56,9 @@ export async function addCopy(_prev: AddState, form: FormData): Promise<AddState
   const { data: profile } = await supabase.from("profiles").select("id").eq("id", user.id).maybeSingle();
   if (!profile) return fail({}, "Make your profile first (Me), then add your book.");
 
-  // The shared book details are decided here on the server, never taken from
-  // the form: an existing row stays as it is; a new ISBN is looked up, and only
-  // if nobody knows it do we use the title and author the reader typed.
-  const { data: existing } = await supabase.from("books").select("isbn").eq("isbn", c.isbn).maybeSingle();
-  if (!existing) {
-    const found = await cachedLookup(c.isbn);
-    const row = found
-      ? { isbn: c.isbn, title: found.title, authors: found.authors, cover_url: found.coverUrl, published_year: found.year }
-      : { isbn: c.isbn, title: c.title, authors: c.authors, cover_url: null, published_year: null };
-    const book = await supabase.from("books").upsert(row, { onConflict: "isbn", ignoreDuplicates: true });
-    if (book.error) {
-      console.error("[add] books insert failed", book.error.code);
-      return fail({}, "Couldn't save the book's details. Try again.");
-    }
-  }
+  // The shared book details are decided on the server (lib/books/ensure-book.ts).
+  const book = await ensureBook(supabase, c.isbn, { title: c.title, authors: c.authors }, "add:book");
+  if (!book.ok) return fail({}, book.message);
 
   const { data: copy, error } = await supabase
     .from("copies")
