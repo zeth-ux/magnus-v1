@@ -4,6 +4,14 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): My shelf and the stamped library card
+
+**Done**
+- `/shelf`: your books with their status (on the shelf, paused, lent out), Pause / Put back, Edit (warkah, condition, lend period) and Take off the shelf (asks twice; cancels open requests). Books you're borrowing, with the due date. Books you took off, folded away.
+- `/me`: "Stamps on your card", one stamp per credit movement (+1 gave, −1 took, held, freed, starter credit), with the book's title and date.
+- Phones get a bottom tab bar (Browse · Shelf · Add · Activity · Me); wide screens keep the top bar.
+- No database changes.
+
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 
 **Done**
