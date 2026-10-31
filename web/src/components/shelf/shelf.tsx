@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { SHELF } from "@/content/shelf";
+import type { ShelfCopy } from "@/content/shelf";
 import { gsap, MOTION_OK, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { Book3D } from "./book-3d";
 import { ShelfDialog } from "./shelf-dialog";
@@ -15,7 +15,8 @@ import { ShelfDialog } from "./shelf-dialog";
  * speed, then settle. Pick a book: the page floods with its colour and it
  * turns to show its cover and who is sharing it.
  */
-export function Shelf() {
+export function Shelf({ copies }: { copies: ShelfCopy[] }) {
+  const realCount = copies.filter((c) => !c.sample).length;
   const root = useRef<HTMLElement>(null);
   const [open, setOpen] = useState<{ index: number; x: number; y: number } | null>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -155,7 +156,13 @@ export function Shelf() {
               </Link>
               <span className="font-display text-[17px] italic text-paper/80">or pick a book &rarr;</span>
             </div>
-            <p className="text-[15px] text-paper/60">Sample shelf until the pilot opens on 9 November.</p>
+            <p className="text-[15px] text-paper/60">
+              {realCount === 0
+                ? "Sample shelf until the pilot opens on 9 November."
+                : realCount === copies.length
+                  ? `${realCount} books from readers in Ansan.`
+                  : `${realCount} ${realCount === 1 ? "book" : "books"} from readers in Ansan, plus a few samples.`}
+            </p>
           </div>
         </div>
 
@@ -166,13 +173,13 @@ export function Shelf() {
             aria-label="Books on the Ansan shelf"
             className="shelf-stack flex flex-col items-center gap-[clamp(30px,4.6vw,56px)] pt-[6vh] [perspective:1800px] lg:pt-[14vh] lg:[perspective:2600px]"
           >
-            {SHELF.map((copy, i) => (
+            {copies.map((copy, i) => (
               <li key={copy.slug}>
                 <button
                   type="button"
                   data-book=""
                   aria-haspopup="dialog"
-                  aria-label={`${copy.title} by ${copy.author}. ${copy.mode === "give" ? "To give" : `To lend, ${copy.lendFor}`}, from ${copy.owner}`}
+                  aria-label={`${copy.sample ? "Sample: " : ""}${copy.title} by ${copy.author}. ${copy.mode === "give" ? "To give" : `To lend, ${copy.lendFor}`}, from ${copy.owner} in ${copy.area}`}
                   onClick={(e) => choose(i, e.currentTarget)}
                   className="block cursor-pointer"
                 >
@@ -192,6 +199,7 @@ export function Shelf() {
 
       {open ? (
         <ShelfDialog
+          copies={copies}
           index={open.index}
           origin={{ x: open.x, y: open.y }}
           onNavigate={navigate}

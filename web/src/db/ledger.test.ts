@@ -345,6 +345,20 @@ describe("lend lifecycle (R3, R4)", () => {
     expect(await credits(db, borrower)).toMatchObject({ locked: 1, balance: 1 });
   });
 
+  it("the lender can't report a book they've confirmed they got back", async () => {
+    const lender = await makeUser(db, "GotBack");
+    const borrower = await makeUser(db, "ForgotToTap");
+    const copy = await listCopy(db, lender, "lend", "flexible");
+    await listCopy(db, borrower);
+    const id = await handover(lender, borrower, copy, inDays(7));
+    await db.as(lender, "select public.confirm_return($1)", [id]);
+    await db.admin("update public.requests set return_by = current_date - 30 where id = $1", [id]);
+    await expect(db.as(lender, "select public.report_not_returned($1)", [id])).rejects.toThrow(/confirmed you got this book back/);
+    expect(await credits(db, borrower)).toMatchObject({ locked: 1, balance: 1 });
+    const [c] = await db.admin("select owner_id from public.copies where id = $1", [copy]);
+    expect(c.owner_id).toBe(lender);
+  });
+
   it("only the lender can report", async () => {
     const lender = await makeUser(db, "L2");
     const borrower = await makeUser(db, "B2");
@@ -352,6 +366,43 @@ describe("lend lifecycle (R3, R4)", () => {
     await listCopy(db, borrower);
     const id = await handover(lender, borrower, copy, inDays(7));
     await expect(db.as(borrower, "select public.report_not_returned($1)", [id])).rejects.toThrow(/not found/);
+  });
+});
+
+describe("lend dates (the copy page's date picker relies on these)", () => {
+  it("accepts tomorrow through the owner's maximum, and nothing outside it", async () => {
+    const lender = await makeUser(db, "DateLender");
+    const borrower = await makeUser(db, "DateBorrower");
+    await listCopy(db, borrower);
+    const [{ d: today }] = await db.admin("select public.today()::text as d");
+    const day = (n: number) => {
+      const d = new Date(`${today}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + n);
+      return d.toISOString().slice(0, 10);
+    };
+    const tryDate = async (n: number) => {
+      const copy = await listCopy(db, lender, "lend", "4_weeks");
+      return db.as(borrower, "select public.request_copy($1, $2::date)", [copy, day(n)]).then(
+        async ([{ request_copy: id }]) => {
+          await db.as(borrower, "select public.cancel_request($1)", [id]);
+          return "ok";
+        },
+        (e: Error) => e.message,
+      );
+    };
+    expect(await tryDate(0)).toMatch(/after today/);
+    expect(await tryDate(1)).toBe("ok");
+    expect(await tryDate(28)).toBe("ok");
+    expect(await tryDate(29)).toMatch(/later than the owner allows/);
+  });
+});
+
+describe("errors meant for readers are marked", () => {
+  it("carry hint 'bayu', so the app can show them and hide everything else", async () => {
+    const a = await makeUser(db, "Hinted");
+    const mine = await listCopy(db, a);
+    const err = await db.as(a, "select public.request_copy($1)", [mine]).catch((e: { hint?: string; message: string }) => e);
+    expect(err).toMatchObject({ hint: "bayu", message: "that is your own book" });
   });
 });
 

@@ -45,7 +45,7 @@ npm install
 npm run dev                  # http://localhost:3000
 npm run lint && npm run typecheck && npm test   # what CI runs
 ```
-The landing page works without Supabase keys; sign-in needs them.
+The landing page works without Supabase keys (it shows the sample shelf); sign-in needs them. `NEXT_PUBLIC_*` values are fixed when the app is built, so a build made without them keeps showing samples until the next build.
 
 ## One-time setup (Supabase + Vercel)
 1. **Supabase** (free): create a project at supabase.com. In **Project Settings → API**, copy the Project URL and the **publishable** key into `web/.env.local`.

@@ -1,0 +1,64 @@
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { listCopy, makeUser, pgliteDb, type TestDb } from "./test-db";
+
+let db: TestDb;
+beforeAll(async () => {
+  db = await pgliteDb();
+}, 60_000);
+afterAll(async () => {
+  await db?.close();
+});
+
+describe("the shelf, read side", () => {
+  it("public_shelf shows exactly the book, give/lend and area: no name, note or listing time", async () => {
+    const aina = await makeUser(db, "Aina");
+    const copy = await listCopy(db, aina, "lend", "4_weeks");
+    await db.as(aina, "update public.copies set note = 'WhatsApp me on +821012345678' where id = $1", [copy]);
+    await db.admin("set role anon");
+    const rows = await db.admin("select * from public.public_shelf(24)");
+    await db.admin("reset role");
+    const row = rows.find((r) => r.copy_id === copy);
+    expect(row).toMatchObject({ mode: "lend", lend_max: "4_weeks", area: "Sa-dong" });
+    expect(Object.keys(row!).sort()).toEqual(["area", "authors", "copy_id", "isbn", "lend_max", "mode", "title"]);
+    expect(JSON.stringify(rows)).not.toMatch(/Aina|WhatsApp/);
+  });
+
+  it("public_shelf leaves out paused, withdrawn and lent copies, and caps the count", async () => {
+    const u = await makeUser(db, "Pauser");
+    const borrower = await makeUser(db, "Borrow");
+    await listCopy(db, borrower);
+    const paused = await listCopy(db, u);
+    const withdrawn = await listCopy(db, u);
+    const lent = await listCopy(db, u, "lend", "4_weeks");
+    await db.as(u, "update public.copies set status = 'paused' where id = $1", [paused]);
+    await db.as(u, "select public.withdraw_copy($1)", [withdrawn]);
+    const due = new Date(Date.now() + 10 * 86_400_000).toISOString().slice(0, 10);
+    const [{ request_copy: id }] = await db.as(borrower, "select public.request_copy($1, $2::date)", [lent, due]);
+    await db.as(u, "select public.respond_request($1, true)", [id]);
+    await db.as(u, "select public.confirm_handover($1)", [id]);
+    await db.as(borrower, "select public.confirm_handover($1)", [id]);
+    const ids = (await db.admin("select copy_id from public.public_shelf(24)")).map((r) => r.copy_id);
+    expect(ids).not.toContain(paused);
+    expect(ids).not.toContain(withdrawn);
+    expect(ids).not.toContain(lent);
+    for (let i = 0; i < 26; i++) await listCopy(db, u);
+    expect(await db.admin("select 1 from public.public_shelf(1000)")).toHaveLength(24);
+  });
+
+  it("search_shelf finds by title or author, filters give/lend, and isn't open to anonymous visitors", async () => {
+    const u = await makeUser(db, "Searcher");
+    const isbn = "9780571364879";
+    await db.as(u, "insert into public.books (isbn, title, authors) values ($1, 'Klara and the Sun', '{Kazuo Ishiguro}')", [isbn]);
+    await db.as(u, "insert into public.copies (owner_id, isbn, mode) values ($1, $2, 'give')", [u, isbn]);
+
+    const byTitle = await db.as(u, "select title, owner_name from public.search_shelf('klara', null)");
+    expect(byTitle).toEqual([{ title: "Klara and the Sun", owner_name: "Searcher" }]);
+    expect(await db.as(u, "select 1 from public.search_shelf('ISHIGURO', null)")).toHaveLength(1);
+    expect(await db.as(u, "select 1 from public.search_shelf('klara', 'lend')")).toHaveLength(0);
+    expect(await db.as(u, "select 1 from public.search_shelf('%', null)")).toHaveLength(0);
+
+    await db.admin("set role anon");
+    await expect(db.admin("select * from public.search_shelf(null, null)")).rejects.toThrow(/permission denied/);
+    await db.admin("reset role");
+  });
+});
