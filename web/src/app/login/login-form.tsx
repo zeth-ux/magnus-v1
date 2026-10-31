@@ -67,7 +67,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
         Continue with Google
       </button>
       {googleError ? (
-        <p role="alert" className="text-[15px] text-[#ff9e8f]">
+        <p role="alert" className="text-[15px] text-merah-light">
           {googleError}
         </p>
       ) : null}
@@ -97,17 +97,17 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "email-error" : undefined}
-          className="field-dark h-13 rounded-xl px-4 text-[17px] outline-none aria-invalid:border-[#ff9e8f]"
+          className="field-dark h-13 rounded-xl px-4 text-[17px] outline-none aria-invalid:border-merah-light"
         />
         {error ? (
-          <p id="email-error" role="alert" className="text-[15px] text-[#ff9e8f]">
+          <p id="email-error" role="alert" className="text-[15px] text-merah-light">
             {error.message}
           </p>
         ) : null}
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+          className="mt-2 h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam transition-transform duration-200 motion-safe:hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
         >
           {pending ? "Sending…" : "Email me a sign-in link"}
         </button>

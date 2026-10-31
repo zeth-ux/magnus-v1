@@ -54,6 +54,7 @@ Malay touches stay **subtle**: palette and linework, not costume.
 | `merah-hati` | Oxblood, stamps | `#6E1F1F` |
 | `malam` | Landing ground (night) | `#1C1614` |
 | `paper` | Text on malam | `#EFE9DF` |
+| `merah-light` | Error text and borders on malam (9.0:1) | `#FF9E8F` |
 
 **Book colours (landing):** each sample book has a spine colour, a pattern ink,
 a text colour and a flood colour for its open page, in `web/src/content/shelf.ts`.

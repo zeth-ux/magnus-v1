@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AUTH_VIEWPORT, AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = { title: "You're in" };
-export const viewport: Viewport = { themeColor: "#1c1614", colorScheme: "dark" };
+export const viewport: Viewport = AUTH_VIEWPORT;
 
 /**
  * The first signed-in page. The static shell (logo, layout) renders instantly;
@@ -53,7 +53,7 @@ async function Welcome() {
         </p>
         <span
           aria-hidden="true"
-          className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-merah px-3 py-1 font-display text-[17px] font-semibold text-merah"
+          className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-merah bg-paper px-3 py-1 font-display text-[17px] font-semibold text-merah"
         >
           Opens 9 Nov
         </span>

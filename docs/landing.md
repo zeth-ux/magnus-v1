@@ -31,6 +31,7 @@ when friends list their books.
 
 ## Rules
 - Native scroll; Lenis smoothing for mouse wheels only.
+- Small looping or one-off decoration (FAQ cards opening, the sign-in books drifting) may be plain CSS under `prefers-reduced-motion: no-preference`; anything scroll-driven or sequenced uses GSAP via `lib/gsap.ts`.
 - Animate transforms, opacity and clip-path only. The breeze uses `gsap.quickSetter` and skips work while the stack is off screen.
 - **Reduced motion:** a fixed camera, no drop-in, no breeze, instant dialog. Still 3D, still colourful.
 - **No JavaScript:** the stack and every section render; the book buttons simply don't open.

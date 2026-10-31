@@ -4,6 +4,30 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Database foundation and credit ledger
+
+**Done**
+- First database migration (`supabase/migrations/20261101000100_core.sql`): profiles (WhatsApp in an owner-only table), books, copies, requests, `app_settings` (R7 limits) and the append-only `credit_ledger`.
+- The whole lend/give lifecycle as Postgres functions: request (R6, R7 checks), accept/decline, cancel, both-sides handover (R1-R3), both-sides return, report not returned after due + 14 days (R4). The starter credit (R5) is granted by a trigger on the first copy.
+- 25 tests run the real SQL: PGlite (in-memory Postgres) for logic and row-level security, plus real Postgres for races (two handovers on one credit, 3-request limit). CI now starts a Postgres service.
+
+**Decisions**
+- Credits only move inside `security definer` functions; users can't write to the ledger or the requests table directly.
+- R10-R13 not built (still waiting for approval).
+
+**Next**
+- [ ] Zarith: run the migration in the Supabase SQL editor (README → Database)
+- [ ] Zarith: approve or change R10-R13
+
+## 2026-11-01 (overnight): Dark sign-in pages
+
+**Done**
+- `/login` and `/welcome` now use the dark shelf look: a shared `AuthShell` with a small stack of shelf books that drifts once and settles (CSS, off for reduced motion), restyled fields and errors, and a stamped "library card" on the welcome page.
+- Steve's review: field borders at 3.4:1, error border visible (custom CSS moved into `@layer components`), a stamp with its own background, the drift no longer loops forever, the books render on the server (no extra JavaScript on /login), and a new `merah-light` error colour token.
+
+**Next**
+- [ ] Merge order: #5 (landing), then this PR (#6)
+
 ## 2026-10-31 (night): Landing v3, the Stripe Press-style shelf
 
 **Done**

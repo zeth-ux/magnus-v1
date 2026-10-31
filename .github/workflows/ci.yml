@@ -13,6 +13,16 @@ jobs:
   web:
     name: Lint, typecheck, test, build (web)
     runs-on: ubuntu-latest
+    # A real Postgres for the concurrency tests of the credit ledger.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     defaults:
       run:
         working-directory: web
@@ -27,6 +37,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
       - run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
