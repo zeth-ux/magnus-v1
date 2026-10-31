@@ -179,7 +179,7 @@ export function Shelf({ copies }: { copies: ShelfCopy[] }) {
                   type="button"
                   data-book=""
                   aria-haspopup="dialog"
-                  aria-label={`${copy.title} by ${copy.author}. ${copy.mode === "give" ? "To give" : `To lend, ${copy.lendFor}`}, from ${copy.owner}`}
+                  aria-label={`${copy.sample ? "Sample: " : ""}${copy.title} by ${copy.author}. ${copy.mode === "give" ? "To give" : `To lend, ${copy.lendFor}`}, from ${copy.owner} in ${copy.area}`}
                   onClick={(e) => choose(i, e.currentTarget)}
                   className="block cursor-pointer"
                 >

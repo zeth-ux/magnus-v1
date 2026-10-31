@@ -1,21 +1,22 @@
 -- The shelf, read side.
--- public_shelf(): what the public landing page shows. Available copies only,
--- with the owner's area but never their name or contact (anyone can call it).
+-- public_shelf(): what the public landing page shows. Available copies only:
+-- the book, give or lend, and the owner's area. Never their name, contact,
+-- warkah note or when they listed it (anyone can call it, and the page is cached).
 -- search_shelf(): what signed-in readers browse, with the owner's first name.
 
-create function public.public_shelf(p_limit integer default 24)
+create function public.public_shelf(p_limit integer default 9)
 returns table (
   copy_id uuid, isbn text, title text, authors text[],
-  mode public.copy_mode, lend_max public.lend_max, area text, note text, listed_at timestamptz
+  mode public.copy_mode, lend_max public.lend_max, area text
 )
 language sql stable security definer set search_path = '' as $$
-  select c.id, b.isbn, b.title, b.authors, c.mode, c.lend_max, p.area, c.note, c.created_at
+  select c.id, b.isbn, b.title, b.authors, c.mode, c.lend_max, p.area
   from public.copies c
   join public.books b on b.isbn = c.isbn
   join public.profiles p on p.id = c.owner_id
   where c.status = 'available'
   order by c.created_at desc
-  limit least(greatest(coalesce(p_limit, 24), 1), 48)
+  limit least(greatest(coalesce(p_limit, 9), 1), 24)
 $$;
 
 -- Runs as the caller, so row level security decides what they can see.

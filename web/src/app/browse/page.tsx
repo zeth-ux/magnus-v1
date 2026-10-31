@@ -84,7 +84,7 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
         </p>
       ) : (
         <>
-          <p className="text-[15px] text-paper/70" aria-live="polite">
+          <p className="text-[15px] text-paper/70">
             {rows.length} {rows.length === 1 ? "book" : "books"}
           </p>
           <ul className="flex flex-col gap-5">
@@ -94,7 +94,7 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
                 href={`/browse/${r.copy_id}`}
                 owner={r.owner_name}
                 mine={r.owner_id === user.id}
-                copy={dressCopy({ ...r, area: r.area })}
+                copy={dressCopy(r)}
               />
             ))}
           </ul>

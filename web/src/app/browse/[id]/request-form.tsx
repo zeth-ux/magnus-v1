@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { requestCopy, type RequestState } from "../actions";
 import { inputClass } from "@/components/app/field";
 
@@ -17,10 +17,15 @@ export function RequestForm({
   maxDate: string;
 }) {
   const [state, action, pending] = useActionState<RequestState, FormData>(requestCopy, { status: "idle" });
+  const done = useRef<HTMLParagraphElement>(null);
+  // The form (and its focused button) is replaced by the confirmation: move focus to it.
+  useEffect(() => {
+    if (state.status === "requested") done.current?.focus();
+  }, [state.status]);
 
   if (state.status === "requested") {
     return (
-      <p role="status" className="rounded-[10px] bg-paper p-6 text-[17px] leading-relaxed text-malam">
+      <p ref={done} tabIndex={-1} role="status" className="rounded-[10px] bg-paper p-6 text-[17px] leading-relaxed text-malam outline-none">
         Request sent. The owner will accept or decline; you&apos;ll agree a meet-up once they accept.
       </p>
     );
@@ -34,7 +39,20 @@ export function RequestForm({
           <label htmlFor="returnBy" className="text-[15px] font-semibold">
             I&apos;ll return it by
           </label>
-          <input id="returnBy" name="returnBy" type="date" required min={minDate} max={maxDate} defaultValue={minDate} className={inputClass} />
+          <input
+            id="returnBy"
+            name="returnBy"
+            type="date"
+            required
+            min={minDate}
+            max={maxDate}
+            defaultValue={maxDate}
+            aria-describedby="returnBy-hint"
+            className={inputClass}
+          />
+          <p id="returnBy-hint" className="text-[15px] text-paper/70">
+            Any day up to {new Date(`${maxDate}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" })}.
+          </p>
         </div>
       ) : null}
       {state.status === "error" ? (
