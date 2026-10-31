@@ -71,9 +71,16 @@ exists, rewards giving, and makes borrowers return books.
 ## Implementation status (2026-11-01)
 Built in `supabase/migrations/20261101000100_core.sql`, tested in `web/src/db/`:
 - `credit_ledger` is append-only (a trigger rejects UPDATE, DELETE and TRUNCATE for everyone). Kinds: `starter_grant`, `give_transfer`, `lend_lock`, `lend_unlock`, `lend_forfeit`. `available = sum(delta) - sum(locked_delta)`.
-- Every movement runs inside one function and one transaction, after `lock_person()` takes the people's profile rows `FOR UPDATE` (in a fixed order, so no deadlocks). A test on real Postgres shows two handovers racing on one credit: exactly one wins. Without the lock, that test fails.
+- Every movement runs inside one function and one transaction, after `lock_person()` takes the people's profile rows `FOR NO KEY UPDATE`, in a fixed order. NO KEY UPDATE matters: it doesn't block the foreign-key checks other transactions make against a profile (with plain FOR UPDATE, a new request during a handover could deadlock). A test on real Postgres shows two handovers racing on one credit: exactly one wins. Without the lock, that test fails.
 - Idempotency: a unique index on `(ref_id, kind, user_id)`, plus "already done" checks in each function.
 - R5: a trigger on the first `copies` insert, with a unique index so it can only happen once.
-- R7 limits live in `app_settings` (`max_open_requests`, `max_active_borrows`, `forfeit_grace_days`).
+- R7 limits live in `app_settings` (`max_open_requests`, `max_active_borrows`, `forfeit_grace_days`, `max_flexible_lend_days` = 183). A missing setting is an error, never a disabled limit. The borrow limit is checked again at the handover, so earlier requests can't stack past it.
+- One accepted reader per copy at a time (a unique index). A handover cancels the copy's other open requests.
+- Copies are never deleted; `withdraw_copy()` takes one off the shelf and cancels its open requests, so history stays intact.
+- Dates use Ansan's local date (`public.today()`, Asia/Seoul), not UTC.
+- R4 can't be used against a borrower who has tapped "returned": that case needs a person (see below).
+- A check constraint ties each ledger kind to its allowed amounts, so even a buggy future function can't mint credits.
 - Not built yet: R10-R13 (waiting for approval); scheduled jobs (reminders, expiry); extension requests.
+- **Open question (Zarith): disputes.** If the borrower taps "returned" and the lender doesn't, R4 is refused and the credit stays locked. Who resolves it? Proposal: the pilot team, by hand, until R12 (auto-confirm) is decided.
+- **Design note:** someone could list a fake copy for the starter credit, withdraw it and repeat with new emails. R5 accepts this risk for a pilot of friends.
 - Open question: deleting an account. Ledger rows reference the profile, so a delete is refused while the person has credit history. Plan: anonymise the profile instead of deleting rows.
