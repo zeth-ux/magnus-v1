@@ -5,6 +5,8 @@ import { getProfile, requireUser } from "@/lib/supabase/user";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ProfileForm } from "./profile-form";
 import { InstallHint } from "@/components/pwa/install-hint";
+import { UnblockButton } from "./unblock-button";
+import { toStamps, type LedgerRow } from "@/lib/card/history";
 
 export const metadata: Metadata = { title: "Your profile" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -24,6 +26,9 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
         <Suspense fallback={<p className="text-paper/70">Opening your card…</p>}>
           <Profile searchParams={searchParams} />
         </Suspense>
+        <Suspense fallback={null}>
+          <Blocked />
+        </Suspense>
         <InstallHint />
       </div>
     </AppShell>
@@ -42,6 +47,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
     .maybeSingle<{ balance: number; locked: number; available: number }>();
 
   return (
+    <div className="flex flex-col gap-16">
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
       <div className="lg:col-span-7">
         <ProfileForm
@@ -80,5 +86,92 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
         </aside>
       ) : null}
     </div>
+    {profile ? (
+      <Suspense fallback={<p className="text-paper/70">Reading your stamps…</p>}>
+        <CardHistory />
+      </Suspense>
+    ) : null}
+    </div>
+  );
+}
+
+/** Every credit movement, as stamps on the card (newest first). */
+async function CardHistory() {
+  const { supabase, user } = await requireUser("/me");
+  const { data, error } = await supabase
+    .from("credit_ledger")
+    .select("id, kind, delta, locked_delta, ref_id, created_at")
+    .eq("user_id", user.id)
+    .order("id", { ascending: false }) // identity: insert order, unique
+    .limit(41);
+  if (error) return <p className="text-[15px] text-paper/70">Couldn&apos;t load your history just now.</p>;
+  const all = (data ?? []) as LedgerRow[];
+  if (all.length === 0) return null;
+  const more = all.length > 40;
+  const rows = all.slice(0, 40);
+
+  // Titles: a starter grant points at the copy; everything else at the request.
+  const copyIds = rows.filter((r) => r.kind === "starter_grant").map((r) => r.ref_id);
+  const requestIds = rows.filter((r) => r.kind !== "starter_grant").map((r) => r.ref_id);
+  const [copies, requests] = await Promise.all([
+    copyIds.length ? supabase.from("copies").select("id, books(title)").in("id", copyIds) : Promise.resolve({ data: [] }),
+    requestIds.length ? supabase.from("requests").select("id, copy:copies(books(title))").in("id", requestIds) : Promise.resolve({ data: [] }),
+  ]);
+  const titles = new Map<string, string>();
+  for (const c of (copies.data ?? []) as unknown as { id: string; books: { title: string } | null }[]) if (c.books) titles.set(c.id, c.books.title);
+  for (const r of (requests.data ?? []) as unknown as { id: string; copy: { books: { title: string } | null } | null }[])
+    if (r.copy?.books) titles.set(r.id, r.copy.books.title);
+
+  const stamps = toStamps(rows, (r) => titles.get(r.ref_id) ?? null);
+  // All at least 4.5:1 on paper (pandan-deep 5.5, merah 9.3, kopi 5.3).
+  const tone = { plus: "border-pandan-deep text-pandan-deep", minus: "border-merah text-merah", held: "border-kopi text-kopi" } as const;
+
+  return (
+    <section aria-labelledby="history-heading" className="rounded-[10px] bg-paper p-7 text-malam">
+      <h2 id="history-heading" className="font-display text-xl font-semibold">
+        Stamps on your card
+      </h2>
+      <ol className="mt-5 flex flex-col divide-y divide-malam/10">
+        {stamps.map((s) => (
+          <li key={s.id} className="flex items-center gap-4 py-3">
+            <span className={`w-20 shrink-0 -rotate-3 rounded-[4px] border-2 px-2 py-1 text-center font-display text-[15px] font-semibold ${tone[s.tone]}`}>
+              {s.amount}
+            </span>
+            <span className="min-w-0 flex-1 text-[15px]">{s.text}</span>
+            <span className="shrink-0 text-[15px] text-muted">{s.date}</span>
+          </li>
+        ))}
+      </ol>
+      {more ? <p className="mt-3 text-[15px] text-muted">Showing your 40 most recent stamps.</p> : null}
+    </section>
+  );
+}
+
+/** Readers you've blocked (only shown when there are any), with a way to undo it. */
+async function Blocked() {
+  const { supabase, user } = await requireUser("/me");
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("blocked_id, profiles!blocks_blocked_id_fkey(display_name)")
+    .eq("blocker_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error || !data || data.length === 0) return null;
+  const rows = data as unknown as { blocked_id: string; profiles: { display_name: string } | null }[];
+  return (
+    <section className="flex max-w-[34rem] flex-col gap-4">
+      <h2 className="font-display text-2xl font-semibold">Readers you&apos;ve blocked</h2>
+      <p className="text-[15px] text-paper/80">You can&apos;t ask each other for books. They aren&apos;t told.</p>
+      <ul className="flex flex-col gap-3">
+        {rows.map((r) => {
+          const name = r.profiles?.display_name ?? "A reader";
+          return (
+            <li key={r.blocked_id} className="flex items-center justify-between gap-4 rounded-[10px] bg-paper/[0.06] px-5 py-3">
+              <span className="text-[17px]">{name}</span>
+              <UnblockButton reader={r.blocked_id} name={name} />
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

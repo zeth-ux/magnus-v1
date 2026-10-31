@@ -4,6 +4,23 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): Summary and morning checklist
+
+Five PRs, each reviewed by Steve with his findings fixed. They're chained (each branch contains the one before), so merge them **in this order** and each merges cleanly:
+1. #11 `feat/meetup`: meet-up cards
+2. #12 `feat/my-shelf`: My shelf, stamped library card, phone tab bar
+3. #13 `feat/wishlist`: wishlist
+4. #14 `feat/trust`: 👍/👎 after handovers, block, report, feedback
+5. #15 `feat/pwa-stats`: offline page, install, pilot stats SQL
+
+**Next**
+- [ ] Zarith: merge #11 → #15 in order
+- [ ] Zarith: in Supabase SQL Editor run, oldest first: `20261101000300_meetups.sql`, `20261101000400_wishlist.sql`, `20261101000500_trust.sql`
+- [ ] Zarith: R10-R13 still need a yes/no before they're built
+
+**Decision (security)**
+- Postgres lets everyone (`PUBLIC`, including signed-out visitors) run a new function unless it's revoked. A schema default can't change that, so every migration from now on revokes `execute` from `public, anon` and grants `authenticated` explicitly. Found by a wishlist test.
+
 ## 2026-11-01 (night 2): App polish and pilot stats
 
 **Done**
@@ -13,6 +30,51 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - Install: the manifest is dark now, opens on `/browse`, and has shortcuts (Add a book, Activity). `/me` shows "Put Bayu on your home screen": an Install button on Android, Share → Add to Home Screen steps on iPhone, nothing once installed.
 - Every page's browser bar is dark (root viewport).
 - `docs/pilot-stats.sql`: copy-paste queries for the headline numbers, week by week, how requests end, give vs lend, a credits sanity check, most listed books and overdue loans. Checked against a fresh database.
+
+## 2026-11-01 (night 2): Trust and feedback
+
+**Done**
+- Migration `20261101000500_trust.sql`: `handover_ratings` (👍/👎 once per handover, changeable; `smooth_handovers()` gives the count, never who), `blocks` (no requests either way; blocking cancels open requests between the two), `reports` and `feedback` (written through functions with daily limits; readers can't read them back; the pilot team reads them in the Supabase dashboard).
+- Activity: "How was the handover?" 👍/👎 and "Report a problem" on finished handovers. `/report` (with "Also block this reader"), `/feedback`, and links to both under every app page. Book pages show "N readers had a smooth handover with them" (distinct readers, so two friends can't inflate it). Your card (`/me`) lists readers you've blocked, with Unblock.
+
+**Decisions**
+- A blocked reader sees the same "not available right now" as any taken book; only the blocker is told they blocked.
+- A block cancels requests that haven't changed hands yet, but a book on loan still has to come back (returns and R4 are unaffected; tested).
+- Report + block run in one database call (`report_problem(..., p_block)`), so a report is never sent without the block asked for.
+- `block_reader` takes the same per-person locks as `request_copy`, so a request racing a block can't slip through.
+
+**Next**
+- [ ] Zarith: run `20261101000500_trust.sql`; read reports and feedback in Supabase → Table Editor
+- [ ] Later: let the pilot team mark reports as handled (an admin view), once there are any
+
+## 2026-11-01 (night 2): Wishlist
+
+**Done**
+- Migration `20261101000400_wishlist.sql`: a private `wishlist` per reader, `wish_count()` ("N readers want this", a count only) and `wished_and_available()` (copies on the shelf now that you wished for).
+- `/wishlist`: add by ISBN (looked up; type the title if nobody knows it), see which are on the shelf now, remove. Book pages get ☆/★ and "N readers want this". Browse gets "On my wishlist". Activity shows "From your wishlist, on the shelf now".
+- Found and documented: Postgres lets PUBLIC execute every new function unless the migration revokes it explicitly (the schema-level default in the core migration can't remove that). New migrations now revoke and grant their own functions.
+
+**Next**
+- [ ] Zarith: run `20261101000400_wishlist.sql` in the Supabase SQL Editor
+
+## 2026-11-01 (night 2): My shelf and the stamped library card
+
+**Done**
+- `/shelf`: your books with their status (on the shelf, paused, lent out), Pause / Put back, Edit (warkah, condition, lend period) and Take off the shelf (asks twice; cancels open requests). Books you're borrowing, with the due date. Books you took off, folded away.
+- `/me`: "Stamps on your card", one stamp per credit movement (+1 gave, −1 took, held, freed, starter credit), with the book's title and date.
+- Phones get a bottom tab bar (Browse · Shelf · Add · Activity · Me); wide screens keep the top bar.
+- No database changes.
+- Decision: pausing a book leaves waiting requests waiting (they can't be accepted until it's back on the shelf); the owner is told so.
+
+## 2026-11-01 (night 2): Meet-up cards
+
+**Done**
+- Migration `20261101000300_meetups.sql`: one live meet-up card per request (place, time, optional note). `propose_meetup()` replaces the live card; `agree_meetup()` is for the other reader only. Times must be in the next 60 days.
+- Activity shows the card on accepted requests (the handover) and on loans (the return): "Sounds good", "Suggest another", or "Change it" once agreed. Times are picked and shown in Korea time whatever the phone's timezone; common Ansan places are suggested.
+- 4 SQL tests and 4 time tests.
+
+**Next**
+- [ ] Zarith: run `20261101000300_meetups.sql` in the Supabase SQL Editor
 
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 
