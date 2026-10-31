@@ -4,6 +4,20 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Profile and add a book
+
+**Done**
+- `/me`: your library card. Name, area of Ansan (a fixed list), and an optional WhatsApp number kept in the owner-only table. Shows available / held / total credits.
+- `/add`: find a book by scanning its barcode (ZXing, loaded only when the camera opens) or typing the ISBN; details come from our own books table, then Google Books, then Open Library; if nobody knows it, type the title. Then give or lend (with a maximum period), condition and a warkah note. The first listing shows the "+1 starter credit" stamp (granted by the database, R5).
+- `/welcome` now points to the next step (make your card, or add your first book).
+- Server-side validation for every field (`lib/books/validate.ts`), ISBN-10/13 checksums and conversion (`lib/books/isbn.ts`), and the lookup with fallbacks (`lib/books/lookup.ts`), all with tests.
+
+**Not verified**
+- The pages against a real Supabase project (I don't have its keys here). The SQL is tested; the forms were checked visually.
+
+**Next**
+- [ ] Zarith: after running the migration, sign in, make your card and add one real book
+
 ## 2026-11-01 (overnight): Database foundation and credit ledger
 
 **Done**
