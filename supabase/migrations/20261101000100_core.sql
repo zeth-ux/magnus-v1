@@ -497,6 +497,9 @@ begin
 
   if r.status = 'forfeited' then return r.status; end if; -- idempotent
   if r.status <> 'on_loan' then raise exception 'this book is not on loan' using errcode = 'check_violation', hint = 'bayu'; end if;
+  if r.owner_got_back then
+    raise exception 'you confirmed you got this book back: ask the reader to confirm the return too' using errcode = 'check_violation', hint = 'bayu';
+  end if;
   if r.requester_returned then
     -- The reader says they gave it back: this needs a person to look at it, not an automatic forfeit.
     raise exception 'the reader says this book was returned: confirm the return, or contact the pilot team' using errcode = 'check_violation', hint = 'bayu';
