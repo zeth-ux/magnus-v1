@@ -60,7 +60,7 @@ export function ownerLine(r: Row, { today, copyBusy }: Context): string {
   }
   if (r.status === "accepted") {
     if (staleLend(r, today)) return "The return date has passed before you met. Cancel, and they can ask again with a new date.";
-    return r.owner_handed_over ? "You've confirmed the handover. Waiting for them to confirm too." : "Agree where to meet, then confirm the handover when you've given it.";
+    return r.owner_handed_over ? "You've confirmed the handover. Waiting for them to confirm too." : "Agree the meet-up below, then confirm the handover when you've given it.";
   }
   if (r.status !== "on_loan") return "";
   if (r.owner_got_back) return "You've confirmed it's back. Waiting for them to confirm too.";
@@ -92,7 +92,7 @@ export function requesterLine(r: Row, today: string): string {
   if (r.status === "requested") return "Waiting for the owner to answer.";
   if (r.status === "accepted") {
     if (staleLend(r, today)) return "The return date has passed before you met. Cancel and ask again with a new date.";
-    return r.requester_received ? "You've confirmed you got it. Waiting for the owner to confirm too." : "Accepted! Agree where to meet, then confirm when you have the book.";
+    return r.requester_received ? "You've confirmed you got it. Waiting for the owner to confirm too." : "Accepted! Agree the meet-up below, then confirm when you have the book.";
   }
   if (r.status !== "on_loan") return "";
   if (r.requester_returned) return "You've said you returned it. Waiting for the owner to confirm.";
