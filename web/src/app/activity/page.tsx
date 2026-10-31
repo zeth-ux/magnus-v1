@@ -6,6 +6,8 @@ import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
 import { RateHandover } from "./rate-handover";
 import { Announcer } from "./announcer";
+import { MeetupCard, type Meetup } from "./meetup-card";
+import { formatSeoul, isPast, seoulPickerMax, seoulPickerMin } from "@/lib/activity/meetup-time";
 import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -54,6 +56,25 @@ async function Requests() {
   }
   // Shape set by the select above (not generated types yet).
   const openRows = (open.data ?? []) as unknown as Row[];
+  // The live meet-up card for each open request.
+  const meetupIds = openRows.filter((r) => r.status !== "requested").map((r) => r.id);
+  const { data: meetupRows, error: meetupError } = meetupIds.length
+    ? await supabase
+        .from("meetups")
+        .select("id, request_id, purpose, proposed_by, place, meet_at, note, status")
+        .in("request_id", meetupIds)
+        .in("status", ["proposed", "agreed"])
+    : { data: [], error: null };
+  type MeetupRow = Omit<Meetup, "when" | "expired"> & { request_id: string; purpose: "handover" | "return"; meet_at: string };
+  // A card counts only for the step it was made for (an agreed handover card is not the return card).
+  const meetups = new Map(
+    ((meetupRows ?? []) as MeetupRow[])
+      .filter((m) => {
+        const row = openRows.find((r) => r.id === m.request_id);
+        return row && m.purpose === (row.status === "accepted" ? "handover" : "return");
+      })
+      .map((m) => [m.request_id, { ...m, when: formatSeoul(m.meet_at), expired: isPast(m.meet_at) }]),
+  );
   const pastRows = (past.data ?? []) as unknown as Row[];
   // My ratings for finished handovers (a thumbs up or down, once each).
   const changedHands = pastRows.filter((r) => ["handed_over", "returned", "forfeited"].includes(r.status)).map((r) => r.id);
@@ -62,6 +83,8 @@ async function Requests() {
     : { data: [] };
   const myRatings = new Map<string, boolean>(((ratingRows ?? []) as { request_id: string; thumbs_up: boolean }[]).map((x) => [x.request_id, x.thumbs_up]));
   const today = seoulToday();
+  const minAt = seoulPickerMin();
+  const maxAt = seoulPickerMax();
   const incoming = openRows.filter((r) => r.owner_id === user.id);
   const outgoing = openRows.filter((r) => r.requester_id === user.id);
   // Copies already promised to someone (or not on the shelf): their other requests can't be accepted.
@@ -69,8 +92,30 @@ async function Requests() {
     incoming.filter((r) => r.status !== "requested" || (r.copy && r.copy.status !== "available")).map((r) => r.copy?.id),
   );
 
+  const { data: wishedData } = await supabase.rpc("wished_and_available");
+  const wished = (wishedData ?? []) as { copy_id: string; title: string; mode: "give" | "lend"; owner_name: string; area: string }[];
+
   return (
     <div className="flex flex-col gap-14">
+      {wished.length > 0 ? (
+        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 rounded-[10px] border border-songket/60 p-5">
+          <h2 id="wished-heading" className="font-display text-2xl font-semibold text-songket">
+            From your wishlist, on the shelf now
+          </h2>
+          <ul className="flex flex-col gap-2 text-[17px]">
+            {wished.map((w) => (
+              <li key={w.copy_id}>
+                <Link href={`/browse/${w.copy_id}`} className="font-semibold underline underline-offset-4">
+                  {w.title}
+                </Link>{" "}
+                <span className="text-paper/80">
+                  · {w.mode === "give" ? "to give" : "to lend"} · {w.owner_name}, {w.area}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <Section title="Asked of you" empty="Nobody has asked for your books yet.">
         {incoming.map((r) => (
           <Item
@@ -79,6 +124,7 @@ async function Requests() {
             who={r.requester?.display_name ?? "A reader"}
             line={ownerLine(r, { today, copyBusy: busy.has(r.copy?.id) })}
             ops={ownerOps(r, { today, copyBusy: busy.has(r.copy?.id) })}
+            meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }}
           />
         ))}
       </Section>
@@ -91,7 +137,7 @@ async function Requests() {
         }
       >
         {outgoing.map((r) => (
-          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} />
+          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }} />
         ))}
       </Section>
       {pastRows.length > 0 ? (
@@ -130,7 +176,21 @@ function Section({ title, empty, children }: { title: string; empty: React.React
   );
 }
 
-function Item({ row, who, line, ops, after }: { row: Row; who: string; line: string; ops: Op[]; after?: React.ReactNode }) {
+function Item({
+  row,
+  who,
+  line,
+  ops,
+  meetup,
+  after,
+}: {
+  row: Row;
+  who: string;
+  line: string;
+  ops: Op[];
+  meetup?: { me: string; card: Meetup | null; minAt: string; maxAt: string; unavailable: boolean };
+  after?: React.ReactNode;
+}) {
   const title = row.copy?.books?.title ?? "A book";
   return (
     <li className="flex flex-col gap-3 rounded-[10px] bg-paper/[0.06] p-5 sm:flex-row sm:items-start sm:justify-between">
@@ -149,8 +209,27 @@ function Item({ row, who, line, ops, after }: { row: Row; who: string; line: str
         </p>
         <p className="text-[15px] text-paper">{line}</p>
       </div>
-      <RequestActions request={row.id} title={title} ops={ops} />
-      {after}
+      <div className="flex flex-col gap-4 sm:max-w-[26rem]">
+        <RequestActions request={row.id} title={title} ops={ops} />
+        {meetup?.unavailable ? (
+          <p className="text-[15px] text-paper/70">Couldn&apos;t load the meet-up just now. Refresh to try again.</p>
+        ) : meetup &&
+          ((row.status === "accepted" && !(row.mode === "lend" && row.return_by !== null && row.return_by <= seoulToday())) ||
+            (row.status === "on_loan" && !row.owner_got_back && !row.requester_returned)) ? (
+          <MeetupCard
+            key={meetup.card?.id ?? "none"}
+            request={row.id}
+            meetup={meetup.card}
+            me={meetup.me}
+            other={who}
+            title={title}
+            purpose={row.status === "accepted" ? "handover" : "return"}
+            minAt={meetup.minAt}
+            maxAt={meetup.maxAt}
+          />
+        ) : null}
+        {after}
+      </div>
     </li>
   );
 }
