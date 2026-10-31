@@ -2,6 +2,9 @@
 -- Rules: docs/decisions/003-credit-system.md (R1-R9). Proposed rules R10-R13
 -- are NOT implemented here; they wait for Zarith's approval.
 --
+-- Errors meant for readers are raised with hint = 'bayu'; the app shows their
+-- message and hides every other database error.
+--
 -- Security model
 -- * Every table has row level security on.
 -- * People read what they need and edit only their own rows.
@@ -135,7 +138,7 @@ begin
   end if;
   if new.status <> old.status
      and not (old.status in ('available', 'paused') and new.status in ('available', 'paused')) then
-    raise exception 'a copy can only be paused or made available by its owner' using errcode = 'check_violation';
+    raise exception 'a copy can only be paused or made available by its owner' using errcode = 'check_violation', hint = 'bayu';
   end if;
   return new;
 end $$;
@@ -178,7 +181,7 @@ revoke insert, update, delete, truncate on public.credit_ledger from anon, authe
 create function public.ledger_append_only() returns trigger
 language plpgsql set search_path = '' as $$
 begin
-  raise exception 'the credit ledger is append-only' using errcode = 'insufficient_privilege';
+  raise exception 'the credit ledger is append-only' using errcode = 'insufficient_privilege', hint = 'bayu';
 end $$;
 create trigger ledger_no_update before update or delete on public.credit_ledger
   for each row execute function public.ledger_append_only();
@@ -212,7 +215,7 @@ begin
   -- checks other transactions make against this profile (no deadlocks).
   perform 1 from public.profiles where id = p_user for no key update;
   if not found then
-    raise exception 'no profile for this account' using errcode = 'no_data_found';
+    raise exception 'no profile for this account' using errcode = 'no_data_found', hint = 'bayu';
   end if;
 end $$;
 
@@ -270,7 +273,7 @@ language plpgsql stable set search_path = '' as $$
 declare v uuid := auth.uid();
 begin
   if v is null then
-    raise exception 'sign in first' using errcode = 'insufficient_privilege';
+    raise exception 'sign in first' using errcode = 'insufficient_privilege', hint = 'bayu';
   end if;
   return v;
 end $$;
@@ -295,32 +298,32 @@ declare
 begin
   perform public.lock_person(me);
   select * into c from public.copies where id = p_copy for update;
-  if not found then raise exception 'that book is no longer listed' using errcode = 'no_data_found'; end if;
-  if c.owner_id = me then raise exception 'that is your own book' using errcode = 'check_violation'; end if;
-  if c.status <> 'available' then raise exception 'that book is not available right now' using errcode = 'check_violation'; end if;
+  if not found then raise exception 'that book is no longer listed' using errcode = 'no_data_found', hint = 'bayu'; end if;
+  if c.owner_id = me then raise exception 'that is your own book' using errcode = 'check_violation', hint = 'bayu'; end if;
+  if c.status <> 'available' then raise exception 'that book is not available right now' using errcode = 'check_violation', hint = 'bayu'; end if;
   if exists (select 1 from public.requests where copy_id = p_copy and requester_id = me and status in ('requested', 'accepted')) then
-    raise exception 'you already asked for this book' using errcode = 'unique_violation';
+    raise exception 'you already asked for this book' using errcode = 'unique_violation', hint = 'bayu';
   end if;
 
   if (public.credits_of(me)).available < 1 then
-    raise exception 'you need 1 available credit: list a book first' using errcode = 'check_violation';
+    raise exception 'you need 1 available credit: list a book first' using errcode = 'check_violation', hint = 'bayu';
   end if;
 
   select count(*) into open_count from public.requests where requester_id = me and status in ('requested', 'accepted');
   if open_count >= public.setting('max_open_requests') then
-    raise exception 'you already have % open requests', open_count using errcode = 'check_violation';
+    raise exception 'you already have % open requests', open_count using errcode = 'check_violation', hint = 'bayu';
   end if;
 
   if c.mode = 'lend' then
     select count(*) into borrow_count from public.requests where requester_id = me and status = 'on_loan';
     if borrow_count >= public.setting('max_active_borrows') then
-      raise exception 'you are already borrowing % books', borrow_count using errcode = 'check_violation';
+      raise exception 'you are already borrowing % books', borrow_count using errcode = 'check_violation', hint = 'bayu';
     end if;
     if p_return_by is null or p_return_by <= public.today() then
-      raise exception 'pick a return date after today' using errcode = 'check_violation';
+      raise exception 'pick a return date after today' using errcode = 'check_violation', hint = 'bayu';
     end if;
     if p_return_by > public.today() + public.lend_max_days(c.lend_max) then
-      raise exception 'that return date is later than the owner allows' using errcode = 'check_violation';
+      raise exception 'that return date is later than the owner allows' using errcode = 'check_violation', hint = 'bayu';
     end if;
   else
     p_return_by := null;
@@ -341,22 +344,22 @@ declare
   r public.requests;
   c public.copies;
 begin
-  if p_accept is null then raise exception 'accept or decline' using errcode = 'null_value_not_allowed'; end if;
+  if p_accept is null then raise exception 'accept or decline' using errcode = 'null_value_not_allowed', hint = 'bayu'; end if;
   select * into r from public.requests where id = p_request for update;
-  if not found or r.owner_id <> me then raise exception 'request not found' using errcode = 'no_data_found'; end if;
+  if not found or r.owner_id <> me then raise exception 'request not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
   if r.status = 'accepted' and p_accept then return r.status; end if;   -- idempotent
   if r.status = 'declined' and not p_accept then return r.status; end if;
   if r.status <> 'requested' then
-    raise exception 'this request was already answered' using errcode = 'check_violation';
+    raise exception 'this request was already answered' using errcode = 'check_violation', hint = 'bayu';
   end if;
 
   if p_accept then
     select * into c from public.copies where id = r.copy_id for update;
     if c.owner_id <> me or c.status <> 'available' then
-      raise exception 'this book is not available any more' using errcode = 'check_violation';
+      raise exception 'this book is not available any more' using errcode = 'check_violation', hint = 'bayu';
     end if;
     if exists (select 1 from public.requests where copy_id = r.copy_id and status in ('accepted', 'on_loan')) then
-      raise exception 'you already accepted another reader for this book' using errcode = 'check_violation';
+      raise exception 'you already accepted another reader for this book' using errcode = 'check_violation', hint = 'bayu';
     end if;
   end if;
 
@@ -374,10 +377,10 @@ declare
   r public.requests;
 begin
   select * into r from public.requests where id = p_request for update;
-  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found'; end if;
+  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
   if r.status = 'cancelled' then return r.status; end if;
   if r.status not in ('requested', 'accepted') then
-    raise exception 'this request can no longer be cancelled' using errcode = 'check_violation';
+    raise exception 'this request can no longer be cancelled' using errcode = 'check_violation', hint = 'bayu';
   end if;
   update public.requests set status = 'cancelled', updated_at = now() where id = p_request;
   return 'cancelled';
@@ -392,7 +395,7 @@ declare
   r public.requests;
 begin
   select * into r from public.requests where id = p_request;
-  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found'; end if;
+  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
 
   -- Lock both people in a fixed order (no deadlocks), then the request.
   perform public.lock_person(least(r.requester_id, r.owner_id));
@@ -400,7 +403,7 @@ begin
   select * into r from public.requests where id = p_request for update;
 
   if r.status in ('handed_over', 'on_loan', 'returned', 'forfeited') then return r.status; end if; -- idempotent
-  if r.status <> 'accepted' then raise exception 'the owner has to accept first' using errcode = 'check_violation'; end if;
+  if r.status <> 'accepted' then raise exception 'the owner has to accept first' using errcode = 'check_violation', hint = 'bayu'; end if;
 
   if me = r.owner_id then r.owner_handed_over := true; else r.requester_received := true; end if;
   update public.requests set owner_handed_over = r.owner_handed_over, requester_received = r.requester_received, updated_at = now()
@@ -411,20 +414,20 @@ begin
   end if;
 
   if (public.credits_of(r.requester_id)).available < 1 then
-    raise exception 'the reader taking the book has no available credit' using errcode = 'check_violation';
+    raise exception 'the reader taking the book has no available credit' using errcode = 'check_violation', hint = 'bayu';
   end if;
   -- The copy must still be the owner's and on the shelf.
   if not exists (select 1 from public.copies where id = r.copy_id and owner_id = r.owner_id and status in ('available', 'paused') for update) then
-    raise exception 'this book is not available any more' using errcode = 'check_violation';
+    raise exception 'this book is not available any more' using errcode = 'check_violation', hint = 'bayu';
   end if;
   if r.mode = 'lend' then
     -- R7 at the moment it matters: requests made earlier can't stack past the limit.
     if (select count(*) from public.requests where requester_id = r.requester_id and status = 'on_loan')
        >= public.setting('max_active_borrows') then
-      raise exception 'you are already borrowing the most books allowed at once' using errcode = 'check_violation';
+      raise exception 'you are already borrowing the most books allowed at once' using errcode = 'check_violation', hint = 'bayu';
     end if;
     if r.return_by <= public.today() then
-      raise exception 'the return date has passed: agree a new date and request again' using errcode = 'check_violation';
+      raise exception 'the return date has passed: agree a new date and request again' using errcode = 'check_violation', hint = 'bayu';
     end if;
   end if;
 
@@ -459,12 +462,12 @@ declare
   r public.requests;
 begin
   select * into r from public.requests where id = p_request;
-  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found'; end if;
+  if not found or me not in (r.requester_id, r.owner_id) then raise exception 'request not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
   perform public.lock_person(r.requester_id);
   select * into r from public.requests where id = p_request for update;
 
   if r.status in ('returned', 'forfeited') then return r.status; end if; -- idempotent
-  if r.status <> 'on_loan' then raise exception 'this book is not on loan' using errcode = 'check_violation'; end if;
+  if r.status <> 'on_loan' then raise exception 'this book is not on loan' using errcode = 'check_violation', hint = 'bayu'; end if;
 
   if me = r.owner_id then r.owner_got_back := true; else r.requester_returned := true; end if;
   update public.requests set owner_got_back = r.owner_got_back, requester_returned = r.requester_returned, updated_at = now()
@@ -487,19 +490,19 @@ declare
   r public.requests;
 begin
   select * into r from public.requests where id = p_request;
-  if not found or me <> r.owner_id then raise exception 'request not found' using errcode = 'no_data_found'; end if;
+  if not found or me <> r.owner_id then raise exception 'request not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
   perform public.lock_person(least(r.requester_id, r.owner_id));
   perform public.lock_person(greatest(r.requester_id, r.owner_id));
   select * into r from public.requests where id = p_request for update;
 
   if r.status = 'forfeited' then return r.status; end if; -- idempotent
-  if r.status <> 'on_loan' then raise exception 'this book is not on loan' using errcode = 'check_violation'; end if;
+  if r.status <> 'on_loan' then raise exception 'this book is not on loan' using errcode = 'check_violation', hint = 'bayu'; end if;
   if r.requester_returned then
     -- The reader says they gave it back: this needs a person to look at it, not an automatic forfeit.
-    raise exception 'the reader says this book was returned: confirm the return, or contact the pilot team' using errcode = 'check_violation';
+    raise exception 'the reader says this book was returned: confirm the return, or contact the pilot team' using errcode = 'check_violation', hint = 'bayu';
   end if;
   if public.today() <= r.return_by + public.setting('forfeit_grace_days') then
-    raise exception 'you can report it after %', r.return_by + public.setting('forfeit_grace_days') using errcode = 'check_violation';
+    raise exception 'you can report it after %', r.return_by + public.setting('forfeit_grace_days') using errcode = 'check_violation', hint = 'bayu';
   end if;
 
   insert into public.credit_ledger (user_id, kind, delta, locked_delta, ref_id) values
@@ -519,9 +522,9 @@ declare
   c public.copies;
 begin
   select * into c from public.copies where id = p_copy for update;
-  if not found or c.owner_id <> me then raise exception 'book not found' using errcode = 'no_data_found'; end if;
+  if not found or c.owner_id <> me then raise exception 'book not found' using errcode = 'no_data_found', hint = 'bayu'; end if;
   if c.status = 'withdrawn' then return c.status; end if;
-  if c.status = 'on_loan' then raise exception 'this book is on loan: wait until it is back' using errcode = 'check_violation'; end if;
+  if c.status = 'on_loan' then raise exception 'this book is on loan: wait until it is back' using errcode = 'check_violation', hint = 'bayu'; end if;
   update public.requests set status = 'cancelled', updated_at = now()
    where copy_id = p_copy and status in ('requested', 'accepted');
   update public.copies set status = 'withdrawn' where id = p_copy;
