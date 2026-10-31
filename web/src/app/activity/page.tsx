@@ -5,6 +5,8 @@ import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
 import { Announcer } from "./announcer";
+import { MeetupCard, type Meetup } from "./meetup-card";
+import { seoulPickerMin } from "@/lib/activity/meetup-time";
 import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -53,8 +55,19 @@ async function Requests() {
   }
   // Shape set by the select above (not generated types yet).
   const openRows = (open.data ?? []) as unknown as Row[];
+  // The live meet-up card for each open request.
+  const meetupIds = openRows.filter((r) => r.status !== "requested").map((r) => r.id);
+  const { data: meetupRows } = meetupIds.length
+    ? await supabase
+        .from("meetups")
+        .select("id, request_id, proposed_by, place, meet_at, note, status")
+        .in("request_id", meetupIds)
+        .in("status", ["proposed", "agreed"])
+    : { data: [] };
+  const meetups = new Map(((meetupRows ?? []) as (Meetup & { request_id: string })[]).map((m) => [m.request_id, m]));
   const pastRows = (past.data ?? []) as unknown as Row[];
   const today = seoulToday();
+  const minAt = seoulPickerMin();
   const incoming = openRows.filter((r) => r.owner_id === user.id);
   const outgoing = openRows.filter((r) => r.requester_id === user.id);
   // Copies already promised to someone (or not on the shelf): their other requests can't be accepted.
@@ -72,6 +85,7 @@ async function Requests() {
             who={r.requester?.display_name ?? "A reader"}
             line={ownerLine(r, { today, copyBusy: busy.has(r.copy?.id) })}
             ops={ownerOps(r, { today, copyBusy: busy.has(r.copy?.id) })}
+            meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt }}
           />
         ))}
       </Section>
@@ -84,7 +98,7 @@ async function Requests() {
         }
       >
         {outgoing.map((r) => (
-          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} />
+          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt }} />
         ))}
       </Section>
       {pastRows.length > 0 ? (
@@ -113,7 +127,19 @@ function Section({ title, empty, children }: { title: string; empty: React.React
   );
 }
 
-function Item({ row, who, line, ops }: { row: Row; who: string; line: string; ops: Op[] }) {
+function Item({
+  row,
+  who,
+  line,
+  ops,
+  meetup,
+}: {
+  row: Row;
+  who: string;
+  line: string;
+  ops: Op[];
+  meetup?: { me: string; card: Meetup | null; minAt: string };
+}) {
   const title = row.copy?.books?.title ?? "A book";
   return (
     <li className="flex flex-col gap-3 rounded-[10px] bg-paper/[0.06] p-5 sm:flex-row sm:items-start sm:justify-between">
@@ -132,7 +158,21 @@ function Item({ row, who, line, ops }: { row: Row; who: string; line: string; op
         </p>
         <p className="text-[15px] text-paper">{line}</p>
       </div>
-      <RequestActions request={row.id} title={title} ops={ops} />
+      <div className="flex flex-col gap-4 sm:max-w-[26rem]">
+        <RequestActions request={row.id} title={title} ops={ops} />
+        {meetup && (row.status === "accepted" || (row.status === "on_loan" && !row.owner_got_back && !row.requester_returned)) ? (
+          <MeetupCard
+            key={meetup.card?.id ?? "none"}
+            request={row.id}
+            meetup={meetup.card}
+            me={meetup.me}
+            other={who}
+            title={title}
+            purpose={row.status === "accepted" ? "handover" : "return"}
+            minAt={meetup.minAt}
+          />
+        ) : null}
+      </div>
     </li>
   );
 }
