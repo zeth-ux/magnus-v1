@@ -4,6 +4,16 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): Wishlist
+
+**Done**
+- Migration `20261101000400_wishlist.sql`: a private `wishlist` per reader, `wish_count()` ("N readers want this", a count only) and `wished_and_available()` (copies on the shelf now that you wished for).
+- `/wishlist`: add by ISBN (looked up; type the title if nobody knows it), see which are on the shelf now, remove. Book pages get ☆/★ and "N readers want this". Browse gets "On my wishlist". Activity shows "From your wishlist, on the shelf now".
+- Found and documented: Postgres lets PUBLIC execute every new function unless the migration revokes it explicitly (the schema-level default in the core migration can't remove that). New migrations now revoke and grant their own functions.
+
+**Next**
+- [ ] Zarith: run `20261101000400_wishlist.sql` in the Supabase SQL Editor
+
 ## 2026-11-01 (overnight): Activity page (request lifecycle)
 
 **Done**
