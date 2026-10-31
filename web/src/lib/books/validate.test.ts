@@ -51,8 +51,20 @@ describe("copy validation", () => {
     if (!r.ok) expect(Object.keys(r.errors).sort()).toEqual(["isbn", "lendMax", "note"]);
   });
 
-  it("drops a cover URL that isn't https and an impossible year", () => {
-    const r = parseCopy(form({ ...base, mode: "give", coverUrl: "javascript:alert(1)", year: "99999" }));
-    expect(r).toMatchObject({ ok: true, value: { coverUrl: null, year: null } });
+  it("never takes a cover or year from the client", () => {
+    const r = parseCopy(form({ ...base, mode: "give", coverUrl: "https://attacker.example/x.gif", year: "1999" }));
+    expect(r.ok && Object.keys(r.value)).not.toContain("coverUrl");
+    expect(r.ok && Object.keys(r.value)).not.toContain("year");
+  });
+
+  it("doesn't accept object prototype keys as a lend period or condition", () => {
+    const r = parseCopy(form({ ...base, mode: "lend", lendMax: "constructor", condition: "__proto__" }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(Object.keys(r.errors).sort()).toEqual(["condition", "lendMax"]);
+  });
+
+  it("keeps line breaks in the note", () => {
+    const r = parseCopy(form({ ...base, mode: "give", note: "  Loved it.\r\nPass it on!  " }));
+    expect(r).toMatchObject({ ok: true, value: { note: "Loved it.\nPass it on!" } });
   });
 });

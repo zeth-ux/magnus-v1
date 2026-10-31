@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { saveProfile, type ProfileState } from "./actions";
 import { AREAS } from "@/lib/books/validate";
-import { Field, inputClass } from "@/components/app/field";
+import { described, Field, focusFirstInvalid, inputClass } from "@/components/app/field";
 
 export function ProfileForm({
   next,
@@ -14,33 +14,38 @@ export function ProfileForm({
 }) {
   const [state, action, pending] = useActionState<ProfileState, FormData>(saveProfile, { status: "idle" });
   const errors = state.status === "error" ? state.errors : {};
+  // After a save or an error, the form remounts with what was submitted, so
+  // nothing the reader typed is lost.
+  const values = state.status === "idle" ? initial : state.values;
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state.status === "error") focusFirstInvalid(formRef.current);
+  }, [state]);
 
   return (
-    <form action={action} className="flex max-w-[30rem] flex-col gap-6" noValidate>
+    <form
+      ref={formRef}
+      key={state.status === "idle" ? 0 : state.attempt}
+      action={action}
+      className="flex max-w-[30rem] flex-col gap-6"
+      noValidate
+    >
       <input type="hidden" name="next" value={next} />
       <Field id="displayName" label="Your name" hint="First name is enough. Other readers see it." error={errors.displayName}>
         <input
           id="displayName"
           name="displayName"
-          defaultValue={initial.displayName}
+          defaultValue={values.displayName}
           maxLength={40}
           required
           autoComplete="given-name"
-          aria-invalid={errors.displayName ? true : undefined}
-          aria-describedby="displayName-hint displayName-error"
           className={inputClass}
+          {...described("displayName", errors.displayName, true)}
         />
       </Field>
       <Field id="area" label="Your area of Ansan" hint="So people can find meet-ups near both of you." error={errors.area}>
-        <select
-          id="area"
-          name="area"
-          defaultValue={initial.area || ""}
-          required
-          aria-invalid={errors.area ? true : undefined}
-          aria-describedby="area-hint area-error"
-          className={inputClass}
-        >
+        <select id="area" name="area" defaultValue={values.area || ""} required className={inputClass} {...described("area", errors.area, true)}>
           <option value="" disabled>
             Choose an area
           </option>
@@ -64,10 +69,9 @@ export function ProfileForm({
           inputMode="tel"
           autoComplete="tel"
           placeholder="+60 12 345 6789"
-          defaultValue={initial.whatsapp}
-          aria-invalid={errors.whatsapp ? true : undefined}
-          aria-describedby="whatsapp-hint whatsapp-error"
+          defaultValue={values.whatsapp}
           className={inputClass}
+          {...described("whatsapp", errors.whatsapp, true)}
         />
       </Field>
       {state.status === "error" && state.message ? (

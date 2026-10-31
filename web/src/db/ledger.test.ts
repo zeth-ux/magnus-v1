@@ -45,7 +45,7 @@ describe("starter credit (R5)", () => {
     const hafiz = await makeUser(db, "Hafiz");
     await expect(
       db.as(hafiz, "insert into public.credit_ledger (user_id, kind, delta, ref_id) values ($1, 'starter_grant', 1, gen_random_uuid())", [hafiz]),
-    ).rejects.toThrow();
+    ).rejects.toThrow(/permission denied/);
   });
 });
 
@@ -158,7 +158,7 @@ describe("limits (R7)", () => {
 
   it("allows at most 3 books borrowed at once", async () => {
     const reader = await makeUser(db, "Bookworm");
-    for (let i = 0; i < 1; i++) await listCopy(db, reader);
+    await listCopy(db, reader);
     // Give the reader 4 credits by giving books away to others.
     const friends = [];
     for (let i = 0; i < 3; i++) {
@@ -180,6 +180,106 @@ describe("limits (R7)", () => {
   it("reads the limits from app_settings (configurable)", async () => {
     const [row] = await db.admin("select value from public.app_settings where key = 'max_open_requests'");
     expect(Number(row.value)).toBe(3);
+  });
+});
+
+describe("limits are checked again at the handover (R7)", () => {
+  it("lend requests made earlier can't stack past 3 borrows", async () => {
+    const reader = await makeUser(db, "Stacker");
+    await listCopy(db, reader);
+    for (let i = 0; i < 3; i++) {
+      const f = await makeUser(db, `Taker${i}`);
+      await listCopy(db, f);
+      await handover(reader, f, await listCopy(db, reader));
+    }
+    const lender = await makeUser(db, "Library2");
+    const lends = [];
+    for (let i = 0; i < 4; i++) lends.push(await listCopy(db, lender, "lend", "4_weeks"));
+    await handover(lender, reader, lends[0], inDays(14)); // 1 borrowed
+    const ids = [];
+    for (let i = 1; i < 4; i++) {
+      const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1, $2::date)", [lends[i], inDays(14)]);
+      await db.as(lender, "select public.respond_request($1, true)", [id]);
+      await db.as(lender, "select public.confirm_handover($1)", [id]);
+      ids.push(id);
+    }
+    await db.as(reader, "select public.confirm_handover($1)", [ids[0]]);
+    await db.as(reader, "select public.confirm_handover($1)", [ids[1]]); // 3 borrowed now
+    await expect(db.as(reader, "select public.confirm_handover($1)", [ids[2]])).rejects.toThrow(/most books allowed/);
+  });
+
+  it("a lend whose return date has passed before the meet-up can't be handed over", async () => {
+    const lender = await makeUser(db, "Late");
+    const borrower = await makeUser(db, "Later");
+    const copy = await listCopy(db, lender, "lend", "4_weeks");
+    await listCopy(db, borrower);
+    const [{ request_copy: id }] = await db.as(borrower, "select public.request_copy($1, $2::date)", [copy, inDays(5)]);
+    await db.as(lender, "select public.respond_request($1, true)", [id]);
+    await db.admin("update public.requests set return_by = current_date - 1 where id = $1", [id]);
+    await db.as(lender, "select public.confirm_handover($1)", [id]);
+    await expect(db.as(borrower, "select public.confirm_handover($1)", [id])).rejects.toThrow(/return date has passed/);
+  });
+});
+
+describe("requests: accept, decline, cancel", () => {
+  async function setup(name: string) {
+    const owner = await makeUser(db, `${name}Owner`);
+    const reader = await makeUser(db, `${name}Reader`);
+    const copy = await listCopy(db, owner);
+    await listCopy(db, reader);
+    const [{ request_copy: id }] = await db.as(reader, "select public.request_copy($1)", [copy]);
+    return { owner, reader, copy, id: id as string };
+  }
+  const statusOf = async (id: string) => (await db.admin("select status from public.requests where id = $1", [id]))[0].status;
+
+  it("declining is final and moves no credits", async () => {
+    const { owner, reader, id } = await setup("Decline");
+    await db.as(owner, "select public.respond_request($1, false)", [id]);
+    await db.as(owner, "select public.respond_request($1, false)", [id]); // idempotent
+    expect(await statusOf(id)).toBe("declined");
+    await expect(db.as(owner, "select public.respond_request($1, true)", [id])).rejects.toThrow(/already answered/);
+    expect(await credits(db, reader)).toMatchObject({ balance: 1 });
+  });
+
+  it("either side can cancel before the handover; cancelling twice is safe; not after the handover", async () => {
+    const a = await setup("Cancel");
+    await db.as(a.reader, "select public.cancel_request($1)", [a.id]);
+    await db.as(a.owner, "select public.cancel_request($1)", [a.id]);
+    expect(await statusOf(a.id)).toBe("cancelled");
+
+    const b = await setup("Late");
+    await db.as(b.owner, "select public.respond_request($1, true)", [b.id]);
+    await db.as(b.owner, "select public.confirm_handover($1)", [b.id]);
+    await db.as(b.reader, "select public.confirm_handover($1)", [b.id]);
+    await expect(db.as(b.reader, "select public.cancel_request($1)", [b.id])).rejects.toThrow(/can no longer be cancelled/);
+  });
+
+  it("a copy can only have one accepted reader at a time", async () => {
+    const { owner, copy, id } = await setup("Double");
+    const second = await makeUser(db, "SecondReader");
+    await listCopy(db, second);
+    const [{ request_copy: id2 }] = await db.as(second, "select public.request_copy($1)", [copy]);
+    await db.as(owner, "select public.respond_request($1, true)", [id]);
+    await expect(db.as(owner, "select public.respond_request($1, true)", [id2])).rejects.toThrow(/already accepted another reader/);
+  });
+
+  it("when a copy is handed over, other open requests for it are cancelled", async () => {
+    const { owner, reader, copy, id } = await setup("Others");
+    const other = await makeUser(db, "OtherReader");
+    await listCopy(db, other);
+    const [{ request_copy: otherId }] = await db.as(other, "select public.request_copy($1)", [copy]);
+    await db.as(owner, "select public.respond_request($1, true)", [id]);
+    await db.as(owner, "select public.confirm_handover($1)", [id]);
+    await db.as(reader, "select public.confirm_handover($1)", [id]);
+    expect(await statusOf(otherId as string)).toBe("cancelled");
+  });
+
+  it("withdrawing a copy cancels its open requests and keeps its history", async () => {
+    const { owner, copy, id } = await setup("Withdraw");
+    await db.as(owner, "select public.withdraw_copy($1)", [copy]);
+    expect(await statusOf(id)).toBe("cancelled");
+    const [c] = await db.admin("select status from public.copies where id = $1", [copy]);
+    expect(c.status).toBe("withdrawn");
   });
 });
 
@@ -233,6 +333,18 @@ describe("lend lifecycle (R3, R4)", () => {
     expect(await ledgerSum()).toBe(0);
   });
 
+  it("the lender can't report a book the borrower says was returned", async () => {
+    const lender = await makeUser(db, "Disputer");
+    const borrower = await makeUser(db, "Returner");
+    const copy = await listCopy(db, lender, "lend", "flexible");
+    await listCopy(db, borrower);
+    const id = await handover(lender, borrower, copy, inDays(7));
+    await db.as(borrower, "select public.confirm_return($1)", [id]);
+    await db.admin("update public.requests set return_by = current_date - 30 where id = $1", [id]);
+    await expect(db.as(lender, "select public.report_not_returned($1)", [id])).rejects.toThrow(/says this book was returned/);
+    expect(await credits(db, borrower)).toMatchObject({ locked: 1, balance: 1 });
+  });
+
   it("only the lender can report", async () => {
     const lender = await makeUser(db, "L2");
     const borrower = await makeUser(db, "B2");
@@ -254,12 +366,44 @@ describe("guards", () => {
     await expect(db.as(b, "select public.request_copy($1)", [mine])).rejects.toThrow(/not available/);
   });
 
-  it("owners can pause a copy but can't mark it given or hand it to someone", async () => {
+  it("owners can pause a copy but can't mark it on loan or withdrawn, or hand it to someone", async () => {
     const a = await makeUser(db, "Sneaky");
     const b = await makeUser(db, "Friend");
     const mine = await listCopy(db, a);
-    await expect(db.as(a, "update public.copies set status = 'given' where id = $1", [mine])).rejects.toThrow();
-    await expect(db.as(a, "update public.copies set owner_id = $2 where id = $1", [mine, b])).rejects.toThrow();
+    await db.as(a, "update public.copies set status = 'paused' where id = $1", [mine]);
+    await expect(db.as(a, "update public.copies set status = 'on_loan' where id = $1", [mine])).rejects.toThrow(/only be paused/);
+    await expect(db.as(a, "update public.copies set status = 'withdrawn' where id = $1", [mine])).rejects.toThrow(/only be paused/);
+    await expect(db.as(a, "update public.copies set owner_id = $2 where id = $1", [mine, b])).rejects.toThrow(/permission denied/);
+    await expect(db.as(a, "delete from public.copies where id = $1", [mine])).rejects.toThrow(/permission denied/);
+  });
+
+  it("a lent book can't be put back on the shelf by its owner while it's out", async () => {
+    const lender = await makeUser(db, "Flipper");
+    const borrower = await makeUser(db, "Holder");
+    const copy = await listCopy(db, lender, "lend", "4_weeks");
+    await listCopy(db, borrower);
+    await handover(lender, borrower, copy, inDays(10));
+    await expect(db.as(lender, "update public.copies set status = 'available' where id = $1", [copy])).rejects.toThrow(/only be paused/);
+  });
+
+  it("missing settings fail closed instead of switching a limit off", async () => {
+    await db.admin("update public.app_settings set key = 'renamed' where key = 'max_open_requests'");
+    const owner = await makeUser(db, "Settings");
+    const reader = await makeUser(db, "Unlimited");
+    const copy = await listCopy(db, owner);
+    await listCopy(db, reader);
+    await expect(db.as(reader, "select public.request_copy($1)", [copy])).rejects.toThrow(/missing app setting/);
+    await db.admin("update public.app_settings set key = 'max_open_requests' where key = 'renamed'");
+  });
+
+  it("the ledger refuses amounts its kind doesn't allow, even from the database owner", async () => {
+    const u = await makeUser(db, "Minter");
+    await expect(
+      db.admin("insert into public.credit_ledger (user_id, kind, delta, ref_id) values ($1, 'give_transfer', 0, gen_random_uuid())", [u]),
+    ).rejects.toThrow(/ledger_kind_amounts/);
+    await expect(
+      db.admin("insert into public.credit_ledger (user_id, kind, delta, locked_delta, ref_id) values ($1, 'lend_unlock', 1, -1, gen_random_uuid())", [u]),
+    ).rejects.toThrow(/ledger_kind_amounts/);
   });
 
   it("only the owner can accept, and nobody can edit requests directly", async () => {
