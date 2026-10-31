@@ -4,6 +4,21 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (overnight): Database foundation and credit ledger
+
+**Done**
+- First database migration (`supabase/migrations/20261101000100_core.sql`): profiles (WhatsApp in an owner-only table), books, copies, requests, `app_settings` (R7 limits) and the append-only `credit_ledger`.
+- The whole lend/give lifecycle as Postgres functions: request (R6, R7 checks), accept/decline, cancel, both-sides handover (R1-R3), both-sides return, report not returned after due + 14 days (R4). The starter credit (R5) is granted by a trigger on the first copy.
+- 25 tests run the real SQL: PGlite (in-memory Postgres) for logic and row-level security, plus real Postgres for races (two handovers on one credit, 3-request limit). CI now starts a Postgres service.
+
+**Decisions**
+- Credits only move inside `security definer` functions; users can't write to the ledger or the requests table directly.
+- R10-R13 not built (still waiting for approval).
+
+**Next**
+- [ ] Zarith: run the migration in the Supabase SQL editor (README → Database)
+- [ ] Zarith: approve or change R10-R13
+
 ## 2026-11-01 (overnight): Dark sign-in pages
 
 **Done**

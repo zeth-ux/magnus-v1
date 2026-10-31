@@ -67,3 +67,13 @@ exists, rewards giving, and makes borrowers return books.
   - Limits R7 are enforced.
   - The lend lifecycle works: lock → unlock on return; lock → forfeit after grace.
   - Double confirmations don't double-move credits.
+
+## Implementation status (2026-11-01)
+Built in `supabase/migrations/20261101000100_core.sql`, tested in `web/src/db/`:
+- `credit_ledger` is append-only (a trigger rejects UPDATE, DELETE and TRUNCATE for everyone). Kinds: `starter_grant`, `give_transfer`, `lend_lock`, `lend_unlock`, `lend_forfeit`. `available = sum(delta) - sum(locked_delta)`.
+- Every movement runs inside one function and one transaction, after `lock_person()` takes the people's profile rows `FOR UPDATE` (in a fixed order, so no deadlocks). A test on real Postgres shows two handovers racing on one credit: exactly one wins. Without the lock, that test fails.
+- Idempotency: a unique index on `(ref_id, kind, user_id)`, plus "already done" checks in each function.
+- R5: a trigger on the first `copies` insert, with a unique index so it can only happen once.
+- R7 limits live in `app_settings` (`max_open_requests`, `max_active_borrows`, `forfeit_grace_days`).
+- Not built yet: R10-R13 (waiting for approval); scheduled jobs (reminders, expiry); extension requests.
+- Open question: deleting an account. Ledger rows reference the profile, so a delete is refused while the person has credit history. Plan: anonymise the profile instead of deleting rows.
