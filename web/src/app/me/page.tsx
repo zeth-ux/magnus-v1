@@ -4,6 +4,7 @@ import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { getProfile, requireUser } from "@/lib/supabase/user";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ProfileForm } from "./profile-form";
+import { InstallHint } from "@/components/pwa/install-hint";
 
 export const metadata: Metadata = { title: "Your profile" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -23,6 +24,7 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
         <Suspense fallback={<p className="text-paper/70">Opening your card…</p>}>
           <Profile searchParams={searchParams} />
         </Suspense>
+        <InstallHint />
       </div>
     </AppShell>
   );
