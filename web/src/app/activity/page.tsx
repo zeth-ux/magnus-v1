@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
+import { Announcer } from "./announcer";
 import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
@@ -16,9 +17,11 @@ export default function ActivityPage() {
     <AppShell>
       <div className="flex flex-col gap-12">
         <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Activity.</h1>
-        <Suspense fallback={<p className="text-paper/70">Checking your requests…</p>}>
-          <Requests />
-        </Suspense>
+        <Announcer>
+          <Suspense fallback={<p className="text-paper/70">Checking your requests…</p>}>
+            <Requests />
+          </Suspense>
+        </Announcer>
       </div>
     </AppShell>
   );
@@ -26,31 +29,50 @@ export default function ActivityPage() {
 
 async function Requests() {
   const { supabase, user } = await requireUser("/activity");
-  const { data, error } = await supabase
-    .from("requests")
-    .select(
-      "id, mode, status, return_by, owner_id, requester_id, owner_handed_over, requester_received, owner_got_back, requester_returned, updated_at, copy:copies(id, books(title)), owner:profiles!requests_owner_id_fkey(display_name), requester:profiles!requests_requester_id_fkey(display_name)",
-    )
-    .order("updated_at", { ascending: false })
-    .limit(60);
-  if (error) {
+  const columns =
+    "id, mode, status, return_by, owner_id, requester_id, owner_handed_over, requester_received, owner_got_back, requester_returned, updated_at, copy:copies(id, status, books(title)), owner:profiles!requests_owner_id_fkey(display_name), requester:profiles!requests_requester_id_fkey(display_name)";
+  const mineOnly = `owner_id.eq.${user.id},requester_id.eq.${user.id}`;
+  // Open requests are never cut off (a long loan must always show its return
+  // button); only the history is limited.
+  const [open, past] = await Promise.all([
+    supabase.from("requests").select(columns).or(mineOnly).in("status", OPEN).order("updated_at", { ascending: false }),
+    supabase
+      .from("requests")
+      .select(columns)
+      .or(mineOnly)
+      .not("status", "in", `(${OPEN.join(",")})`)
+      .order("updated_at", { ascending: false })
+      .limit(10),
+  ]);
+  if (open.error || past.error) {
     return (
       <p role="alert" className="text-[17px] text-merah-light">
         Couldn&apos;t load your requests just now. Refresh to try again.
       </p>
     );
   }
-  const rows = (data ?? []) as unknown as Row[];
+  // Shape set by the select above (not generated types yet).
+  const openRows = (open.data ?? []) as unknown as Row[];
+  const pastRows = (past.data ?? []) as unknown as Row[];
   const today = seoulToday();
-  const incoming = rows.filter((r) => r.owner_id === user.id && OPEN.includes(r.status));
-  const outgoing = rows.filter((r) => r.requester_id === user.id && OPEN.includes(r.status));
-  const past = rows.filter((r) => !OPEN.includes(r.status)).slice(0, 10);
+  const incoming = openRows.filter((r) => r.owner_id === user.id);
+  const outgoing = openRows.filter((r) => r.requester_id === user.id);
+  // Copies already promised to someone (or not on the shelf): their other requests can't be accepted.
+  const busy = new Set(
+    incoming.filter((r) => r.status !== "requested" || (r.copy && r.copy.status !== "available")).map((r) => r.copy?.id),
+  );
 
   return (
     <div className="flex flex-col gap-14">
       <Section title="Asked of you" empty="Nobody has asked for your books yet.">
         {incoming.map((r) => (
-          <Item key={r.id} row={r} who={r.requester?.display_name ?? "A reader"} line={ownerLine(r, today)} ops={ownerOps(r, today)} />
+          <Item
+            key={r.id}
+            row={r}
+            who={r.requester?.display_name ?? "A reader"}
+            line={ownerLine(r, { today, copyBusy: busy.has(r.copy?.id) })}
+            ops={ownerOps(r, { today, copyBusy: busy.has(r.copy?.id) })}
+          />
         ))}
       </Section>
       <Section
@@ -62,12 +84,12 @@ async function Requests() {
         }
       >
         {outgoing.map((r) => (
-          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r)} ops={requesterOps(r)} />
+          <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} />
         ))}
       </Section>
-      {past.length > 0 ? (
+      {pastRows.length > 0 ? (
         <Section title="Earlier" empty="">
-          {past.map((r) => (
+          {pastRows.map((r) => (
             <Item
               key={r.id}
               row={r}
@@ -110,7 +132,7 @@ function Item({ row, who, line, ops }: { row: Row; who: string; line: string; op
         </p>
         <p className="text-[15px] text-paper">{line}</p>
       </div>
-      <RequestActions request={row.id} ops={ops} />
+      <RequestActions request={row.id} title={title} ops={ops} />
     </li>
   );
 }
