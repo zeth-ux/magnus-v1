@@ -28,7 +28,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-[1100px] px-5 pt-6 pb-24 sm:px-8">{children}</main>
+      <main className="mx-auto w-full max-w-[1100px] px-5 pt-6 pb-16 sm:px-8">{children}</main>
+      <footer className="mx-auto flex w-full max-w-[1100px] flex-wrap gap-x-6 gap-y-2 px-5 pb-28 text-[15px] text-paper/70 sm:px-8 sm:pb-12">
+        <Link href="/feedback" className="text-paper/80 underline underline-offset-4">
+          Send feedback
+        </Link>
+        <Link href="/report" className="text-paper/80 underline underline-offset-4">
+          Report a problem
+        </Link>
+      </footer>
     </div>
   );
 }

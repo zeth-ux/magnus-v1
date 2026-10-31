@@ -4,6 +4,7 @@ import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { getProfile, requireUser } from "@/lib/supabase/user";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ProfileForm } from "./profile-form";
+import { UnblockButton } from "./unblock-button";
 
 export const metadata: Metadata = { title: "Your profile" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -22,6 +23,9 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
         </div>
         <Suspense fallback={<p className="text-paper/70">Opening your card…</p>}>
           <Profile searchParams={searchParams} />
+        </Suspense>
+        <Suspense fallback={null}>
+          <Blocked />
         </Suspense>
       </div>
     </AppShell>
@@ -78,5 +82,34 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
         </aside>
       ) : null}
     </div>
+  );
+}
+
+/** Readers you've blocked (only shown when there are any), with a way to undo it. */
+async function Blocked() {
+  const { supabase, user } = await requireUser("/me");
+  const { data, error } = await supabase
+    .from("blocks")
+    .select("blocked_id, profiles!blocks_blocked_id_fkey(display_name)")
+    .eq("blocker_id", user.id)
+    .order("created_at", { ascending: false });
+  if (error || !data || data.length === 0) return null;
+  const rows = data as unknown as { blocked_id: string; profiles: { display_name: string } | null }[];
+  return (
+    <section className="flex max-w-[34rem] flex-col gap-4">
+      <h2 className="font-display text-2xl font-semibold">Readers you&apos;ve blocked</h2>
+      <p className="text-[15px] text-paper/80">You can&apos;t ask each other for books. They aren&apos;t told.</p>
+      <ul className="flex flex-col gap-3">
+        {rows.map((r) => {
+          const name = r.profiles?.display_name ?? "A reader";
+          return (
+            <li key={r.blocked_id} className="flex items-center justify-between gap-4 rounded-[10px] bg-paper/[0.06] px-5 py-3">
+              <span className="text-[17px]">{name}</span>
+              <UnblockButton reader={r.blocked_id} name={name} />
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
