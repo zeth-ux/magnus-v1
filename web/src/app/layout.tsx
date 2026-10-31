@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description:
     "Give and lend English books with readers near you in Ansan. Credits keep every swap fair.",
   applicationName: "Bayu",
-  appleWebApp: { capable: true, title: "Bayu", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Bayu", statusBarStyle: "black" },
 };
 
 // Every page is on the dark "malam" ground now.

@@ -75,6 +75,6 @@ function redirectToLogin(request: NextRequest, from?: NextResponse) {
 export const config = {
   // Skip static files, images and the PWA icons/manifest.
   matcher: [
-    "/((?!_next/static|_next/image|icons/|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)",
+    "/((?!_next/static|_next/image|icons/|sw\\.js|offline\\.html|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|woff2?)$).*)",
   ],
 };
