@@ -345,6 +345,20 @@ describe("lend lifecycle (R3, R4)", () => {
     expect(await credits(db, borrower)).toMatchObject({ locked: 1, balance: 1 });
   });
 
+  it("the lender can't report a book they've confirmed they got back", async () => {
+    const lender = await makeUser(db, "GotBack");
+    const borrower = await makeUser(db, "ForgotToTap");
+    const copy = await listCopy(db, lender, "lend", "flexible");
+    await listCopy(db, borrower);
+    const id = await handover(lender, borrower, copy, inDays(7));
+    await db.as(lender, "select public.confirm_return($1)", [id]);
+    await db.admin("update public.requests set return_by = current_date - 30 where id = $1", [id]);
+    await expect(db.as(lender, "select public.report_not_returned($1)", [id])).rejects.toThrow(/confirmed you got this book back/);
+    expect(await credits(db, borrower)).toMatchObject({ locked: 1, balance: 1 });
+    const [c] = await db.admin("select owner_id from public.copies where id = $1", [copy]);
+    expect(c.owner_id).toBe(lender);
+  });
+
   it("only the lender can report", async () => {
     const lender = await makeUser(db, "L2");
     const borrower = await makeUser(db, "B2");
