@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
 import { RequestActions, type Op } from "./request-actions";
+import { RateHandover } from "./rate-handover";
 import { Announcer } from "./announcer";
 import { MeetupCard, type Meetup } from "./meetup-card";
 import { formatSeoul, isPast, seoulPickerMax, seoulPickerMin } from "@/lib/activity/meetup-time";
@@ -75,6 +76,12 @@ async function Requests() {
       .map((m) => [m.request_id, { ...m, when: formatSeoul(m.meet_at), expired: isPast(m.meet_at) }]),
   );
   const pastRows = (past.data ?? []) as unknown as Row[];
+  // My ratings for finished handovers (a thumbs up or down, once each).
+  const changedHands = pastRows.filter((r) => ["handed_over", "returned", "forfeited"].includes(r.status)).map((r) => r.id);
+  const { data: ratingRows } = changedHands.length
+    ? await supabase.from("handover_ratings").select("request_id, thumbs_up").in("request_id", changedHands).eq("rater_id", user.id)
+    : { data: [] };
+  const myRatings = new Map<string, boolean>(((ratingRows ?? []) as { request_id: string; thumbs_up: boolean }[]).map((x) => [x.request_id, x.thumbs_up]));
   const today = seoulToday();
   const minAt = seoulPickerMin();
   const maxAt = seoulPickerMax();
@@ -142,6 +149,16 @@ async function Requests() {
               who={(r.owner_id === user.id ? r.requester : r.owner)?.display_name ?? "A reader"}
               line={STATUS_WORDS[r.status]}
               ops={[]}
+              after={
+                ["handed_over", "returned", "forfeited"].includes(r.status) ? (
+                  <RateHandover
+                    request={r.id}
+                    title={r.copy?.books?.title ?? "A book"}
+                    other={(r.owner_id === user.id ? r.requester : r.owner)?.display_name ?? "the other reader"}
+                    rated={myRatings.get(r.id) ?? null}
+                  />
+                ) : null
+              }
             />
           ))}
         </Section>
@@ -165,12 +182,14 @@ function Item({
   line,
   ops,
   meetup,
+  after,
 }: {
   row: Row;
   who: string;
   line: string;
   ops: Op[];
   meetup?: { me: string; card: Meetup | null; minAt: string; maxAt: string; unavailable: boolean };
+  after?: React.ReactNode;
 }) {
   const title = row.copy?.books?.title ?? "A book";
   return (
@@ -209,6 +228,7 @@ function Item({
             maxAt={meetup.maxAt}
           />
         ) : null}
+        {after}
       </div>
     </li>
   );

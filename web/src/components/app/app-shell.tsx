@@ -32,7 +32,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-[1100px] px-5 pt-6 pb-32 sm:px-8 sm:pb-24">{children}</main>
+      <main className="mx-auto w-full max-w-[1100px] px-5 pt-6 pb-12 sm:px-8">{children}</main>
+      {/* pb-28 on phones clears the fixed tab bar below. */}
+      <footer className="mx-auto flex w-full max-w-[1100px] flex-wrap gap-x-6 gap-y-2 px-5 pb-28 text-[15px] text-paper/70 sm:px-8 sm:pb-12">
+        <Link href="/feedback" className="text-paper/80 underline underline-offset-4">
+          Send feedback
+        </Link>
+        <Link href="/report" className="text-paper/80 underline underline-offset-4">
+          Report a problem
+        </Link>
+      </footer>
       <nav
         aria-label="App, tab bar"
         className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-paper/15 bg-malam pb-[env(safe-area-inset-bottom)] sm:hidden"

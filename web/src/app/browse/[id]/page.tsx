@@ -62,7 +62,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
   const copy = data as CopyRow | null;
   if (!copy || !copy.books || !copy.profiles) notFound();
 
-  const [{ count: copies }, { data: mine }, { data: flexibleDays }] = await Promise.all([
+  const [{ count: copies }, { data: mine }, { data: flexibleDays }, { data: smooth }] = await Promise.all([
     supabase.from("copies").select("id", { count: "exact", head: true }).eq("isbn", copy.isbn).eq("status", "available"),
     supabase
       .from("requests")
@@ -73,7 +73,9 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
       .order("created_at", { ascending: false })
       .limit(1),
     supabase.rpc("setting", { p_key: "max_flexible_lend_days" }),
+    supabase.rpc("smooth_handovers", { p_user: copy.owner_id }),
   ]);
+  const smoothCount = Number(smooth ?? 0);
   const [{ data: wishCount }, { data: myWish }] = await Promise.all([
     supabase.rpc("wish_count", { p_isbn: copy.isbn }),
     supabase.from("wishlist").select("isbn").eq("isbn", copy.isbn).eq("user_id", user.id).maybeSingle(),
@@ -115,6 +117,11 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             <dt className="text-paper/70">From</dt>
             <dd className="text-[17px] font-semibold">
               {isMine ? "You" : copy.profiles.display_name}, {copy.profiles.area}
+              {smoothCount > 0 ? (
+                <span className="block text-[15px] font-normal text-paper/80">
+                  {smoothCount === 1 ? "1 reader had a smooth handover with them" : `${smoothCount} readers had a smooth handover with them`}
+                </span>
+              ) : null}
             </dd>
           </div>
           <div>
