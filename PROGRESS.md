@@ -4,6 +4,20 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (afternoon): The email link finally signs you in
+
+**What happened**
+- After PR #29 the email link still left Zarith on the landing page. Supabase's logs showed the link itself worked (`login_method: implicit` at 16:27 KST), but the page never used the session: no call back to Supabase at all.
+- Cause: the hand-off wiped the tokens from the address bar *before* reading them, and `window.location` is live, so it read an empty hash. The unit tests passed a plain copy of the address, so they couldn't see it. Found by running the production build in a headless browser.
+
+**Done**
+- `finishSignInFromUrl` copies the address before touching it, plus a test with a live address object that changes when wiped.
+- Checked end to end in a headless browser against the production build: the link's session is used, the refresh token rotated, and the reader sent on.
+
+**Next**
+- [ ] Zarith: request one link and tap it from Gmail.
+- [ ] Optional (needs Zarith's yes): add `https://magnus-v1.vercel.app/**` to Supabase's Redirect URLs, so the link lands on the page you were heading to instead of Welcome.
+
 ## 2026-11-01 (day): Email sign-in works in any browser; one production address
 
 **What the logs showed**

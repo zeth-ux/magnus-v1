@@ -84,6 +84,24 @@ describe("finishSignInFromUrl", () => {
   });
 });
 
+describe("with the real, live address bar", () => {
+  it("reads the tokens before wiping them", async () => {
+    // Like window.location: replaceUrl changes what loc.hash returns.
+    const { client, calls } = fake();
+    let href = `/?next=%2Fbrowse${hashFor("u1")}`;
+    const live = {
+      get pathname() { return "/"; },
+      get search() { return "?next=%2Fbrowse"; },
+      get hash() { return href.includes("#") ? href.slice(href.indexOf("#")) : ""; },
+    };
+    const went: string[] = [];
+    await finishSignInFromUrl(live, client, { replaceUrl: (u) => (href = u), go: (u) => went.push(u) });
+    expect(href).toBe("/?next=%2Fbrowse");
+    expect(calls).toEqual(["setSession", "refresh"]);
+    expect(went).toEqual(["/browse"]);
+  });
+});
+
 describe("tokenSubject", () => {
   it("reads sub, or null", () => {
     expect(tokenSubject(jwtFor("abc"))).toBe("abc");

@@ -43,11 +43,14 @@ export function tokenSubject(jwt: string): string | null {
  * Returns true when it took over the page.
  */
 export async function finishSignInFromUrl(
-  loc: { pathname: string; search: string; hash: string },
+  live: { pathname: string; search: string; hash: string },
   /** Called only when there are tokens to use, so ordinary landing visits load no auth client. */
   getClient: () => SignInClient | null,
   nav: Nav,
 ): Promise<boolean> {
+  // Copy the address first: window.location is live, and the tokens are wiped
+  // from it below before they're read (that bug kept everyone on the landing page).
+  const loc = { pathname: live.pathname, search: live.search, hash: live.hash };
   const params = new URLSearchParams(loc.search);
   const fail = () => nav.go("/login?error=link");
 
