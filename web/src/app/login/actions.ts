@@ -28,7 +28,10 @@ async function siteOrigin(): Promise<string | null> {
     if (!origin) console.error("[auth] NEXT_PUBLIC_SITE_URL isn't a usable address");
     return origin;
   }
-  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.NODE_ENV === "production") {
+    console.error("[auth] NEXT_PUBLIC_SITE_URL is not set in production");
+    return null;
+  }
   const host = (await headers()).get("host") ?? "localhost:3000";
   return `http://${host}`;
 }
@@ -52,7 +55,6 @@ export async function sendMagicLink(
   const supabase = await createSupabaseServerClient();
   const origin = await siteOrigin();
   if (!supabase || !origin) {
-    if (!origin) console.error("[auth] NEXT_PUBLIC_SITE_URL is not set in production");
     return { status: "error", email, message: "Sign-in isn't set up yet. Try again soon." };
   }
 
