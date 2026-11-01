@@ -64,6 +64,7 @@ export function Closing() {
             <a href="#safety" className="text-paper hover:text-songket">Safety</a>
             <a href="#faq" className="text-paper hover:text-songket">FAQ</a>
             <Link href="/login" className="text-paper hover:text-songket">Sign in</Link>
+            <Link href="/privacy" className="text-paper hover:text-songket">Privacy</Link>
           </nav>
           <p className="col-span-2 text-paper/70 md:col-span-4 md:text-right">
             A breeze between readers, made in Ansan.

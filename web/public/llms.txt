@@ -1,0 +1,13 @@
+# Bayu
+
+> Bayu ("gentle breeze" in Malay) is a small web app where English-language readers in Ansan, Korea give and lend physical books to each other. It is in a pilot with about 15 readers (Nov 30 - Dec 13, 2026).
+
+- Readers list books they own as "give" (yours to keep) or "lend" (comes back by a date).
+- Credits keep it fair: giving a book earns 1, taking one costs 1, and borrowing holds 1 until the book is back. Credits aren't money and can't be bought.
+- Handovers happen in person: readers agree a public place and time in the app.
+- Privacy: other readers don't see your email or WhatsApp number. The public home page shows a few newest books with the owner's area, never their name. See https://magnus-v1.vercel.app/privacy.
+
+## Pages
+- [Home](https://magnus-v1.vercel.app/): what Bayu is, how it works, safety and FAQ
+- [Join the pilot](https://magnus-v1.vercel.app/login): sign in with an email link or Google
+- [Privacy](https://magnus-v1.vercel.app/privacy): what Bayu keeps and why

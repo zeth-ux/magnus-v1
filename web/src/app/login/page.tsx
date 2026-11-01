@@ -5,7 +5,11 @@ import { LoginForm, LoginFormPlaceholder } from "./login-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { AUTH_VIEWPORT, AuthShell } from "@/components/auth/auth-shell";
 
-export const metadata: Metadata = { title: "Join the pilot" };
+export const metadata: Metadata = {
+  title: "Join the pilot",
+  description: "Sign in with an email link to give and lend English books with readers in Ansan.",
+  alternates: { canonical: "/login" },
+};
 export const viewport: Viewport = AUTH_VIEWPORT;
 
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */

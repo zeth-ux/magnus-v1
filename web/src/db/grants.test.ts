@@ -32,7 +32,6 @@ describe("table privileges", () => {
       "loan_extensions authenticated SELECT",
       "meetups authenticated SELECT",
       "profile_contacts authenticated SELECT",
-      "profiles authenticated SELECT",
       "requests authenticated SELECT",
       "wishlist authenticated DELETE,SELECT",
     ]);
@@ -40,7 +39,7 @@ describe("table privileges", () => {
     const columns = await db.admin(`
       select cp.table_name || ' ' || cp.privilege_type || ' ' || string_agg(cp.column_name, ',' order by cp.column_name) as g
       from information_schema.column_privileges cp
-      where cp.table_schema = 'public' and cp.grantee in ('anon', 'authenticated') and cp.privilege_type in ('INSERT', 'UPDATE')
+      where cp.table_schema = 'public' and cp.grantee in ('anon', 'authenticated') and cp.privilege_type in ('SELECT', 'INSERT', 'UPDATE')
         and not exists (
           select 1 from information_schema.role_table_grants t
           where t.table_schema = 'public' and t.table_name = cp.table_name and t.grantee = cp.grantee and t.privilege_type = cp.privilege_type)
@@ -52,6 +51,7 @@ describe("table privileges", () => {
       "profile_contacts INSERT id,whatsapp",
       "profile_contacts UPDATE id,whatsapp",
       "profiles INSERT area,display_name,id",
+      "profiles SELECT area,display_name,id",
       "profiles UPDATE area,display_name,id",
       "wishlist INSERT isbn,user_id",
     ]);
@@ -119,6 +119,7 @@ describe("table privileges", () => {
       ["select * from public.credit_balances", []],
       ["delete from public.profiles where id = $1", [me]],
       ["update public.profiles set created_at = '2000-01-01' where id = $1", [me]],
+      ["select created_at from public.profiles", []],
     ] as const;
     for (const [sql, params] of refused) {
       await expect(db.as(me, sql, [...params]), sql).rejects.toThrow(/permission denied/);

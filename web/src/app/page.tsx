@@ -1,4 +1,4 @@
-import type { Viewport } from "next";
+import type { Metadata, Viewport } from "next";
 import { Shelf } from "@/components/shelf/shelf";
 import { getLandingShelf } from "@/lib/shelf/landing-shelf";
 import { SiteHeader } from "@/components/landing/site-header";
@@ -13,6 +13,8 @@ import { LinkErrorRedirect } from "@/components/auth/link-error-redirect";
  * The shelf comes first and is the page's main event: a stack of 3D books you
  * scroll through and pick from (after Stripe Press).
  */
+export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { url: "/" } };
+
 export const viewport: Viewport = {
   themeColor: "#1c1614",
   colorScheme: "dark",

@@ -4,6 +4,28 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Launch basics
+
+**Done**
+- Custom 404 ("This page blew away.") and error pages (`error.tsx`, plus a self-contained `global-error.tsx`).
+- `robots.txt` (public pages in, the signed-in app out) and `sitemap.xml`; `metadataBase`, Open Graph and Twitter card tags, canonical links on the public pages.
+- A share card generated in the brand colours (`opengraph-image.tsx`), shown when a Bayu link is pasted into WhatsApp or KakaoTalk.
+- `/privacy`: what Bayu keeps (including Google sign-in data and host logs), who sees it (the public home page shows a few newest books with the owner's area), where it's processed (Supabase in Ireland, Vercel in the US, Google if used), and exactly what deletion removes and keeps (matches `admin_anonymise_reader`). Linked from the landing footer and every app page. Steve checked every claim against the code.
+- Migration `20261101001100_profiles_columns.sql`: readers see another reader's id, name and area only, not when they joined.
+- Error pages use Next 16's `retry()` (fetches again) instead of `reset()`.
+- `public/llms.txt`.
+- Checked at 320, 375, 390 and 1280px: no sideways scrolling, no broken links, no console errors on `/`, `/login`, `/privacy`, the 404 and the offline page.
+
+**Skipped on purpose**
+- Reviews, team photo, maps, local-business schema, case studies, thank-you page, breadcrumbs, sticky CTA: not a fit for a 15-reader pilot.
+- Analytics and a custom domain: waiting for Zarith's call.
+
+**Next**
+- [ ] Zarith: confirm the Vercel functions region (Project → Settings → Functions) so /privacy names the right country (it says the United States, the default).
+- [ ] Zarith: choose a privacy contact email for /privacy (today only "Send feedback" or the pilot group, which need a sign-in or an invite).
+- [ ] When Gmail SMTP is set up, update /privacy: sign-in emails go through Google.
+- [ ] Hide withdrawn copies from `/browse/[id]` (404) and tighten the copies policy; fix the "Warkah from" name on a given-away copy.
+
 ## 2026-11-01 (day): Security headers (security step 2)
 
 **Done**
