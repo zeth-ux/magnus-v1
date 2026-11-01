@@ -1,6 +1,7 @@
 -- Test-only stand-in for the parts of Supabase our migrations rely on:
--- the anon/authenticated roles, auth.users, auth.uid() and the default
--- privileges Supabase gives those roles on the public schema.
+-- the anon/authenticated roles, auth.users (and the auth tables the
+-- anonymise function clears) and auth.uid(). Like a new Supabase project, it
+-- gives anon/authenticated no automatic table privileges.
 do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
@@ -30,6 +31,9 @@ $$;
 grant usage on schema auth to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
 grant usage on schema public to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+-- Like a new Supabase project: no automatic table privileges for anon and
+-- authenticated. Every migration grants what it needs explicitly
+-- (20261101001000_explicit_table_grants.sql), and the tests prove it's enough.
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on functions to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
