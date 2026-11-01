@@ -4,6 +4,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Security headers (security step 2)
+
+**Done**
+- Every response carries: a small CSP (`frame-ancestors 'none'; base-uri 'self'; object-src 'none'`), `X-Frame-Options: DENY`, HSTS (on Vercel only), `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a Permissions-Policy (camera on our own pages for the barcode scanner; microphone, location, payments off), and `Cross-Origin-Opener-Policy: same-origin-allow-popups` (no tab-nabbing). `X-Powered-By` removed; browser source maps stay off.
+- Checked on a production build: headers present on pages and `/sw.js`, no console errors, and another site can't frame `/login`.
+
+**Decisions**
+- No full script CSP yet: it needs per-request nonces, which would make every page dynamic. Revisit if third-party scripts are ever added.
+
 ## 2026-11-01 (day): Explicit table permissions (security step 1)
 
 **Found:** on the live database, signed-in readers had no table privileges except on `wishlist`. New Supabase projects no longer grant `anon`/`authenticated` anything on new tables; our migrations assumed the old defaults and only narrowed them with `revoke`, and the test database still had the old defaults, so tests passed. After sign-in, every page reading `profiles`, `copies`, `requests` etc. would have failed.
