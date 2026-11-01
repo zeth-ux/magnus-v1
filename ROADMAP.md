@@ -1,6 +1,6 @@
 # Roadmap: Bayu pilot (v0.1)
 
-*Updated 2026-10-30. Assumes **~10 hours/week** alongside classes. If weeks
+*Updated 2026-11-01 (most of weeks 1-4 is built ahead of schedule; see PROGRESS.md). Assumes **~10 hours/week** alongside classes. If weeks
 get busy, cut scope (wishlist, extensions) before moving the pilot past finals.*
 
 **Goal:** by mid-December 2026, about **15 English readers in Ansan** have been
@@ -31,7 +31,7 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 **Build**
 - [x] Next.js + TypeScript (strict) + Tailwind app, mobile-first, Bayu colour tokens
 - [x] Supabase project + Auth (email magic link + Google)
-- [ ] Deploy to Vercel. Every PR gets a preview URL.
+- [x] Deploy to Vercel. Every PR gets a preview URL.
 - [x] GitHub Actions CI: lint + typecheck + tests on every PR
 - [x] PWA basics: manifest, icon, installable
 - [x] Landing page, full version with both scroll scenes (moved up from week 4) ([landing.md](docs/landing.md))
@@ -46,27 +46,28 @@ Dec 14 ─ Jan 3    Finals  Light: pilot report, decide v0.2
 **You'll learn:** deploy pipeline, CI, auth, environment variables and secrets.
 
 ## Week 2: Shelf (Nov 9-15)
-- [ ] Profile: display name, city, languages
-- [ ] **Add a book:** scan the ISBN barcode (ZXing) or search, then look it up on Google Books (Open Library as fallback)
-- [ ] Each copy: condition, **give or lend**, max lend period (2w / 4w / 2m / flexible), short note
-- [ ] My shelf: edit, pause, remove
-- [ ] **Browse + search** all available books (title, author, give/lend filter)
-- [ ] Book detail page, with **"N readers have this"**
-- [ ] Database: `profiles`, `books`, `copies` + Row Level Security
+- [x] Profile: display name, area (languages: not needed for an English-only pilot)
+- [x] **Add a book:** scan the ISBN barcode (ZXing) or search, then look it up on Google Books (Open Library as fallback)
+- [x] Each copy: condition, **give or lend**, max lend period (2w / 4w / 2m / flexible), short note
+- [x] My shelf: edit, pause, remove
+- [x] **Browse + search** all available books (title, author, give/lend filter)
+- [x] Book detail page, with **"N readers have this"**
+- [x] Database: `profiles`, `books`, `copies` + Row Level Security
 
 **Done when:** you can scan a real book on your phone and a friend sees it in browse.
 **You'll learn:** camera APIs, external APIs, RLS.
 
 ## Week 3: Requests, handover and credits (Nov 16-22)
-- [ ] **Request** a copy (for a lend: propose a return date within the max)
-- [ ] Owner **accepts or declines**. Accepted → WhatsApp numbers revealed (R13) → **meet-up card**: one proposes place + time, the other confirms or counters
-- [ ] **Both confirm "handed over"** → credits move ([ADR 003](docs/decisions/003-credit-system.md) R1-R3)
-- [ ] `credit_ledger` (append-only) + Postgres functions for every credit move
-- [ ] Starter credit on the first listing (R5), limits: 3 borrowed, 3 open requests (R7)
+- [x] **Request** a copy (for a lend: propose a return date within the max)
+- [x] Owner **accepts or declines** → **meet-up card**: one proposes place + time, the other confirms or counters
+- [ ] WhatsApp numbers revealed on accept (R13, waiting for approval)
+- [x] **Both confirm "handed over"** → credits move ([ADR 003](docs/decisions/003-credit-system.md) R1-R3)
+- [x] `credit_ledger` (append-only) + Postgres functions for every credit move
+- [x] Starter credit on the first listing (R5), limits: 3 borrowed, 3 open requests (R7)
 - [ ] Credit hold on accept, 3-day request expiry, 3-day handover auto-confirm (R10-R12, once approved; see [user-flow.md](docs/user-flow.md))
-- [ ] Credits page styled as a library card: balance, locked, history
-- [ ] Email notifications: new request, accepted, handover confirmed
-- [ ] After each handover: quick 👍/👎 and a report button
+- [x] Credits page styled as a library card: balance, locked, history
+- [ ] Email notifications: new request, accepted, handover confirmed (in-app Activity badge done; email needs a Resend key)
+- [x] After each handover: quick 👍/👎 and a report button (plus block, and report from any request)
 
 **Must-have tests:** every test listed in ADR 003, including two requests
 racing for the last credit.
@@ -74,12 +75,12 @@ racing for the last credit.
 **You'll learn:** transactions, row locking, designing a ledger, idempotency.
 
 ## Week 4: Lending lifecycle + launch prep (Nov 23-29)
-- [ ] Due dates styled as a library stamp, reminder email 3 days before
-- [ ] Extension request → lender approves or declines
-- [ ] Return confirmation → credit unlocks. Not returned after +14 days → lender reports → forfeit (R4)
-- [ ] **Wishlist** + "a book you want is available" email
-- [ ] Polish: empty states, loading states, errors, install prompt
-- [ ] Landing: swap the sample shelf for the real pilot shelf (Supabase), add real account deletion
+- [ ] Due dates styled as a library stamp, reminder email 3 days before (in-app countdown and badge done; email needs a Resend key)
+- [x] Extension request → lender approves or declines
+- [x] Return confirmation → credit unlocks. Not returned after +14 days → lender reports → forfeit (R4)
+- [ ] **Wishlist** + "a book you want is available" email (wishlist and the in-app "on the shelf now" done; email needs a Resend key)
+- [x] Polish: empty states, loading states, errors, install prompt (offline page too)
+- [x] Landing: swap the sample shelf for the real pilot shelf (Supabase), add real account deletion (by the pilot team for now: `docs/runbooks/delete-account.md`)
 - [ ] **Seed:** you + 5 friends list ~5 books each before launch (25+ books)
 - [ ] Ask Steve for a full review and fix every Blocking item
 
