@@ -63,6 +63,6 @@ export const FAQ = [
   {
     tab: "Leaving",
     q: "Can I delete my account?",
-    a: "Yes. Ask through \"Send feedback\" (or in the pilot group) and we'll remove your name, area, WhatsApp number, books and wishlist. A record of past swaps, and any reports, stay without your name, so everyone's credits still add up and safety reports aren't lost. A delete button is on the way.",
+    a: "Yes. Ask through \"Send feedback\" (or in the pilot group) once any handover or loan is finished, and we'll remove your name, area, WhatsApp number, wishlist and the notes on books you still own, and take those books off the shelf. A record of past swaps, ratings and any reports stay without your name, so everyone's credits still add up. Details on the Privacy page.",
   },
 ] as const;

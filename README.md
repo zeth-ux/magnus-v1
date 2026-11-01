@@ -58,6 +58,9 @@ The landing page works without Supabase keys (it shows the sample shelf); sign-i
 6. **Vercel** (free): import the GitHub repo, set **Root Directory = `web`**, and add the three variables from `.env.example` (with `NEXT_PUBLIC_SITE_URL` = your Vercel URL). Every PR then gets a preview link.
    Note: `NEXT_PUBLIC_*` values are fixed at build time, so sign-in emails sent from a *preview* deployment link to production. Test sign-in on production (or locally).
 
+## Public pages and SEO
+`/` (landing), `/login`, `/privacy` (what Bayu keeps; keep it in step with the schema), a custom 404 and error page, `robots.txt` and `sitemap.xml` (public pages only), a generated share card (`opengraph-image.tsx`) and `public/llms.txt`. Every response carries security headers (`web/next.config.ts`).
+
 ## Database (Supabase)
 The schema lives in `supabase/migrations/` as plain SQL, applied in filename order.
 - **Apply it:** open your Supabase project → **SQL Editor** → paste each migration file (oldest first) → **Run**. (Or, with the Supabase CLI linked to the project: `supabase db push`.)

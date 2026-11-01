@@ -51,6 +51,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Link href="/report" className="text-paper/80 underline underline-offset-4">
           Report a problem
         </Link>
+        <Link href="/privacy" className="text-paper/80 underline underline-offset-4">
+          Privacy
+        </Link>
       </footer>
       <nav
         aria-label="App, tab bar"
