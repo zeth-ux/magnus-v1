@@ -67,6 +67,7 @@ The schema lives in `supabase/migrations/` as plain SQL, applied in filename ord
 - **Deleting an account (`20261101000800_anonymise_reader.sql`):** `admin_anonymise_reader(id)`, run by the pilot team in the SQL Editor only. Steps: [docs/runbooks/delete-account.md](docs/runbooks/delete-account.md).
 - **Activity badge (`20261101000900_waiting_count.sql`):** `my_waiting_count()`, the number of things waiting on the signed-in reader.
 - **Function permissions:** Postgres lets everyone (`PUBLIC`) run a new function by default, so every migration revokes `execute` from `public, anon` and grants it to `authenticated` only.
+- **Table permissions:** new Supabase projects give `anon` and `authenticated` no automatic table privileges, so `20261101001000_explicit_table_grants.sql` grants exactly what the app uses (signed-out visitors get none). A new table needs its own `grant` in its migration. The test database works the same way, and `web/src/db/grants.test.ts` runs the app's direct table calls as a signed-in reader.
 - **Tests:** `npm test` runs the real SQL in an in-memory Postgres (PGlite), no setup. The concurrency tests need a real Postgres: set `TEST_DATABASE_URL` (CI does this automatically).
 
 ## Pilot stats

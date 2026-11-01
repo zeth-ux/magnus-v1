@@ -4,6 +4,17 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Explicit table permissions (security step 1)
+
+**Found:** on the live database, signed-in readers had no table privileges except on `wishlist`. New Supabase projects no longer grant `anon`/`authenticated` anything on new tables; our migrations assumed the old defaults and only narrowed them with `revoke`, and the test database still had the old defaults, so tests passed. After sign-in, every page reading `profiles`, `copies`, `requests` etc. would have failed.
+
+**Done**
+- Migration `20261101001000_explicit_table_grants.sql`: least privilege. Signed-in readers get exactly what the app uses: reads, plus writes on named columns only (their own profile, contact, new books, copies, wishlist; unblock). So nobody can set an id or `created_at` (a copy dated 2100 would sit first on the shelf forever) or rewrite a book's title. Signed-out visitors get no table access (the landing shelf uses `public_shelf()`). feedback, reports and `credit_balances` get none; the service role gets nothing extra (a leaked key couldn't write credits).
+- The test database now starts like a new Supabase project (no automatic privileges). `grants.test.ts` pins the exact privilege list (anon: none), runs every direct table call the app makes as a signed-in reader (including upsert and conflict paths), and checks 17 writes that must stay forbidden.
+
+**Decisions**
+- Every new table's migration must `grant` what it needs (README).
+
 ## 2026-11-01 (day): Site URL was the protected address
 
 **Found:** Supabase's Site URL was `https://magnus-v1-merey-jago.vercel.app`. Whenever Supabase rejects the app's return address it falls back to the Site URL, so readers landed on a different address from the one holding their sign-in key (`bad_code_verifier` in the logs), and on an address Vercel puts behind its own login for everyone else.
