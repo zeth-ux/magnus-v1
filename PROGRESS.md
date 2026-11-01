@@ -4,6 +4,21 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Landing safety and FAQ brought up to date
+
+**Done**
+- Safety points and FAQ now match what's built: meet-up cards, blocking and reports, asking for more time on a loan, and how to delete an account today (ask the pilot team; a button is still to come).
+- Fixed a promise we don't keep yet: the landing and the profile form said your WhatsApp number is shared once a request is accepted. That reveal is R13, still waiting for approval, so both now say it isn't shown to other readers.
+- FAQ drawer with 7 cards: tabs step back to the left after a full set of colours and overlap less, so no tab covers a question or its open/close mark (checked on a phone and desktop).
+- Account deletion made real, so the FAQ's promise holds: `admin_anonymise_reader()` (migration `20261101000800_anonymise_reader.sql`) removes everything personal (including notes on books they still own and the meet-up places they wrote), keeps the anonymised swap history the ledger needs, and clears and bans the sign-in (a 100-year ban: Supabase Auth can't read 'infinity'). It locks first, then checks for open handovers. Only the SQL Editor can run it, and running it twice is safe. Steps in `docs/runbooks/delete-account.md`. 3 tests.
+- Activity: every request without a rating card now has "Report a problem", so a reader can report (and block) before a handover, not only after.
+
+**Decisions**
+- Deleting = anonymising (ADR 003's plan). Reports stay, for safety; ratings and ledger rows stay without the name.
+
+**Next**
+- [ ] If R13 is approved, update the profile hint and the safety point again.
+
 ## 2026-11-01 (day): Loan extensions
 
 **Done**

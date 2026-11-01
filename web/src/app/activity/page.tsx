@@ -258,7 +258,12 @@ function Item({
             view={extension}
           />
         ) : null}
-        {after}
+        {after ?? (
+          // Rows with a rating card already link to the report page from there.
+          <Link href={`/report?request=${row.id}`} className="self-start text-[15px] text-paper/80 underline underline-offset-4">
+            Report a problem<span className="sr-only"> with {title}</span>
+          </Link>
+        )}
       </div>
     </li>
   );

@@ -84,4 +84,4 @@ Built in `supabase/migrations/20261101000100_core.sql`, tested in `web/src/db/`:
 - Not built yet: R10-R13 (waiting for approval); scheduled jobs (reminders, expiry).
 - **Open question (Zarith): disputes.** If the borrower taps "returned" and the lender doesn't, R4 is refused and the credit stays locked. Who resolves it? Proposal: the pilot team, by hand, until R12 (auto-confirm) is decided.
 - **Design note:** someone could list a fake copy for the starter credit, withdraw it and repeat with new emails. R5 accepts this risk for a pilot of friends.
-- Open question: deleting an account. Ledger rows reference the profile, so a delete is refused while the person has credit history. Plan: anonymise the profile instead of deleting rows.
+- Deleting an account: ledger rows reference the profile, so the profile is anonymised instead of deleted (`admin_anonymise_reader()`, run by the pilot team; see `docs/runbooks/delete-account.md`).

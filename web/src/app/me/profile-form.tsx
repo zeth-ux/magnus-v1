@@ -59,7 +59,7 @@ export function ProfileForm({
       <Field
         id="whatsapp"
         label="WhatsApp number (optional for now)"
-        hint="Private. Only you can see it. It's shared with the other reader once a request is accepted."
+        hint="Private: only you can see it. Bayu doesn't share it with other readers."
         error={errors.whatsapp}
       >
         <input
