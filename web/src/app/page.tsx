@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { SafetyFaq } from "@/components/landing/safety-faq";
 import { Closing } from "@/components/landing/closing";
 import { SmoothScroll } from "@/components/landing/smooth-scroll";
+import { LinkErrorRedirect } from "@/components/auth/link-error-redirect";
 
 /**
  * The landing page. Story and rules: docs/landing.md.
@@ -20,6 +21,7 @@ export const viewport: Viewport = {
 export default function LandingPage() {
   return (
     <div className="page-malam bg-malam">
+      <LinkErrorRedirect />
       <SmoothScroll />
       <SiteHeader />
       <main>

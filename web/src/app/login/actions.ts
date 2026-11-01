@@ -62,6 +62,14 @@ export async function sendMagicLink(
   if (error) {
     // Log the code (never the email) so failed sends can be debugged in Vercel logs.
     console.error("[auth] signInWithOtp failed:", error.code ?? error.status);
+    if (error.code === "over_email_send_rate_limit") {
+      return {
+        status: "error",
+        email,
+        // Supabase uses this code for both the 60-second resend wait and the hourly cap.
+        message: "We've just sent you a link, or our email is busy right now. If you have one from us, open the newest. Otherwise try again in a few minutes.",
+      };
+    }
     return {
       status: "error",
       email,
