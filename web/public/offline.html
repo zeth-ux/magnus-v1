@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c1614">
+<meta name="color-scheme" content="dark">
+<title>You're offline · Bayu</title>
+<!--
+  Shown by the service worker (sw.js) when a page can't load without the internet.
+  Self-contained on purpose (inline styles and logo, no scripts), because nothing
+  else is cached. After editing this file, bump CACHE in sw.js so phones fetch it again.
+-->
+<style>
+  :root { color-scheme: dark; }
+  html, body { margin: 0; background: #1c1614; color: #efe9df; }
+  body {
+    min-height: 100svh; box-sizing: border-box; display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: center; gap: 24px;
+    padding: 24px max(24px, env(safe-area-inset-right)) 24px max(24px, env(safe-area-inset-left));
+    font: 17px/1.6 "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (min-width: 640px) { body { padding-inline: 64px; } }
+  svg { width: 48px; height: 48px; }
+  h1 {
+    margin: 0; font-family: Literata, Georgia, "Times New Roman", serif; font-weight: 500;
+    font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.04; letter-spacing: -0.02em;
+  }
+  p { margin: 0; max-width: 30rem; color: rgb(239 233 223 / 0.8); }
+  a {
+    display: inline-block; border-radius: 999px; background: #efe9df; color: #1c1614;
+    padding: 12px 24px; font-weight: 600; text-decoration: none;
+  }
+  a:focus-visible { outline: 3px solid #c9a24a; outline-offset: 3px; }
+</style>
+</head>
+<body>
+  <svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 27 L17 24 L30 27 L30 10 L17 7 L4 10 Z"/><path d="M17 7 L17 24"/>
+    <path d="M19 9 C 23 4, 27 4, 30 6"/><path d="M21 12 C 25 8, 29 9, 32 11"/>
+  </svg>
+  <h1>The wind has dropped.</h1>
+  <p>You're offline, and the shelf needs the internet. Check your connection, then try again.</p>
+  <!-- An empty href reloads the page the reader was trying to open. -->
+  <a href="">Try again</a>
+</body>
+</html>

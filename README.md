@@ -66,6 +66,9 @@ The schema lives in `supabase/migrations/` as plain SQL, applied in filename ord
 - **Function permissions:** Postgres lets everyone (`PUBLIC`) run a new function by default, so every migration revokes `execute` from `public, anon` and grants it to `authenticated` only.
 - **Tests:** `npm test` runs the real SQL in an in-memory Postgres (PGlite), no setup. The concurrency tests need a real Postgres: set `TEST_DATABASE_URL` (CI does this automatically).
 
+## Pilot stats
+`docs/pilot-stats.sql` has read-only queries (paste into the Supabase SQL Editor): readers, listings, requests, handovers, week by week, how requests end, a credits sanity check, and overdue loans.
+
 ## Development workflow (Claude Code)
 This repo is set up so Claude Code can do most of the build work with guardrails.
 

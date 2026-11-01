@@ -4,6 +4,7 @@ import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { getProfile, requireUser } from "@/lib/supabase/user";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 import { ProfileForm } from "./profile-form";
+import { InstallHint } from "@/components/pwa/install-hint";
 import { UnblockButton } from "./unblock-button";
 import { toStamps, type LedgerRow } from "@/lib/card/history";
 
@@ -28,6 +29,7 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
         <Suspense fallback={null}>
           <Blocked />
         </Suspense>
+        <InstallHint />
       </div>
     </AppShell>
   );

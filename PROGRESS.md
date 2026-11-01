@@ -4,6 +4,33 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (night 2): Summary and morning checklist
+
+Five PRs, each reviewed by Steve with his findings fixed. They're chained (each branch contains the one before), so merge them **in this order** and each merges cleanly:
+1. #11 `feat/meetup`: meet-up cards
+2. #12 `feat/my-shelf`: My shelf, stamped library card, phone tab bar
+3. #13 `feat/wishlist`: wishlist
+4. #14 `feat/trust`: 👍/👎 after handovers, block, report, feedback
+5. #15 `feat/pwa-stats`: offline page, install, pilot stats SQL
+
+**Next**
+- [ ] Zarith: merge #11 → #15 in order
+- [ ] Zarith: in Supabase SQL Editor run, oldest first: `20261101000300_meetups.sql`, `20261101000400_wishlist.sql`, `20261101000500_trust.sql`
+- [ ] Zarith: R10-R13 still need a yes/no before they're built
+
+**Decision (security)**
+- Postgres lets everyone (`PUBLIC`, including signed-out visitors) run a new function unless it's revoked. A schema default can't change that, so every migration from now on revokes `execute` from `public, anon` and grants `authenticated` explicitly. Found by a wishlist test.
+
+## 2026-11-01 (night 2): App polish and pilot stats
+
+**Done**
+- Offline page: a tiny service worker (`public/sw.js`) shows `public/offline.html` ("The wind has dropped", self-contained: inline styles, no scripts) when a page can't load without the internet. It caches nothing else, so no stale shelves or signed-in pages stay on the phone. It only touches plain GET page loads (never form posts or `/auth/` sign-in callbacks) and uses navigation preload so it adds no delay. Registered in production only; never cached itself.
+- **Kill switch:** if the worker ever misbehaves, deploy a `sw.js` that calls `self.registration.unregister()`; it's served with `no-cache`, so phones pick it up on the next visit. Bump `CACHE` in `sw.js` whenever `offline.html` changes.
+- The Android install prompt is caught in the root layout (it fires once, early), so the Install button on `/me` still works after moving around the app.
+- Install: the manifest is dark now, opens on `/browse`, and has shortcuts (Add a book, Activity). `/me` shows "Put Bayu on your home screen": an Install button on Android, Share → Add to Home Screen steps on iPhone, nothing once installed.
+- Every page's browser bar is dark (root viewport).
+- `docs/pilot-stats.sql`: copy-paste queries for the headline numbers, week by week, how requests end, give vs lend, a credits sanity check, most listed books and overdue loans. Checked against a fresh database.
+
 ## 2026-11-01 (night 2): Trust and feedback
 
 **Done**
