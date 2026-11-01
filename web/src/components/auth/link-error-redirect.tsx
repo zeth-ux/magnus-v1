@@ -2,18 +2,33 @@
 
 import { useEffect } from "react";
 
+/** Characters Supabase uses in a PKCE code. Anything else is ignored. */
+const SAFE = /^[A-Za-z0-9_-]{6,200}$/;
+
 /**
- * When Supabase can't use a sign-in link (expired, already used, or an older
- * email), it sends the reader to the Site URL, our landing page, with the
- * reason in the URL hash (#error=access_denied&error_code=otp_expired...).
- * The landing page alone would look like a loop, so send them to the login
- * page, which explains it and lets them ask for a new link.
- * The hash never reaches the server, so this has to run in the browser.
+ * Sign-in links that end up on the landing page instead of /auth/callback.
+ *
+ * Supabase sends a reader to the Site URL (this page) when the address the app
+ * asked for doesn't match its Redirect URLs list, so the sign-in still has to
+ * be finished here:
+ *   ?code=...                  a good link: pass the code to /auth/callback
+ *   #error=...&error_code=...  expired, used or old link: /login explains
+ * Only a well-formed code is forwarded, to our own /auth/callback, which checks
+ * it with Supabase (and it only works in the browser that asked for the link).
+ * Where to go next is the callback's default (DEFAULT_AFTER_LOGIN). Runs in the browser because the landing page is
+ * static (and the hash never reaches the server).
  */
 export function LinkErrorRedirect() {
   useEffect(() => {
-    const hash = window.location.hash;
-    if (/[#&]error(_code)?=/.test(hash)) window.location.replace("/login?error=link");
+    const { search, hash } = window.location;
+    const params = new URLSearchParams(search);
+    const code = params.get("code");
+
+    if (code && SAFE.test(code)) {
+      window.location.replace(`/auth/callback?code=${encodeURIComponent(code)}`);
+    } else if (/[#&]error(_code)?=/.test(hash)) {
+      window.location.replace("/login?error=link");
+    }
   }, []);
   return null;
 }
