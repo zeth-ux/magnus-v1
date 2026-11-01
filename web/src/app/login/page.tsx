@@ -9,7 +9,7 @@ export const viewport: Viewport = AUTH_VIEWPORT;
 
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */
 const NOTICES: Record<string, string> = {
-  link: "That sign-in link has expired or was already used. Send yourself a new one below.",
+  link: "That sign-in link has expired or was already used. Send yourself a new one below, then open the newest email in this same browser.",
 };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {

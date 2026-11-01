@@ -42,8 +42,8 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           Check your inbox.
         </h2>
         <p className="text-[17px] leading-relaxed">
-          We sent a sign-in link to <strong>{state.email}</strong>. It works on any phone or
-          computer, and expires in an hour.
+          We sent a sign-in link to <strong>{state.email}</strong>. Open the newest email (Gmail
+          groups them, newest at the bottom) in this same browser. The link expires in an hour.
         </p>
       </div>
     );

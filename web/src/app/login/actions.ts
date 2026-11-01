@@ -62,6 +62,13 @@ export async function sendMagicLink(
   if (error) {
     // Log the code (never the email) so failed sends can be debugged in Vercel logs.
     console.error("[auth] signInWithOtp failed:", error.code ?? error.status);
+    if (error.code === "over_email_send_rate_limit") {
+      return {
+        status: "error",
+        email,
+        message: "We've sent a lot of sign-in emails in the last hour. Use the newest one you already have, or try again in an hour.",
+      };
+    }
     return {
       status: "error",
       email,
