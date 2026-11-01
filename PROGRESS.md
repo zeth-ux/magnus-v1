@@ -4,6 +4,19 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Loan extensions
+
+**Done**
+- Migration `20261101000700_extensions.sql`: the borrower asks for more time (`ask_extension`), the lender says yes or no (`answer_extension`). Yes moves the due date, so "report not returned" (R4) moves with it. One open ask per loan, at most 5 per loan, and the new date stays within the copy's lend period from today. No credits move. 6 SQL tests, 5 logic tests.
+- Activity: a "More time" card on every loan. The borrower picks a date (the picker only offers allowed dates); the lender sees "Aina asks to keep it until 13 Nov (now due 10 Nov)" with "Yes, that's fine" / "No, keep 10 Nov". The last answer is shown to both.
+- `lib/books/lend.ts`: one place for lend periods in days (the book page and Activity share it).
+- Supabase is connected to Claude (Zarith, 1 Nov: "supabase and vercel are all yours"). Additive migrations are applied to the live project after Steve's review; each PR says what went live.
+- Table `loan_extensions` (not `extensions`: every Supabase project already has an `extensions` schema). A double tap doesn't use up one of the 5 asks; an unanswered ask is closed when the loan ends or its return starts.
+
+**Decisions**
+- The longest extension is the copy's lend period counted from today, the same rule as a new request, so a "4 weeks" book can never be kept more than 4 weeks ahead.
+- Tests use Seoul dates (before 9am KST, UTC is still yesterday).
+
 ## 2026-11-01 (night 2): Summary and morning checklist
 
 Five PRs, each reviewed by Steve with his findings fixed. They're chained (each branch contains the one before), so merge them **in this order** and each merges cleanly:

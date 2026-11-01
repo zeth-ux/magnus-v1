@@ -63,6 +63,7 @@ The schema lives in `supabase/migrations/` as plain SQL, applied in filename ord
 - **Apply it:** open your Supabase project → **SQL Editor** → paste each migration file (oldest first) → **Run**. (Or, with the Supabase CLI linked to the project: `supabase db push`.)
 - **What's in it:** profiles (WhatsApp kept in a separate owner-only table), books (by ISBN-13), copies, requests, and the **append-only credit ledger** with its lifecycle functions (`request_copy`, `respond_request`, `cancel_request`, `confirm_handover`, `confirm_return`, `report_not_returned`, `my_credits`). Rules: [ADR 003](docs/decisions/003-credit-system.md).
 - **Trust (`20261101000500_trust.sql`):** handover ratings (`rate_handover`, `smooth_handovers` counts distinct readers), blocks (`block_reader`; a trigger refuses requests between blocked readers, loans still have to come back), and reports and feedback (`report_problem`, `send_feedback`, with daily limits; read them in **Table Editor → reports / feedback**).
+- **Extensions (`20261101000700_extensions.sql`, table `loan_extensions`):** `ask_extension` (borrower picks a later due date) and `answer_extension` (lender says yes or no; yes moves the due date).
 - **Function permissions:** Postgres lets everyone (`PUBLIC`) run a new function by default, so every migration revokes `execute` from `public, anon` and grants it to `authenticated` only.
 - **Tests:** `npm test` runs the real SQL in an in-memory Postgres (PGlite), no setup. The concurrency tests need a real Postgres: set `TEST_DATABASE_URL` (CI does this automatically).
 

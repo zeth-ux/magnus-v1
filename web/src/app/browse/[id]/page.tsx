@@ -10,19 +10,18 @@ import { CONDITIONS } from "@/lib/books/validate";
 import { RequestForm } from "./request-form";
 import { WishButton } from "../../wishlist/wish-button";
 import { seoulDate } from "@/lib/dates";
+import { lendDays, type LendMax } from "@/lib/books/lend";
 
 export const metadata: Metadata = { title: "A book on the shelf" };
 export const viewport: Viewport = APP_VIEWPORT;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-// Mirrors public.lend_max_days(); "flexible" reads the max_flexible_lend_days setting.
-const LEND_DAYS = { "2_weeks": 14, "4_weeks": 28, "2_months": 61 } as const;
 
 type CopyRow = {
   id: string;
   isbn: string;
   mode: "give" | "lend";
-  lend_max: keyof typeof LEND_DAYS | "flexible" | null;
+  lend_max: LendMax | null;
   condition: keyof typeof CONDITIONS;
   note: string | null;
   status: string;
@@ -81,7 +80,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
     supabase.from("wishlist").select("isbn").eq("isbn", copy.isbn).eq("user_id", user.id).maybeSingle(),
   ]);
   const wanted = Number(wishCount ?? 0);
-  const lendDays = copy.lend_max === "flexible" || copy.lend_max === null ? Number(flexibleDays ?? 183) : LEND_DAYS[copy.lend_max];
+  const lendFor = lendDays(copy.lend_max, Number(flexibleDays ?? 183));
 
   const look = dressCopy({
     copy_id: copy.id,
@@ -166,7 +165,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             copyId={copy.id}
             mode={copy.mode}
             minDate={seoulDate(1)}
-            maxDate={seoulDate(lendDays)}
+            maxDate={seoulDate(lendFor)}
           />
         )}
       </div>

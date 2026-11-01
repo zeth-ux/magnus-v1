@@ -3,6 +3,8 @@
  * "Request lifecycle"). Pure functions: the page renders them, the database
  * functions enforce them, and the tests pin them down.
  */
+import type { LendMax } from "@/lib/books/lend";
+
 export type Op = { op: "accept" | "decline" | "cancel" | "handover" | "returned" | "report"; label: string; primary?: boolean };
 
 export type Row = {
@@ -17,7 +19,7 @@ export type Row = {
   owner_got_back: boolean;
   requester_returned: boolean;
   updated_at: string;
-  copy: { id: string; status: string; books: { title: string } | null } | null;
+  copy: { id: string; status: string; lend_max?: LendMax | null; books: { title: string } | null } | null;
   owner: { display_name: string } | null;
   requester: { display_name: string } | null;
 };
