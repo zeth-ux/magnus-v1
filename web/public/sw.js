@@ -18,8 +18,12 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Start page loads while the worker boots, so it adds no delay.
-      if (self.registration.navigationPreload) await self.registration.navigationPreload.enable();
+      // Navigation preload stays OFF (and is switched off for workers that had it).
+      // With it on, every page load the worker skips (like /auth/callback) is
+      // fetched twice: the preload and the normal request. A sign-in link's
+      // one-time code was swapped by the invisible preload, and the request the
+      // reader actually saw failed, sending them back to sign in.
+      if (self.registration.navigationPreload) await self.registration.navigationPreload.disable();
       const keys = await caches.keys();
       await Promise.all(keys.filter((k) => k.startsWith("bayu-") && k !== CACHE).map((k) => caches.delete(k)));
       await self.clients.claim();
@@ -35,8 +39,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
       try {
-        const preloaded = await event.preloadResponse;
-        return preloaded || (await fetch(request));
+        return await fetch(request);
       } catch {
         const cached = await caches.match(OFFLINE_URL, { cacheName: CACHE });
         return cached || Response.error();

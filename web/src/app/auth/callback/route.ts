@@ -21,6 +21,12 @@ function isAllowedOtpType(value: string | null): value is EmailOtpType {
  * a reason the login page explains.
  */
 export async function GET(request: NextRequest) {
+  // A service worker's navigation preload is an invisible copy of this request.
+  // It must never use the one-time code, or the real request (the one the
+  // reader sees) finds it used and fails. Our worker no longer preloads, but a
+  // phone with the old worker still does on its first visit after the update.
+  if (request.headers.has("service-worker-navigation-preload")) return new Response(null, { status: 204 });
+
   const { searchParams, origin } = request.nextUrl;
   const next = safeRedirectPath(searchParams.get("next"));
   const failure = NextResponse.redirect(`${origin}/login?error=link`);
