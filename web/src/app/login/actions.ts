@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { normaliseSiteOrigin } from "@/lib/auth/site-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 
@@ -22,7 +23,11 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 async function siteOrigin(): Promise<string | null> {
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
-  if (configured) return configured.replace(/\/$/, "");
+  if (configured) {
+    const origin = normaliseSiteOrigin(configured);
+    if (!origin) console.error("[auth] NEXT_PUBLIC_SITE_URL isn't a usable address");
+    return origin;
+  }
   if (process.env.NODE_ENV === "production") return null;
   const host = (await headers()).get("host") ?? "localhost:3000";
   return `http://${host}`;

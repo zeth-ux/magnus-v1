@@ -4,6 +4,16 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Site URL was the protected address
+
+**Found:** Supabase's Site URL was `https://magnus-v1-merey-jago.vercel.app`. Whenever Supabase rejects the app's return address it falls back to the Site URL, so readers landed on a different address from the one holding their sign-in key (`bad_code_verifier` in the logs), and on an address Vercel puts behind its own login for everyone else.
+
+**Done**
+- `normaliseSiteOrigin()` cleans up `NEXT_PUBLIC_SITE_URL` (spaces, quotes, missing `https://`, a path or trailing slash), so a small typo can't make Supabase reject the return address. A value that isn't a web address now fails loudly instead.
+
+**Next**
+- [ ] Zarith: Site URL → `https://magnus-v1.vercel.app`; add `https://magnus-v1.vercel.app/**` to Redirect URLs.
+
 ## 2026-11-01 (day): Sign-in survives a mismatched Site URL
 
 **What happened:** after the service-worker fix, the email link still ended on the landing page. Supabase's auth settings were saved again at 12:04-12:11 KST, and since then every email's link went to `magnus-v1-merey-jago.vercel.app/` (the Site URL fallback) instead of `/auth/callback`. Supabase accepted the link and sent a valid sign-in code, but it landed on the homepage, where nothing used it.
