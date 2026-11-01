@@ -66,7 +66,8 @@ export function SafetyFaq() {
           <h2 id="faq" className="mb-10 scroll-mt-8 font-display text-[clamp(2.5rem,4.4vw,4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
             Questions
           </h2>
-          <div data-drawer="" className="flex flex-col">
+          {/* --tab-w matches the tab's width at each breakpoint, so the last tabs stop at the card's right edge. */}
+          <div data-drawer="" className="flex flex-col [--tab-w:7.5rem] sm:[--tab-w:12rem]">
             {FAQ.map((item, i) => {
               const bg = CARD_COLOURS[i % CARD_COLOURS.length];
               return (
@@ -74,13 +75,14 @@ export function SafetyFaq() {
                   key={item.q}
                   data-card-faq=""
                   className="relative pt-10"
-                  style={{ marginTop: i === 0 ? 0 : "-28px", zIndex: i }}
+                  // Overlap less than the summary's bottom padding (20px), so a tab never covers the question above.
+                  style={{ marginTop: i === 0 ? 0 : "-16px", zIndex: i }}
                 >
-                  {/* The tab: an arch, stepping right card by card. */}
+                  {/* The tab: an arch, stepping right card by card, back to the left after a full set of colours. */}
                   <span
                     aria-hidden="true"
                     className="arch absolute top-0 flex h-10 text-ink w-[7.5rem] items-center justify-center text-[15px] font-bold sm:w-[12rem]"
-                    style={{ background: bg, left: `min(${i * 18}%, calc(100% - 12rem))` }}
+                    style={{ background: bg, left: `min(${(i % CARD_COLOURS.length) * 18}%, calc(100% - var(--tab-w)))` }}
                   >
                     {item.tab}
                   </span>
