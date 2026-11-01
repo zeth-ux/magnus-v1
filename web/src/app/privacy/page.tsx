@@ -74,8 +74,8 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Other signed-in readers</strong> see your name, your area, the books you list (with
-              your notes), and how many readers had a smooth handover with you. A book you&apos;ve taken off the shelf no
-              longer shows in Browse, but can still be opened from an old link.
+              your notes), and how many readers had a smooth handover with you. A book you&apos;ve taken off the shelf is
+              hidden from them, except readers who asked for it or passed it on to you.
             </li>
             <li>
               <strong>The reader you&apos;re swapping with</strong> also sees the request and the meet-up details.
