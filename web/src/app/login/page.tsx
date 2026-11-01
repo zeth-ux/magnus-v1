@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { OPEN_LINK_HINT } from "@/lib/auth/copy";
 import { Suspense } from "react";
 import { LoginForm, LoginFormPlaceholder } from "./login-form";
 import { safeRedirectPath } from "@/lib/safe-redirect";
@@ -9,7 +10,7 @@ export const viewport: Viewport = AUTH_VIEWPORT;
 
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */
 const NOTICES: Record<string, string> = {
-  link: "That sign-in link has expired or was already used. Send yourself a new one below.",
+  link: `That sign-in link has expired or was already used. Send yourself a new one below. ${OPEN_LINK_HINT}`,
 };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {

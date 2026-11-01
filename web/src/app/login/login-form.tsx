@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { OPEN_LINK_HINT } from "@/lib/auth/copy";
 import { sendMagicLink, type MagicLinkState } from "./actions";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { safeRedirectPath } from "@/lib/safe-redirect";
@@ -42,8 +43,8 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           Check your inbox.
         </h2>
         <p className="text-[17px] leading-relaxed">
-          We sent a sign-in link to <strong>{state.email}</strong>. It works on any phone or
-          computer, and expires in an hour.
+          We sent a sign-in link to <strong>{state.email}</strong>. {OPEN_LINK_HINT} It expires in an
+          hour.
         </p>
       </div>
     );

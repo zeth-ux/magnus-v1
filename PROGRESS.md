@@ -4,6 +4,22 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Sign-in link loop
+
+**What happened:** clicking the email link landed on the landing page, signed out. Supabase's logs showed why:
+- The link clicked was an older one (Gmail groups every "Your sign-in link" email in one thread, oldest at the top); the newest link's token was still unused. When Supabase rejects a link it sends the reader to the Site URL, the landing page, with the reason in the URL hash, so it looked like a loop.
+- Supabase's built-in email had hit its hourly limit about 20 times since 31 Oct, so asking again often sent nothing.
+- Earlier, the Site URL pointed at `magnus-v1-merey-jago.vercel.app`, which Vercel puts behind its login. Zarith fixed the Site URL and Redirect URLs.
+
+**Done**
+- The landing page sends a rejected link to `/login?error=link`, which explains it.
+- "Check your inbox" now says to open the newest email in the same browser (true for Supabase's default email, which only works in the browser that asked).
+- The email limit gets its own message instead of "try again in a minute".
+
+**Next**
+- [ ] Zarith: connect Gmail SMTP in Supabase (Authentication → Emails → Set up SMTP), then set the Magic link and Confirm signup templates to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`. That lifts the email limit and makes links work in any browser (e.g. Gmail's own). Then drop "in this same browser" from `OPEN_LINK_HINT` in `web/src/lib/auth/copy.ts`.
+- [ ] Set `NEXT_PUBLIC_SITE_URL=https://magnus-v1.vercel.app` in Vercel (needs the Vercel connector approved).
+
 ## 2026-11-01 (day): Activity badge and due-date countdown
 
 **Done**
