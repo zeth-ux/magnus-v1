@@ -4,6 +4,26 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Email sign-in works in any browser; one production address
+
+**What the logs showed**
+- Supabase's Site URL is reset to `magnus-v1-merey-jago.vercel.app` about 10 s after every production deploy (8 out of 8 merges): the Vercel-Supabase integration rewrites it. Changing it in the dashboard can't stick.
+- On a phone, tapping the email link inside Gmail opens it in another browser, so the PKCE flow's key (saved in the browser that asked) was missing: `bad_code_verifier` every time.
+- "Continue with Google" failed with "provider is not enabled": Google sign-in was never set up in Supabase.
+
+**Done**
+- Email links use the implicit flow: Supabase sends the session back in the URL hash, and the landing page saves it in whichever browser opened the link, then removes it from the address bar. No key from the original browser is needed, so phones and Gmail's browser work. (`lib/auth/session-hash.ts`, `components/auth/link-error-redirect.tsx`, `app/login/actions.ts`.)
+- One production address: the proxy sends any other production host to Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`), keeping path, query and hash, so a sign-in always lives on one site whatever Supabase's Site URL says. Previews and local dev are untouched. (`lib/site/canonical.ts`; reads the Host header, after a local test caught `nextUrl` redirecting the main address to itself.)
+- The Google button is hidden unless `NEXT_PUBLIC_GOOGLE_SIGNIN=on`.
+- Login hint: "Open the newest one" (no more "same browser").
+
+**Decisions**
+- Implicit flow for email only: tokens travel in the URL hash (never sent to a server) and are wiped at once. Like any any-browser magic link, someone could send you a link that signs you in as *them*; /welcome shows who you're signed in as.
+
+**Next**
+- [ ] Zarith (optional): enable Google in Supabase (Authentication → Providers, with a Google Cloud OAuth client), then set `NEXT_PUBLIC_GOOGLE_SIGNIN=on` in Vercel.
+- [ ] Optional: in the Vercel-Supabase integration settings, stop it syncing the Site URL; no longer needed for sign-in to work.
+
 ## 2026-11-01 (day): Taken-off books stay hidden; warkah and welcome fixes
 
 **Done**

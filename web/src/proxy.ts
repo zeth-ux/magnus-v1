@@ -1,12 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { canonicalRedirect } from "@/lib/site/canonical";
 
 /** Pages that need a signed-in user. */
-const PROTECTED_PATHS = ["/welcome", "/me", "/add", "/browse", "/activity", "/shelf", "/wishlist", "/report", "/feedback"];
+const PROTECTED_PATHS = [
+  "/welcome",
+  "/me",
+  "/add",
+  "/browse",
+  "/activity",
+  "/shelf",
+  "/wishlist",
+  "/report",
+  "/feedback",
+];
 
 function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 }
 
 /**
@@ -16,6 +29,18 @@ function isProtectedPath(pathname: string): boolean {
  *    Pages still check the user themselves; this is only a fast first gate.
  */
 export async function proxy(request: NextRequest) {
+  // One address on production (see lib/site/canonical.ts). Runs before
+  // anything else so a sign-in always lands where its cookies live.
+  const canonical = canonicalRedirect(
+    request.headers.get("host"),
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    {
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    },
+  );
+  if (canonical) return NextResponse.redirect(canonical, 308);
+
   // The landing page is static and needs no session: keep it fast.
   if (request.nextUrl.pathname === "/") return NextResponse.next();
 
@@ -34,13 +59,17 @@ export async function proxy(request: NextRequest) {
         return request.cookies.getAll();
       },
       setAll(cookiesToSet, headers) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value),
+        );
         response = NextResponse.next({ request });
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set(name, value, options),
         );
         // Responses that set auth cookies must never be cached by a CDN.
-        Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
+        Object.entries(headers).forEach(([key, value]) =>
+          response.headers.set(key, value),
+        );
       },
     },
   });
@@ -67,7 +96,8 @@ function redirectToLogin(request: NextRequest, from?: NextResponse) {
   const redirect = NextResponse.redirect(url);
   from?.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
   from?.headers.forEach((value, key) => {
-    if (["cache-control", "expires", "pragma"].includes(key)) redirect.headers.set(key, value);
+    if (["cache-control", "expires", "pragma"].includes(key))
+      redirect.headers.set(key, value);
   });
   return redirect;
 }

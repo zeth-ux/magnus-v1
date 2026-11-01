@@ -1,29 +1,45 @@
 "use client";
 
 import { useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { parseSessionHash } from "@/lib/auth/session-hash";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 /** Characters Supabase uses in a PKCE code. Anything else is ignored. */
 const SAFE = /^[A-Za-z0-9_-]{6,200}$/;
 
 /**
- * Sign-in links that end up on the landing page instead of /auth/callback.
- *
- * Supabase sends a reader to the Site URL (this page) when the address the app
- * asked for doesn't match its Redirect URLs list, so the sign-in still has to
- * be finished here:
- *   ?code=...                  a good link: pass the code to /auth/callback
- *   #error=...&error_code=...  expired, used or old link: /login explains
- * Only a well-formed code is forwarded, to our own /auth/callback, which checks
- * it with Supabase (and it only works in the browser that asked for the link).
- * Where to go next is the callback's default (DEFAULT_AFTER_LOGIN). Runs in the browser because the landing page is
- * static (and the hash never reaches the server).
+ * Finishes a sign-in that lands on the landing page.
+ *   #access_token=...&refresh_token=...  an email link (implicit flow): save the
+ *                                        session in this browser, then go on
+ *   ?code=...                            a PKCE code: pass it to /auth/callback
+ *   #error=...&error_code=...            expired, used or old link: /login explains
+ * Supabase sends readers here (the Site URL) whenever the return address isn't
+ * on its list, so this must work whatever that list says. The hash never
+ * reaches a server; the tokens are removed from the address bar straight away.
+ * Runs in the browser because the landing page is static.
  */
 export function LinkErrorRedirect() {
   useEffect(() => {
-    const { search, hash } = window.location;
+    const { search, hash, pathname } = window.location;
     const params = new URLSearchParams(search);
-    const code = params.get("code");
+    const session = parseSessionHash(hash);
 
+    if (session) {
+      // Don't leave the tokens in the address bar or the history.
+      window.history.replaceState(null, "", pathname + search);
+      const supabase = createSupabaseBrowserClient();
+      if (!supabase) {
+        window.location.replace("/login?error=link");
+        return;
+      }
+      void supabase.auth
+        .setSession({ access_token: session.accessToken, refresh_token: session.refreshToken })
+        .then(({ error }) => window.location.replace(error ? "/login?error=link" : safeRedirectPath(params.get("next"))));
+      return;
+    }
+
+    const code = params.get("code");
     if (code && SAFE.test(code)) {
       window.location.replace(`/auth/callback?code=${encodeURIComponent(code)}`);
     } else if (/[#&]error(_code)?=/.test(hash)) {

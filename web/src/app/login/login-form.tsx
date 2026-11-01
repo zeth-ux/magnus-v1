@@ -6,6 +6,13 @@ import { sendMagicLink, type MagicLinkState } from "./actions";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 
+/**
+ * Google sign-in shows only once it's enabled in Supabase (Authentication →
+ * Providers → Google) and NEXT_PUBLIC_GOOGLE_SIGNIN=on is set in Vercel.
+ * Until then the button led to Supabase's "provider is not enabled" error page.
+ */
+const GOOGLE_ON = process.env.NEXT_PUBLIC_GOOGLE_SIGNIN === "on";
+
 const initial: MagicLinkState = { status: "idle" };
 
 export function LoginForm({ next, notice }: { next: string; notice?: string }) {
@@ -33,18 +40,28 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(target)}`,
       },
     });
-    if (error) setGoogleError("Google sign-in isn't available right now. Use your email instead.");
+    if (error)
+      setGoogleError(
+        "Google sign-in isn't available right now. Use your email instead.",
+      );
   }
 
   if (state.status === "sent") {
     return (
-      <div role="status" className="flex flex-col gap-3 rounded-[10px] bg-paper p-7 text-malam">
-        <h2 ref={sentHeading} tabIndex={-1} className="font-display text-2xl font-medium outline-none">
+      <div
+        role="status"
+        className="flex flex-col gap-3 rounded-[10px] bg-paper p-7 text-malam"
+      >
+        <h2
+          ref={sentHeading}
+          tabIndex={-1}
+          className="font-display text-2xl font-medium outline-none"
+        >
           Check your inbox.
         </h2>
         <p className="text-[17px] leading-relaxed">
-          We sent a sign-in link to <strong>{state.email}</strong>. {OPEN_LINK_HINT} It expires in an
-          hour.
+          We sent a sign-in link to <strong>{state.email}</strong>.{" "}
+          {OPEN_LINK_HINT} It expires in an hour.
         </p>
       </div>
     );
@@ -55,29 +72,39 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
   return (
     <div className="flex flex-col gap-6">
       {notice ? (
-        <p role="alert" className="rounded-[10px] bg-paper/10 px-4 py-3 text-[15px] leading-relaxed">
+        <p
+          role="alert"
+          className="rounded-[10px] bg-paper/10 px-4 py-3 text-[15px] leading-relaxed"
+        >
           {notice}
         </p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={signInWithGoogle}
-        className="h-13 rounded-full border-[1.5px] border-paper/70 bg-transparent px-6 text-[17px] font-semibold text-paper transition-colors duration-200 hover:bg-paper hover:text-malam active:scale-[0.98]"
-      >
-        Continue with Google
-      </button>
-      {googleError ? (
-        <p role="alert" className="text-[15px] text-merah-light">
-          {googleError}
-        </p>
-      ) : null}
+      {GOOGLE_ON ? (
+        <>
+          <button
+            type="button"
+            onClick={signInWithGoogle}
+            className="h-13 rounded-full border-[1.5px] border-paper/70 bg-transparent px-6 text-[17px] font-semibold text-paper transition-colors duration-200 hover:bg-paper hover:text-malam active:scale-[0.98]"
+          >
+            Continue with Google
+          </button>
+          {googleError ? (
+            <p role="alert" className="text-[15px] text-merah-light">
+              {googleError}
+            </p>
+          ) : null}
 
-      <div className="flex items-center gap-4 text-[15px] text-paper/70" aria-hidden="true">
-        <span className="h-px flex-1 bg-paper/25" />
-        or
-        <span className="h-px flex-1 bg-paper/25" />
-      </div>
+          <div
+            className="flex items-center gap-4 text-[15px] text-paper/70"
+            aria-hidden="true"
+          >
+            <span className="h-px flex-1 bg-paper/25" />
+            or
+            <span className="h-px flex-1 bg-paper/25" />
+          </div>
+        </>
+      ) : null}
 
       <form action={formAction} className="flex flex-col gap-3" noValidate>
         <input type="hidden" name="next" value={next} />
@@ -101,7 +128,11 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           className="field-dark h-13 rounded-xl px-4 text-[17px] outline-none aria-invalid:border-merah-light"
         />
         {error ? (
-          <p id="email-error" role="alert" className="text-[15px] text-merah-light">
+          <p
+            id="email-error"
+            role="alert"
+            className="text-[15px] text-merah-light"
+          >
             {error.message}
           </p>
         ) : null}
