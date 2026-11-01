@@ -4,6 +4,13 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Taken-off books stay hidden; warkah and welcome fixes
+
+**Done**
+- Migration `20261101001200_copies_visibility.sql`: a withdrawn copy is no longer visible to other readers, even from an old link (the book page then 404s). The owner and anyone in a request for it still see it, so Activity history keeps its titles. 2 tests.
+- Book page: the note is labelled "Warkah: the note that travels with this book" instead of "Warkah from <owner>", because a given book keeps its note and the new owner didn't write it.
+- `/welcome`: readers who already have books see "Welcome back" and "Go to the shelf", not "Add your first book" and the starter-credit card.
+
 ## 2026-11-01 (day): Launch basics
 
 **Done**
@@ -24,7 +31,6 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - [ ] Zarith: confirm the Vercel functions region (Project → Settings → Functions) so /privacy names the right country (it says the United States, the default).
 - [ ] Zarith: choose a privacy contact email for /privacy (today only "Send feedback" or the pilot group, which need a sign-in or an invite).
 - [ ] When Gmail SMTP is set up, update /privacy: sign-in emails go through Google.
-- [ ] Hide withdrawn copies from `/browse/[id]` (404) and tighten the copies policy; fix the "Warkah from" name on a given-away copy.
 
 ## 2026-11-01 (day): Security headers (security step 2)
 

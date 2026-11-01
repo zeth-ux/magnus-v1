@@ -131,7 +131,8 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
         {copy.note ? (
           <figure className="flex flex-col gap-2">
             <figcaption className="text-[15px] font-semibold text-paper/80">
-              {isMine ? "Your warkah" : `Warkah from ${copy.profiles.display_name}`}
+              {/* Not "from <owner>": a given book keeps its note, so the owner may not be who wrote it. */}
+              Warkah: the note that travels with this book
             </figcaption>
             <blockquote className="font-display text-[clamp(1.2rem,1.8vw,1.5rem)] leading-snug whitespace-pre-line italic">
               &ldquo;{copy.note}&rdquo;
