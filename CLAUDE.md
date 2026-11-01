@@ -20,11 +20,13 @@ Instructions for Claude Code working in this repo.
 - Start new features in **plan mode**: propose the approach, files touched, and risks before editing.
 - Small, focused commits with clear messages. Never commit secrets or `.env` files.
 - Run tests and the linter before saying a task is done. If something can't be verified, say so.
-- Ask before: adding a paid service, changing the database schema in a destructive way, deleting files, or deploying.
+- Ask before: adding a paid service, changing the database schema in a destructive way, deleting files (other than your own temporary ones), or changing Vercel/Supabase project settings.
 - Prefer simple, boring solutions over clever ones.
 - After finishing a feature, ask Steve (the `steve` subagent) to review the changes and fix Blocking items before committing.
 - If a hook blocks an action (e.g. touching `.env`), don't work around it. Tell me what you needed instead.
-- Git: one branch per issue (`feat/...`, `fix/...`, `docs/...`) → open a PR into `main`. **Never merge PRs yourself**; I merge.
+- Git: one branch per issue (`feat/...`, `fix/...`, `docs/...`) → open a PR into `main`.
+- **Merging (allowed since 2026-11-01):** you may merge your own PRs into `main` once CI is green and Steve's Blocking items are fixed. Merging to `main` deploys production on Vercel, so merge in the order the PR descriptions give and tell me what went live. Never force-push or rewrite `main`.
+- **Live Supabase (allowed since 2026-11-01):** you may apply additive migrations (new tables, functions, indexes) to the live project through the connector after Steve's review, and say so in the PR. Destructive changes (dropping or rewriting tables, columns or data) still need my yes first. Never paste keys into chat or commit them.
 
 ## Keep the docs current (every session)
 - Add an entry to the top of `PROGRESS.md`: what was done, decisions, next steps.
