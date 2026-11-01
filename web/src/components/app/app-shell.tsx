@@ -1,7 +1,9 @@
 import type { Viewport } from "next";
 import Link from "next/link";
 import { BayuMark } from "@/components/bayu-mark";
+import { Suspense } from "react";
 import { NavLink } from "./nav-link";
+import { WaitingBadge } from "./waiting-badge";
 
 // viewportFit "cover" lets the phone tab bar sit above the home indicator (safe-area padding).
 export const APP_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "dark", viewportFit: "cover" };
@@ -15,6 +17,14 @@ const NAV = [
   { href: "/me", label: "Me", short: "Me" },
 ];
 
+/** The count on Activity: streamed in, so the frame never waits for it. */
+const badgeFor = (href: string, corner = false) =>
+  href === "/activity" ? (
+    <Suspense fallback={null}>
+      <WaitingBadge corner={corner} />
+    </Suspense>
+  ) : null;
+
 /** The signed-in app frame: the night ground, the mark, and the main places. */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -26,7 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav aria-label="App" className="hidden items-center gap-5 text-[15px] whitespace-nowrap sm:flex">
           {NAV.map((item) => (
-            <NavLink key={item.href} href={item.href} className="text-paper hover:underline">
+            <NavLink key={item.href} href={item.href} className="text-paper hover:underline" badge={badgeFor(item.href)}>
               {item.label}
             </NavLink>
           ))}
@@ -50,6 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <NavLink
             key={item.href}
             href={item.href}
+            badge={badgeFor(item.href, true)}
             className={`flex h-14 items-center justify-center text-[13px] font-semibold ${item.href === "/add" ? "text-songket" : "text-paper"}`}
           >
             {item.short}

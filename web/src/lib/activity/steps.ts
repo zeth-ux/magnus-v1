@@ -32,6 +32,8 @@ export const addDays = (date: string, days: number) => {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 };
+/** Whole days from one YYYY-MM-DD date to another. */
+export const daysBetween = (from: string, to: string) => Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
 export const pretty = (date: string) =>
   new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
 
@@ -99,7 +101,12 @@ export function requesterLine(r: Row, today: string): string {
   if (r.status !== "on_loan") return "";
   if (r.requester_returned) return "You've said you returned it. Waiting for the owner to confirm.";
   if (r.owner_got_back) return "The owner says it's back. Confirm to unlock your credit.";
-  return `Yours until ${pretty(dueOf(r))}.`;
+  const due = dueOf(r);
+  const left = daysBetween(today, due);
+  if (left < 0) return `Was due back ${pretty(due)}. Return it soon, or ask the owner for more time.`;
+  if (left === 0) return `Due back today (${pretty(due)}).`;
+  if (left <= 3) return `Due back in ${left === 1 ? "1 day" : `${left} days`} (${pretty(due)}).`;
+  return `Yours until ${pretty(due)}.`;
 }
 
 export function requesterOps(r: Row, today: string): Op[] {

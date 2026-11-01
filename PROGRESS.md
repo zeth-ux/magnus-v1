@@ -4,6 +4,19 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Activity badge and due-date countdown
+
+**Done**
+- Migration `20261101000900_waiting_count.sql`: `my_waiting_count()` counts your requests where the next step is yours (each request once): a request you can accept, a handover or return the other reader confirmed and you haven't, a lend that went stale before the handover (cancel it), their meet-up suggestion on a card the page shows, a "more time" ask on your book, and a book you're borrowing that's due within 3 days or overdue. Same rules as the Activity page's buttons. It runs as the reader (row level security applies). 6 SQL tests.
+- The Activity link (top bar and phone tab bar) shows the count as a small songket badge ("9+" above nine). Screen readers hear "Activity, 3 waiting for you". It streams in, so pages never wait for it, and it's one database call per page (both navs share it). On phones it sits on the corner of the word, so the five tabs still fit at 320px.
+- The borrower's line counts down: "Due back in 2 days (10 Nov)", "Due back today", then "Was due back 10 Nov. Return it soon, or ask for more time below."
+
+**Decisions**
+- In-app only for now. Email reminders need Resend (free tier) and a key only Zarith can create; see Next.
+
+**Next**
+- [ ] Zarith: create a free Resend account and add `RESEND_API_KEY` in Supabase (Edge Function secrets) and Vercel, then email notifications (new request, accepted, due in 3 days) can be built on the same events as the badge.
+
 ## 2026-11-01 (day): Landing safety and FAQ brought up to date
 
 **Done**

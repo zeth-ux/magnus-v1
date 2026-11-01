@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, ownerLine, ownerOps, requesterLine, requesterOps, type Row } from "./steps";
+import { addDays, daysBetween, ownerLine, ownerOps, requesterLine, requesterOps, type Row } from "./steps";
 
 const base: Row = {
   id: "r1",
@@ -76,5 +76,22 @@ describe("request steps", () => {
 
   it("adds days across month ends", () => {
     expect(addDays("2026-11-20", 14)).toBe("2026-12-04");
+  });
+});
+
+describe("the borrower's due-date line", () => {
+  const onLoan = { ...base, mode: "lend", status: "on_loan", return_by: "2026-11-10", owner_handed_over: true, requester_received: true } as Row;
+  it("counts down in the last 3 days, then says it's late", () => {
+    expect(requesterLine(onLoan, "2026-11-01")).toBe("Yours until 10 Nov.");
+    expect(requesterLine(onLoan, "2026-11-07")).toBe("Due back in 3 days (10 Nov).");
+    expect(requesterLine(onLoan, "2026-11-09")).toBe("Due back in 1 day (10 Nov).");
+    expect(requesterLine(onLoan, "2026-11-10")).toBe("Due back today (10 Nov).");
+    expect(requesterLine(onLoan, "2026-11-06")).toBe("Yours until 10 Nov.");
+    expect(requesterLine(onLoan, "2026-11-12")).toBe("Was due back 10 Nov. Return it soon, or ask the owner for more time.");
+  });
+  it("daysBetween crosses months and years", () => {
+    expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
+    expect(daysBetween("2026-12-30", "2027-01-02")).toBe(3);
+    expect(daysBetween("2026-11-10", "2026-11-08")).toBe(-2);
   });
 });
