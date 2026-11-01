@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/supabase/user";
 import { dressCopy } from "@/lib/shelf/dress";
 import { CONDITIONS } from "@/lib/books/validate";
 import { RequestForm } from "./request-form";
+import { WishButton } from "../../wishlist/wish-button";
 import { seoulDate } from "@/lib/dates";
 
 export const metadata: Metadata = { title: "A book on the shelf" };
@@ -73,6 +74,11 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
       .limit(1),
     supabase.rpc("setting", { p_key: "max_flexible_lend_days" }),
   ]);
+  const [{ data: wishCount }, { data: myWish }] = await Promise.all([
+    supabase.rpc("wish_count", { p_isbn: copy.isbn }),
+    supabase.from("wishlist").select("isbn").eq("isbn", copy.isbn).eq("user_id", user.id).maybeSingle(),
+  ]);
+  const wanted = Number(wishCount ?? 0);
   const lendDays = copy.lend_max === "flexible" || copy.lend_max === null ? Number(flexibleDays ?? 183) : LEND_DAYS[copy.lend_max];
 
   const look = dressCopy({
@@ -126,6 +132,12 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             </blockquote>
           </figure>
         ) : null}
+        {wanted > 0 ? (
+          <p className="text-[15px] text-paper/80">
+            {wanted === 1 ? "1 other reader wants this book." : `${wanted} other readers want this book.`}
+          </p>
+        ) : null}
+        {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}
         {copies && copies > 1 ? (
           <p className="text-[15px] text-paper/80">{copies} copies of this book are on the shelf.</p>
         ) : null}
