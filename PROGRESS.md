@@ -17,7 +17,7 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - The email limit gets its own message instead of "try again in a minute".
 
 **Next**
-- [ ] Zarith: connect Gmail SMTP in Supabase (Authentication → Emails → Set up SMTP), then set the Magic link and Confirm signup templates to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`. That lifts the email limit and makes links work in any browser (e.g. Gmail's own).
+- [ ] Zarith: connect Gmail SMTP in Supabase (Authentication → Emails → Set up SMTP), then set the Magic link and Confirm signup templates to `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=email`. That lifts the email limit and makes links work in any browser (e.g. Gmail's own). Then drop "in this same browser" from `OPEN_LINK_HINT` in `web/src/lib/auth/copy.ts`.
 - [ ] Set `NEXT_PUBLIC_SITE_URL=https://magnus-v1.vercel.app` in Vercel (needs the Vercel connector approved).
 
 ## 2026-11-01 (day): Activity badge and due-date countdown

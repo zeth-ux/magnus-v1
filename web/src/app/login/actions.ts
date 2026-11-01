@@ -66,7 +66,8 @@ export async function sendMagicLink(
       return {
         status: "error",
         email,
-        message: "We've sent a lot of sign-in emails in the last hour. Use the newest one you already have, or try again in an hour.",
+        // Supabase uses this code for both the 60-second resend wait and the hourly cap.
+        message: "We've just sent you a link, or our email is busy right now. If you have one from us, open the newest. Otherwise try again in a few minutes.",
       };
     }
     return {
