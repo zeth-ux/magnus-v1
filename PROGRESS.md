@@ -9,7 +9,8 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 **What happened:** clicking a fresh sign-in link still ended on "enter your email". Supabase's logs showed the code swapped twice, 0.5 s apart: the first worked, the second failed. The cause was the offline service worker's *navigation preload* (added in the PWA review fixes): with it on, every page load the worker skips, like `/auth/callback`, is fetched twice, once as the invisible preload and once for real. The preload used up the one-time code; the reader saw the failed second request. Reproduced locally (2 hits per click), fixed (1 hit), and checked the upgrade from the old worker.
 
 **Done**
-- `public/sw.js`: navigation preload off, and switched off on phones that already have the old worker (on their next visit). The offline page still works.
+- `public/sw.js`: navigation preload off, and switched off on phones that already have the old worker (from the second page load of their next visit). The offline page still works.
+- `/auth/callback` ignores a preload request (204, code untouched), so even the very first click after the update, still handled by the old worker, signs in. Tested that exact case: the preload got 204, the real request used the code.
 
 **Decisions**
 - Navigation preload saves a few milliseconds on a cold worker; not worth a sign-in bug. Leave it off.
