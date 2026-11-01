@@ -15,6 +15,8 @@ export const viewport: Viewport = AUTH_VIEWPORT;
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */
 const NOTICES: Record<string, string> = {
   link: `That sign-in link has expired or was already used. Send yourself a new one below. ${OPEN_LINK_HINT}`,
+  account:
+    "You're already signed in as someone else on this browser. Sign out first, then open the link again.",
 };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -44,9 +46,21 @@ async function LoginFormWithParams({ searchParams }: Pick<PageProps<"/login">, "
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
   const errorKey = first(params.error);
   return (
-    <LoginForm
-      next={safeRedirectPath(first(params.next))}
-      notice={errorKey ? NOTICES[errorKey] : undefined}
-    />
+    <>
+      <LoginForm
+        next={safeRedirectPath(first(params.next))}
+        notice={errorKey ? NOTICES[errorKey] : undefined}
+      />
+      {errorKey === "account" ? (
+        <form action="/auth/signout" method="post">
+          <button
+            type="submit"
+            className="text-[15px] font-semibold text-paper/80 underline underline-offset-4 hover:text-paper"
+          >
+            Sign out of this browser
+          </button>
+        </form>
+      ) : null}
+    </>
   );
 }

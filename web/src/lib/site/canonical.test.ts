@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canonicalRedirect } from "./canonical";
+import { canonicalRedirect, productionOrigin } from "./canonical";
 
 const prod = { VERCEL_ENV: "production", VERCEL_PROJECT_PRODUCTION_URL: "magnus-v1.vercel.app" };
 
@@ -21,5 +21,13 @@ describe("canonicalRedirect", () => {
   it("does nothing when the production domain is missing or odd", () => {
     expect(canonicalRedirect("x.vercel.app", "/", { VERCEL_ENV: "production" })).toBeNull();
     expect(canonicalRedirect("x.vercel.app", "/", { VERCEL_ENV: "production", VERCEL_PROJECT_PRODUCTION_URL: "https://evil.com/x" })).toBeNull();
+  });
+});
+
+describe("productionOrigin", () => {
+  it("is the production domain on production only", () => {
+    expect(productionOrigin(prod)).toBe("https://magnus-v1.vercel.app");
+    expect(productionOrigin({ ...prod, VERCEL_ENV: "preview" })).toBeNull();
+    expect(productionOrigin({ VERCEL_ENV: "production" })).toBeNull();
   });
 });

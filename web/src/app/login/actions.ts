@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { productionOrigin } from "@/lib/site/canonical";
 import { normaliseSiteOrigin } from "@/lib/auth/site-origin";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "@/lib/supabase/env";
@@ -23,6 +24,13 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * link to someone else's website. Locally, the request's own host is fine.
  */
 async function siteOrigin(): Promise<string | null> {
+  // On production the email link goes to the same one address the proxy
+  // redirects to, so the session lands where the reader will use it.
+  const production = productionOrigin({
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  });
+  if (production) return production;
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) {
     const origin = normaliseSiteOrigin(configured);

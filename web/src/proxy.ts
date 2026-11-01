@@ -39,7 +39,13 @@ export async function proxy(request: NextRequest) {
       VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
     },
   );
-  if (canonical) return NextResponse.redirect(canonical, 308);
+  if (canonical) {
+    // 307, not 308: a permanent redirect gets cached by browsers for good,
+    // so a wrong production domain would be stuck in phones forever.
+    const res = NextResponse.redirect(canonical, 307);
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  }
 
   // The landing page is static and needs no session: keep it fast.
   if (request.nextUrl.pathname === "/") return NextResponse.next();

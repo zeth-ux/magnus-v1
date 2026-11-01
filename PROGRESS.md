@@ -14,11 +14,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 **Done**
 - Email links use the implicit flow: Supabase sends the session back in the URL hash, and the landing page saves it in whichever browser opened the link, then removes it from the address bar. No key from the original browser is needed, so phones and Gmail's browser work. (`lib/auth/session-hash.ts`, `components/auth/link-error-redirect.tsx`, `app/login/actions.ts`.)
 - One production address: the proxy sends any other production host to Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`), keeping path, query and hash, so a sign-in always lives on one site whatever Supabase's Site URL says. Previews and local dev are untouched. (`lib/site/canonical.ts`; reads the Host header, after a local test caught `nextUrl` redirecting the main address to itself.)
-- The Google button is hidden unless `NEXT_PUBLIC_GOOGLE_SIGNIN=on`.
-- Login hint: "Open the newest one" (no more "same browser").
+- The redirect is a 307 with `Cache-Control: no-store` (Steve: a 308 would be cached in phones for good if the domain were ever wrong). Sign-in emails use the same production domain (`productionOrigin()`), so there's one source of truth.
+- The landing-page hand-off is a pure, tested function (`lib/auth/finish-sign-in.ts`, 8 tests; plus 3 proxy tests): tokens wiped from the address bar first; a link for a *different* account than the one already signed in is refused (`/login?error=account`, with a sign-out button) so nobody can be silently swapped into someone else's account; the refresh token is rotated straight after use; failures go to `/login?error=link`; `?code` and `?token_hash` are forwarded to `/auth/callback`.
+- The Google button is hidden unless `NEXT_PUBLIC_GOOGLE_SIGNIN=on` (in README and `.env.example`).
+- Login hint: "Open the newest one. You'll be signed in on the browser that opens it."
+- README setup steps 2–3 rewritten for the one-address model.
 
 **Decisions**
-- Implicit flow for email only: tokens travel in the URL hash (never sent to a server) and are wiped at once. Like any any-browser magic link, someone could send you a link that signs you in as *them*; /welcome shows who you're signed in as.
+- Implicit flow for email only: tokens travel in the URL hash (never sent to a server) and are wiped at once. Like any any-browser magic link, someone could send you a link that signs you in as *them*: blocked when you're already signed in, and /welcome shows who you're signed in as otherwise.
+- After this deploys, sessions on the longer team address end (that host now redirects); sign in once more on magnus-v1.vercel.app.
 
 **Next**
 - [ ] Zarith (optional): enable Google in Supabase (Authentication → Providers, with a Google Cloud OAuth client), then set `NEXT_PUBLIC_GOOGLE_SIGNIN=on` in Vercel.
