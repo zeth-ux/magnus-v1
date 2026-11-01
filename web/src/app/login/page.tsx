@@ -16,7 +16,7 @@ export const viewport: Viewport = AUTH_VIEWPORT;
 const NOTICES: Record<string, string> = {
   link: `That sign-in link has expired or was already used. Send yourself a new one below. ${OPEN_LINK_HINT}`,
   account:
-    "You're already signed in as someone else on this browser. Sign out first, then open the link again.",
+    "You're already signed in as someone else on this browser. Sign out, then send yourself a new link below.",
 };
 
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -53,6 +53,7 @@ async function LoginFormWithParams({ searchParams }: Pick<PageProps<"/login">, "
       />
       {errorKey === "account" ? (
         <form action="/auth/signout" method="post">
+          <input type="hidden" name="then" value="login" />
           <button
             type="submit"
             className="text-[15px] font-semibold text-paper/80 underline underline-offset-4 hover:text-paper"

@@ -18,7 +18,11 @@ export type Nav = {
 const CODE = /^[A-Za-z0-9_-]{6,200}$/;
 const OTP_TYPES = new Set(["email", "magiclink", "signup", "invite"]);
 
-/** The account a token belongs to (the JWT's `sub`), read without trusting it; Supabase checks it in setSession. */
+/**
+ * The account a token claims (the JWT's `sub`), read WITHOUT verifying it.
+ * Only for choosing what to tell the reader: never as a security check
+ * (setSession doesn't verify an expired access token either).
+ */
 export function tokenSubject(jwt: string): string | null {
   try {
     const payload = jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
@@ -40,7 +44,8 @@ export function tokenSubject(jwt: string): string | null {
  */
 export async function finishSignInFromUrl(
   loc: { pathname: string; search: string; hash: string },
-  client: SignInClient | null,
+  /** Called only when there are tokens to use, so ordinary landing visits load no auth client. */
+  getClient: () => SignInClient | null,
   nav: Nav,
 ): Promise<boolean> {
   const params = new URLSearchParams(loc.search);
@@ -50,17 +55,23 @@ export async function finishSignInFromUrl(
     // Tokens out of the address bar and history before anything else.
     nav.replaceUrl(loc.pathname + loc.search);
     const session = parseSessionHash(loc.hash);
+    const client = session ? getClient() : null;
     if (!session || !client) return fail(), true;
+    const next = safeRedirectPath(params.get("next"));
     try {
-      // Never swap a signed-in reader into someone else's account from a link
-      // (anyone can send a link carrying their own tokens).
+      // A browser that's already signed in never takes a session from a link:
+      // anyone can send a link carrying their own tokens, and the token's
+      // account can't be trusted before Supabase checks it. Same account (the
+      // usual "tapped the link twice") just carries on.
       const { data } = await client.getUser().catch(() => ({ data: { user: null } }));
-      if (data.user && data.user.id !== tokenSubject(session.accessToken)) return nav.go("/login?error=account"), true;
+      if (data.user) {
+        return nav.go(data.user.id === tokenSubject(session.accessToken) ? next : "/login?error=account"), true;
+      }
       const { error } = await client.setSession({ access_token: session.accessToken, refresh_token: session.refreshToken });
       if (error) return fail(), true;
       // Rotate at once, so the refresh token that travelled in the URL is dead.
       await client.refreshSession().catch(() => undefined);
-      nav.go(safeRedirectPath(params.get("next")));
+      nav.go(next);
     } catch {
       fail();
     }
@@ -68,13 +79,13 @@ export async function finishSignInFromUrl(
   }
 
   const code = params.get("code");
-  if (code && CODE.test(code)) return nav.go(`/auth/callback?code=${encodeURIComponent(code)}`), true;
+  const nextParam = encodeURIComponent(safeRedirectPath(params.get("next")));
+  if (code && CODE.test(code)) return nav.go(`/auth/callback?code=${encodeURIComponent(code)}&next=${nextParam}`), true;
 
   const tokenHash = params.get("token_hash");
   const type = params.get("type");
   if (tokenHash && CODE.test(tokenHash) && type && OTP_TYPES.has(type)) {
-    const next = encodeURIComponent(safeRedirectPath(params.get("next")));
-    return nav.go(`/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=${type}&next=${next}`), true;
+    return nav.go(`/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=${type}&next=${nextParam}`), true;
   }
 
   if (/[#&]error(_code)?=/.test(loc.hash)) return fail(), true;

@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(home, { status: 303 });
   }
 
+  // Only one other place to land: back on the sign-in form (from /login).
+  const form = await request.formData().catch(() => null);
+  if (form?.get("then") === "login") home.pathname = "/login";
+
   const supabase = await createSupabaseServerClient();
   // "local" signs out this browser only, not the PWA on your phone too.
   if (supabase) await supabase.auth.signOut({ scope: "local" });

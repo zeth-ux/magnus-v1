@@ -13,7 +13,7 @@ function fake(over: Partial<SignInClient> & { current?: string | null } = {}) {
     refreshSession: async () => (calls.push("refresh"), { error: null }),
   };
   const nav = { replaced: [] as string[], went: [] as string[], replaceUrl(u: string) { this.replaced.push(u); }, go(u: string) { this.went.push(u); } };
-  return { client, nav, calls };
+  return { client: () => client, nav, calls };
 }
 
 describe("finishSignInFromUrl", () => {
@@ -26,9 +26,11 @@ describe("finishSignInFromUrl", () => {
   });
 
   it("never follows an outside next", async () => {
-    const { client, nav } = fake();
-    await finishSignInFromUrl({ pathname: "/", search: "?next=%2F%2Fevil.example", hash: hashFor("u1") }, client, nav);
-    expect(nav.went).toEqual(["/welcome"]);
+    for (const bad of ["%2F%2Fevil.example", "%2F.%2F%2Fevil.example"]) {
+      const { client, nav } = fake();
+      await finishSignInFromUrl({ pathname: "/", search: `?next=${bad}`, hash: hashFor("u1") }, client, nav);
+      expect(nav.went).toEqual(["/welcome"]);
+    }
   });
 
   it("won't swap a signed-in reader into another account", async () => {
@@ -38,10 +40,13 @@ describe("finishSignInFromUrl", () => {
     expect(nav.went).toEqual(["/login?error=account"]);
   });
 
-  it("is fine when the link is for the reader already signed in", async () => {
-    const { client, nav } = fake({ current: "me" });
-    await finishSignInFromUrl({ pathname: "/", search: "", hash: hashFor("me") }, client, nav);
-    expect(nav.went).toEqual(["/welcome"]);
+  it("never takes a session from a link when already signed in, even one claiming the same account", async () => {
+    // An expired fake JWT can claim any sub while carrying someone else's refresh token.
+    const { client, nav, calls } = fake({ current: "me" });
+    await finishSignInFromUrl({ pathname: "/", search: "?next=%2Fbrowse", hash: hashFor("me") }, client, nav);
+    expect(calls).toEqual([]);
+    expect(nav.replaced).toEqual(["/?next=%2Fbrowse"]);
+    expect(nav.went).toEqual(["/browse"]);
   });
 
   it("sends a rejected or malformed link to /login (and still wipes it)", async () => {
@@ -60,7 +65,7 @@ describe("finishSignInFromUrl", () => {
   it("forwards a code or a token hash to /auth/callback, and errors to /login", async () => {
     const a = fake();
     await finishSignInFromUrl({ pathname: "/", search: "?code=8f2d7c1e-4b6a", hash: "" }, a.client, a.nav);
-    expect(a.nav.went).toEqual(["/auth/callback?code=8f2d7c1e-4b6a"]);
+    expect(a.nav.went).toEqual(["/auth/callback?code=8f2d7c1e-4b6a&next=%2Fwelcome"]);
     const b = fake();
     await finishSignInFromUrl({ pathname: "/", search: "?next=%2Fadd&token_hash=pkce_abc123&type=email", hash: "" }, b.client, b.nav);
     expect(b.nav.went).toEqual(["/auth/callback?token_hash=pkce_abc123&type=email&next=%2Fadd"]);
@@ -69,9 +74,12 @@ describe("finishSignInFromUrl", () => {
     expect(c.nav.went).toEqual(["/login?error=link"]);
   });
 
-  it("leaves an ordinary visit alone", async () => {
-    const { client, nav } = fake();
-    expect(await finishSignInFromUrl({ pathname: "/", search: "", hash: "#faq" }, client, nav)).toBe(false);
+  it("leaves an ordinary visit alone, without loading an auth client", async () => {
+    const { nav } = fake();
+    const noClient = () => {
+      throw new Error("client created");
+    };
+    expect(await finishSignInFromUrl({ pathname: "/", search: "", hash: "#faq" }, noClient, nav)).toBe(false);
     expect(nav.went).toEqual([]);
   });
 });

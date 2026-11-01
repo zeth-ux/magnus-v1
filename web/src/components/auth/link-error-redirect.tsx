@@ -12,8 +12,7 @@ import { finishSignInFromUrl } from "@/lib/auth/finish-sign-in";
  */
 export function LinkErrorRedirect() {
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    void finishSignInFromUrl(window.location, supabase ? supabase.auth : null, {
+    void finishSignInFromUrl(window.location, () => createSupabaseBrowserClient()?.auth ?? null, {
       replaceUrl: (url) => window.history.replaceState(null, "", url),
       go: (url) => window.location.replace(url),
     });

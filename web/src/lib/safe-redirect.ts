@@ -25,7 +25,11 @@ export function safeRedirectPath(
   try {
     const url = new URL(next, "http://bayu.invalid");
     if (url.origin !== "http://bayu.invalid") return fallback;
-    return `${url.pathname}${url.search}${url.hash}`;
+    const out = `${url.pathname}${url.search}${url.hash}`;
+    // Dot segments can collapse into "//": "/.//evil.example" resolves to the
+    // path "//evil.example", which a browser reads as another site.
+    if (out.startsWith("//") || out.startsWith("/\\")) return fallback;
+    return out;
   } catch {
     return fallback;
   }
