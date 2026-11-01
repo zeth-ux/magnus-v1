@@ -4,6 +4,32 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Email sign-in works in any browser; one production address
+
+**What the logs showed**
+- Supabase's Site URL is reset to `magnus-v1-merey-jago.vercel.app` about 10 s after every production deploy (8 out of 8 merges): the Vercel-Supabase integration rewrites it. Changing it in the dashboard can't stick.
+- On a phone, tapping the email link inside Gmail opens it in another browser, so the PKCE flow's key (saved in the browser that asked) was missing: `bad_code_verifier` every time.
+- "Continue with Google" failed with "provider is not enabled": Google sign-in was never set up in Supabase.
+
+**Done**
+- Email links use the implicit flow: Supabase sends the session back in the URL hash, and the landing page saves it in whichever browser opened the link, then removes it from the address bar. No key from the original browser is needed, so phones and Gmail's browser work. (`lib/auth/session-hash.ts`, `components/auth/link-error-redirect.tsx`, `app/login/actions.ts`.)
+- One production address: the proxy sends any other production host to Vercel's production domain (`VERCEL_PROJECT_PRODUCTION_URL`), keeping path, query and hash, so a sign-in always lives on one site whatever Supabase's Site URL says. Previews and local dev are untouched. (`lib/site/canonical.ts`; reads the Host header, after a local test caught `nextUrl` redirecting the main address to itself.)
+- The redirect is a 307 with `Cache-Control: no-store` (Steve: a 308 would be cached in phones for good if the domain were ever wrong). Sign-in emails use the same production domain (`productionOrigin()`), so there's one source of truth.
+- The landing-page hand-off is a pure, tested function (`lib/auth/finish-sign-in.ts`, 8 tests; plus 3 proxy tests): tokens wiped from the address bar first; a browser that's already signed in never takes a session from a link, on the landing page or in `/auth/callback` (a different account gets `/login?error=account`, with a sign-out button), so nobody can be silently swapped into someone else's account (Steve caught that checking the token's account isn't enough: an expired token's `sub` isn't verified); the refresh token is rotated straight after use; failures go to `/login?error=link`; `?code` and `?token_hash` are forwarded to `/auth/callback`.
+- The Google button is hidden unless `NEXT_PUBLIC_GOOGLE_SIGNIN=on` (in README and `.env.example`).
+- Login hint: "Open the newest one. You'll be signed in on the browser that opens it."
+- README setup steps 2–3 rewritten for the one-address model.
+- `safeRedirectPath` also checks its output: `/.//evil.example` used to collapse to `//evil.example` (another site). Also protected `/me`'s redirect, which was already on main.
+- The landing page only loads the auth client when a link brings tokens.
+
+**Decisions**
+- Implicit flow for email only: tokens travel in the URL hash (never sent to a server) and are wiped at once. Like any any-browser magic link, someone could send you a link that signs you in as *them*: blocked when you're already signed in; otherwise /welcome shows who you're signed in as otherwise.
+- After this deploys, sessions on the longer team address end (that host now redirects); sign in once more on magnus-v1.vercel.app.
+
+**Next**
+- [ ] Zarith (optional): enable Google in Supabase (Authentication → Providers, with a Google Cloud OAuth client), then set `NEXT_PUBLIC_GOOGLE_SIGNIN=on` in Vercel.
+- [ ] Optional: in the Vercel-Supabase integration settings, stop it syncing the Site URL; no longer needed for sign-in to work.
+
 ## 2026-11-01 (day): Taken-off books stay hidden; warkah and welcome fixes
 
 **Done**

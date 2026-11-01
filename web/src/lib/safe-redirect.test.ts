@@ -33,4 +33,10 @@ describe("safeRedirectPath", () => {
   it("normalises dot segments without leaving the site", () => {
     expect(safeRedirectPath("/a/../welcome")).toBe("/welcome");
   });
+
+  it("refuses dot segments that collapse into another host", () => {
+    for (const bad of ["/.//evil.example", "/..//evil.example", "/a/..//evil.example", "/%2e//evil.example"]) {
+      expect(safeRedirectPath(bad)).toBe("/welcome");
+    }
+  });
 });

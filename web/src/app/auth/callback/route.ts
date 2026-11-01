@@ -34,6 +34,12 @@ export async function GET(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
   if (!supabase) return failure;
 
+  // A browser that's already signed in never takes a session from a link:
+  // anyone can send a link with their own code or token hash. Same rule as
+  // the landing page (lib/auth/finish-sign-in.ts). The link stays unused.
+  const { data: current } = await supabase.auth.getUser();
+  if (current.user) return NextResponse.redirect(`${origin}${next}`);
+
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type");
   if (tokenHash && isAllowedOtpType(type)) {

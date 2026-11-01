@@ -1,8 +1,10 @@
 "use server";
 
 import { headers } from "next/headers";
+import { productionOrigin } from "@/lib/site/canonical";
 import { normaliseSiteOrigin } from "@/lib/auth/site-origin";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export type MagicLinkState =
@@ -22,6 +24,13 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * link to someone else's website. Locally, the request's own host is fine.
  */
 async function siteOrigin(): Promise<string | null> {
+  // On production the email link goes to the same one address the proxy
+  // redirects to, so the session lands where the reader will use it.
+  const production = productionOrigin({
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+  });
+  if (production) return production;
   const configured = process.env.NEXT_PUBLIC_SITE_URL;
   if (configured) {
     const origin = normaliseSiteOrigin(configured);
@@ -52,7 +61,17 @@ export async function sendMagicLink(
     };
   }
 
-  const supabase = await createSupabaseServerClient();
+  // The email link uses the implicit flow (the session comes back in the URL
+  // hash, finished by components/auth/link-error-redirect.tsx), so it works in
+  // whichever browser the phone opens it in. The PKCE flow needs a key saved
+  // in the browser that asked, which fails when Gmail opens the link itself.
+  // This client only sends the email: nothing to remember, no cookies.
+  const env = getSupabaseEnv();
+  const supabase = env
+    ? createClient(env.url, env.publishableKey, {
+        auth: { flowType: "implicit", persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      })
+    : null;
   const origin = await siteOrigin();
   if (!supabase || !origin) {
     return { status: "error", email, message: "Sign-in isn't set up yet. Try again soon." };
@@ -61,7 +80,7 @@ export async function sendMagicLink(
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${origin}/?next=${encodeURIComponent(next)}`,
       shouldCreateUser: true,
     },
   });
