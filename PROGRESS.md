@@ -4,6 +4,13 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Claude can merge and apply additive migrations
+
+**Decisions (Zarith)**
+- Claude may merge its own PRs once CI is green and Steve's Blocking items are fixed, in the order the PR descriptions give. Merging deploys production.
+- Claude may apply additive migrations to the live Supabase project after review; destructive ones still need Zarith's yes.
+- Recorded in CLAUDE.md ("How to work").
+
 ## 2026-11-01 (day): Sign-in links were swapped twice (service worker bug)
 
 **What happened:** clicking a fresh sign-in link still ended on "enter your email". Supabase's logs showed the code swapped twice, 0.5 s apart: the first worked, the second failed. The cause was the offline service worker's *navigation preload* (added in the PWA review fixes): with it on, every page load the worker skips, like `/auth/callback`, is fetched twice, once as the invisible preload and once for real. The preload used up the one-time code; the reader saw the failed second request. Reproduced locally (2 hits per click), fixed (1 hit), and checked the upgrade from the old worker.
