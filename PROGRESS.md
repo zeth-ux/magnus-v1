@@ -4,6 +4,16 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-01 (day): Sign-in survives a mismatched Site URL
+
+**What happened:** after the service-worker fix, the email link still ended on the landing page. Supabase's auth settings were saved again at 12:04-12:11 KST, and since then every email's link went to `magnus-v1-merey-jago.vercel.app/` (the Site URL fallback) instead of `/auth/callback`. Supabase accepted the link and sent a valid sign-in code, but it landed on the homepage, where nothing used it.
+
+**Done**
+- The landing page now finishes a sign-in that lands on it: `?code=` (and `?token_hash=&type=`) go to `/auth/callback` (same site, so the browser's sign-in cookie matches); `#error=` still goes to `/login?error=link`. Only well-formed values are forwarded. Tested in a headless browser.
+
+**Next**
+- [ ] Zarith: in Supabase → Authentication → URL Configuration, set Site URL back to `https://magnus-v1.vercel.app` and keep `https://magnus-v1.vercel.app/auth/callback` in Redirect URLs; use `magnus-v1.vercel.app` (not the `-merey-jago` address, which Vercel puts behind its login for everyone else).
+
 ## 2026-11-01 (day): Claude can merge and apply additive migrations
 
 **Decisions (Zarith)**
