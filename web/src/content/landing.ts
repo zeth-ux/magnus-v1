@@ -3,39 +3,27 @@
  * books live in shelf.ts.
  */
 
-/** How it works: four stages, each in the colour of a book on the shelf. */
+/** How it works: four stages in order, each with the library stamp it ends with. */
 export const HOW_STAGES = [
   {
     name: "List",
     text: "Scan the barcode on an English book you own and mark it give or lend. Your first one earns a starter credit.",
     stamp: "+1 starter",
-    bg: "#1f4d3a",
-    ink: "#f3ecdc",
-    dark: true,
   },
   {
     name: "Request",
     text: "Browse what readers near you are sharing. Pick a book; for a lend, pick the date you'll return it.",
     stamp: "Requested",
-    bg: "#1b2a6b",
-    ink: "#eef0fb",
-    dark: true,
   },
   {
     name: "Meet up",
     text: "Agree a café or a station that suits you both. When the book changes hands, you both tap handed over.",
     stamp: "Handed over",
-    bg: "#5a1f4a",
-    ink: "#fbe9f0",
-    dark: true,
   },
   {
     name: "Credits",
     text: "Give a book, earn a credit. Take one, spend a credit. Borrowing holds a credit until the book comes home.",
-    stamp: "+1 · −1",
-    bg: "#f0b429",
-    ink: "#2a1a0c",
-    dark: false,
+    stamp: "+1 / −1",
   },
 ] as const;
 

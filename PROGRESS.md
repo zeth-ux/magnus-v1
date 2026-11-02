@@ -4,6 +4,25 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-02: Paper redesign, part 1: foundation and the turning shelf
+
+**Why:** Zarith wants a beautiful, functional app before the pilot (no rush on 9 November now), using the concept in `Design.md`. Choices: Give/Lend tabs, English only, new brand colours (the reference's paper and cobalt).
+
+**Done**
+- New design foundation: paper `#EDEBE6`, sheet, ink, muted, one cobalt accent, vermilion for errors and stamps, print inks for covers (brand.md, with contrast checks). Newsreader + Inter Tight. Paper grain. Boxed catalogue labels (`.lbl`, `.box`), square printed buttons, cards and fields, a library stamp.
+- Every page moved from the dark ground to paper (a mechanical pass; the careful page-by-page polish is next).
+- Landing rebuilt around the **turning shelf**: 3D standing books, the centre one turned out to its cover, Give/Lend tabs, rolling caption, arrows/keys/drag/sideways scroll, ring cursor with OPEN on the cover. Opening a book grows a sheet from the cover with an ink-blot reveal. How it works, safety, questions and the footer redone as ruled, static sections. docs/landing.md rewritten.
+- Checked in headless Chromium at 1440 and 390 px, and with reduced motion.
+
+**Decisions**
+- Concept and motion from Design.md, not its images (someone else's VHS art on their CDN) or its "no libraries" rule (GSAP per CLAUDE.md).
+- Native cursor stays everywhere except over the shelf; text selection stays on except on the shelf.
+
+**Next**
+- [ ] Browse as a turning shelf of real copies; the book page with the ink reveal.
+- [ ] Page-by-page polish of the app (login, welcome, add, shelf, activity, wishlist, me, feedback, report, privacy, 404).
+- [ ] Zarith: OK to delete the old landing stack (`components/shelf/shelf.tsx`, `shelf-dialog.tsx`), now unused?
+
 ## 2026-11-01 (afternoon): The email link finally signs you in
 
 **What happened**

@@ -8,9 +8,14 @@
  */
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CustomEase } from "gsap/CustomEase";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(useGSAP, ScrollTrigger, CustomEase);
+
+/** The two eases of the paper design (docs/brand.md): text slides and turns, and a sheet unfolding. */
+CustomEase.create("paper", "0.2,0.8,0.2,1");
+CustomEase.create("sheet", "0.76,0,0.18,1");
 
 /** Motion only runs for people who haven't asked their device to reduce it. */
 export const MOTION_OK = "(prefers-reduced-motion: no-preference)";
