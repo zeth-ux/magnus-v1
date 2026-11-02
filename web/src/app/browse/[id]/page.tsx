@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
-import { Book3D } from "@/components/shelf/book-3d";
+import { InkPoster } from "@/components/turning-shelf/ink-poster";
+import { Rise } from "@/components/motion/rise";
 import { requireUser } from "@/lib/supabase/user";
 import { dressCopy } from "@/lib/shelf/dress";
 import { CONDITIONS } from "@/lib/books/validate";
@@ -34,10 +35,10 @@ type CopyRow = {
 export default function CopyPage({ params }: PageProps<"/browse/[id]">) {
   return (
     <AppShell>
-      <Link href="/browse" className="text-[15px] text-ink/80 underline underline-offset-4">
-        &larr; Back to the shelf
+      <Link href="/browse" className="box lbl text-ink no-underline">
+        Back to the shelf
       </Link>
-      <Suspense fallback={<p className="mt-10 text-ink/70">Taking it off the shelf…</p>}>
+      <Suspense fallback={<p className="mt-10 text-muted">Taking it off the shelf…</p>}>
         <CopyDetail params={params} />
       </Suspense>
     </AppShell>
@@ -82,94 +83,96 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
   const wanted = Number(wishCount ?? 0);
   const lendFor = lendDays(copy.lend_max, Number(flexibleDays ?? 183));
 
-  const look = dressCopy({
-    copy_id: copy.id,
-    isbn: copy.isbn,
-    title: copy.books.title,
-    authors: copy.books.authors,
-    mode: copy.mode,
-    lend_max: copy.lend_max,
-    area: copy.profiles.area,
-  });
+  const look = {
+    ...dressCopy({
+      copy_id: copy.id,
+      isbn: copy.isbn,
+      title: copy.books.title,
+      authors: copy.books.authors,
+      mode: copy.mode,
+      lend_max: copy.lend_max,
+      area: copy.profiles.area,
+    }),
+    note: copy.note ?? "",
+  };
   const isMine = copy.owner_id === user.id;
   const myRequest = (mine?.[0] ?? null) as { id: string; status: string } | null;
 
+  const facts = [copy.mode === "give" ? "To give" : "To lend", copy.mode === "give" ? "Yours to keep" : `Up to ${look.lendFor?.toLowerCase()}`, CONDITIONS[copy.condition]];
+
   return (
-    <div className="mt-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-6">
-      <div aria-hidden="true" className="flex min-h-[36svh] items-center justify-center [perspective:1400px] lg:col-span-6">
-        <div style={{ transformStyle: "preserve-3d", transform: "rotateX(-62deg) rotateZ(-11deg) rotateY(6deg)" }}>
-          <Book3D copy={look} size="min(520px, 74vw)" className="[--k:0.8] lg:[--k:1.1]" />
-        </div>
+    <div className="mt-8 grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-[4vw]">
+      <div className="flex justify-center md:order-2 md:sticky md:top-8">
+        <InkPoster copy={look} delay={0.15} className="relative aspect-[2/3] h-[46svh] max-w-full md:h-[min(72vh,720px)]" />
       </div>
 
-      <div className="flex flex-col gap-6 lg:col-span-6">
-        <h1 className="font-display text-[clamp(2.2rem,4vw,3.4rem)] leading-[1.04] font-semibold tracking-[-0.02em]">
-          {copy.books.title}
+      <Rise className="flex max-w-[560px] flex-col gap-[18px] md:order-1 md:pt-6">
+        <span className="mask">
+          <span data-rise="" className="lbl block text-cobalt">
+            {look.author}
+          </span>
+        </span>
+        <h1 className="mask font-display text-[42px] leading-[1] font-normal tracking-[-0.025em] md:text-[clamp(44px,5vw,76px)]">
+          <span data-rise="" className="block">
+            {copy.books.title}
+          </span>
         </h1>
-        <p className="font-display text-xl italic">{look.author}</p>
-        <dl className="grid grid-cols-2 gap-4 border-y border-ink/30 py-5 text-[15px] sm:grid-cols-3">
-          <div>
-            <dt className="text-ink/70">{copy.mode === "give" ? "To give" : "To lend"}</dt>
-            <dd className="text-[17px] font-semibold">{copy.mode === "give" ? "Yours to keep" : `Up to ${look.lendFor?.toLowerCase()}`}</dd>
-          </div>
-          <div>
-            <dt className="text-ink/70">From</dt>
-            <dd className="text-[17px] font-semibold">
-              {isMine ? "You" : copy.profiles.display_name}, {copy.profiles.area}
-              {smoothCount > 0 ? (
-                <span className="block text-[15px] font-normal text-ink/80">
-                  {smoothCount === 1 ? "1 reader had a smooth handover with them" : `${smoothCount} readers had a smooth handover with them`}
-                </span>
-              ) : null}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-ink/70">Condition</dt>
-            <dd className="text-[17px] font-semibold">{CONDITIONS[copy.condition]}</dd>
-          </div>
-        </dl>
+        <span className="mask">
+          <span data-rise="" className="flex flex-wrap">
+            {facts.map((f) => (
+              <span key={f} className="box lbl -ml-px first:ml-0">
+                {f}
+              </span>
+            ))}
+          </span>
+        </span>
+        <span className="mask">
+          <span data-rise="" className="block text-[16px] leading-[1.5]">
+            {isMine ? "Yours" : `From ${copy.profiles.display_name}`}, {copy.profiles.area}
+            {smoothCount > 0 ? (
+              <span className="block text-[14px] text-muted">
+                {smoothCount === 1 ? "1 reader had a smooth handover with them" : `${smoothCount} readers had a smooth handover with them`}
+              </span>
+            ) : null}
+          </span>
+        </span>
         {copy.note ? (
-          <figure className="flex flex-col gap-2">
-            <figcaption className="text-[15px] font-semibold text-ink/80">
+          <figure className="mask">
+            <span data-rise="" className="block border-l-2 border-cobalt pl-4">
               {/* Not "from <owner>": a given book keeps its note, so the owner may not be who wrote it. */}
-              Warkah: the note that travels with this book
-            </figcaption>
-            <blockquote className="font-display text-[clamp(1.2rem,1.8vw,1.5rem)] leading-snug whitespace-pre-line italic">
-              &ldquo;{copy.note}&rdquo;
-            </blockquote>
+              <figcaption className="lbl mb-2 text-muted">Warkah: the note that travels with this book</figcaption>
+              <blockquote className="max-w-[42ch] font-display text-[19px] leading-[1.5] whitespace-pre-line italic">&ldquo;{copy.note}&rdquo;</blockquote>
+            </span>
           </figure>
         ) : null}
-        {wanted > 0 ? (
-          <p className="text-[15px] text-ink/80">
-            {wanted === 1 ? "1 other reader wants this book." : `${wanted} other readers want this book.`}
-          </p>
-        ) : null}
-        {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}
-        {copies && copies > 1 ? (
-          <p className="text-[15px] text-ink/80">{copies} copies of this book are on the shelf.</p>
+        {wanted > 0 || (copies && copies > 1) ? (
+          <span className="mask">
+            <span data-rise="" className="block text-[14px] text-muted">
+              {wanted > 0 ? (wanted === 1 ? "1 other reader wants this book. " : `${wanted} other readers want this book. `) : null}
+              {copies && copies > 1 ? `${copies} copies of this book are on the shelf.` : null}
+            </span>
+          </span>
         ) : null}
 
-        {isMine ? (
-          <p className="text-[17px] text-ink/80">This is your book. Requests for it appear in Activity.</p>
-        ) : myRequest ? (
-          <p role="status" className="card p-6 text-[17px] text-ink">
-            {myRequest.status === "requested"
-              ? "You've asked for this book. Waiting for the owner to answer."
-              : myRequest.status === "accepted"
-                ? "The owner accepted. Agree where and when to meet, then confirm the handover in Activity."
-                : "You're borrowing this book."}
-          </p>
-        ) : copy.status !== "available" ? (
-          <p className="text-[17px] text-ink/80">This book isn&apos;t available right now.</p>
-        ) : (
-          <RequestForm
-            copyId={copy.id}
-            mode={copy.mode}
-            minDate={seoulDate(1)}
-            maxDate={seoulDate(lendFor)}
-          />
-        )}
-      </div>
+        <div className="mt-2 flex flex-col gap-5 border-t border-ink/90 pt-6">
+          {isMine ? (
+            <p className="text-[16px] text-ink/80">This is your book. Requests for it appear in Activity.</p>
+          ) : myRequest ? (
+            <p role="status" className="card p-5 text-[16px] leading-[1.5]">
+              {myRequest.status === "requested"
+                ? "You've asked for this book. Waiting for the owner to answer."
+                : myRequest.status === "accepted"
+                  ? "The owner accepted. Agree where and when to meet, then confirm the handover in Activity."
+                  : "You're borrowing this book."}
+            </p>
+          ) : copy.status !== "available" ? (
+            <p className="text-[16px] text-ink/80">This book isn&apos;t available right now.</p>
+          ) : (
+            <RequestForm copyId={copy.id} mode={copy.mode} minDate={seoulDate(1)} maxDate={seoulDate(lendFor)} />
+          )}
+          {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}
+        </div>
+      </Rise>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useId, useRef } from "react";
 import type { ShelfCopy } from "@/content/shelf";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { activeIndex, bookHeight, bookX, copiesFor, dims, nearestTarget, openness, smoothstep, wrapRel, type Dims } from "./geometry";
@@ -79,6 +79,7 @@ const Caption = memo(function Caption({ copy }: { copy: ShelfCopy }) {
 
 export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfProps) {
   const root = useRef<HTMLElement>(null);
+  const helpId = `ts-help-${useId().replace(/:/g, "")}`;
   const n = copies.length;
   const reps = copiesFor(n);
   const total = n * reps;
@@ -104,6 +105,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
       const tabs = Array.from(el.querySelectorAll<HTMLButtonElement>(".ts-tab"));
       const indicator = el.querySelector<HTMLElement>(".ts-tab-ink")!;
       const lines = Array.from(el.querySelectorAll<HTMLElement>(".ts-cap-line"));
+      const live = el.querySelector<HTMLElement>(".ts-live")!;
       const heights = copies.map((c) => bookHeight(c.length));
 
       const mm = gsap.matchMedia();
@@ -133,6 +135,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
       let s = startS;
       let T = startS;
       let active = activeIndex(s, n);
+      let announced = active;
       let dirty = true;
       const lift = new Float32Array(total);
       const liftTarget = new Float32Array(total);
@@ -146,7 +149,8 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
       let down: { x: number; T0: number; id: number } | null = null;
       let suppressClick = false;
       let wheelTimer = 0;
-      let paused = false;
+      // Read, not assumed: Next can hide this page and re-run setup while a book is open.
+      let paused = el.dataset.paused === "1";
 
       // ---- tabs: the cobalt block sits under the active book's mode ----
       const setTabs = () => {
@@ -199,6 +203,12 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
           setTabs();
         }
 
+        // Tell screen readers once the shelf has stopped on a book, not for every book it passes.
+        if (s === T && announced !== active) {
+          announced = active;
+          announce();
+        }
+
         // Tilt: the open cover leans towards the pointer like a card held in the hand.
         const cy = shelfY;
         const settled = Math.abs(T - s) < 0.3;
@@ -220,7 +230,8 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         tiltX = ntX;
 
         if (cursor) {
-          cursor.dataset.state = paused ? "" : onCover ? "open" : cursor.dataset.over === "spine" ? "spine" : cursor.dataset.over === "btn" ? "btn" : "";
+          const state = paused ? "" : onCover ? "open" : cursor.dataset.over === "spine" ? "spine" : cursor.dataset.over === "btn" ? "btn" : "";
+          if (cursor.dataset.state !== state) cursor.dataset.state = state;
         }
         if (!moving && !dirty) return;
         dirty = false;
@@ -258,6 +269,18 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         if (!visible) return;
         render(Math.min(deltaMs, 50) / 1000);
       };
+      // The caption is changed directly, so after a re-run (e.g. coming back to a
+      // page Next kept alive) rebuild it for the book actually in front.
+      for (const line of lines) {
+        line.replaceChildren();
+        fillCaption(line, line.dataset.line as "title" | "author" | "facts", copies[active]);
+      }
+      const announce = () => {
+        const c = copies[active];
+        live.textContent = `${c.title} by ${c.author}. ${captionParts(c).facts.join(", ")}.`;
+        ring.setAttribute("aria-label", `Open ${c.title}`);
+      };
+      announce();
       measure();
       setTabs();
       render(0);
@@ -364,7 +387,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         if (paused) return;
         if (e.key === "ArrowRight") step(1);
         else if (e.key === "ArrowLeft") step(-1);
-        else if (e.key === "Enter" && e.target === el.querySelector(".ts-shelf")) open();
+        else if ((e.key === "Enter" || e.key === " ") && e.target === el.querySelector(".ts-shelf")) open();
         else return;
         e.preventDefault();
       };
@@ -427,17 +450,17 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         window.clearTimeout(wheelTimer);
       };
     },
-    { scope: root, dependencies: [n] },
+    { scope: root, dependencies: [copies], revertOnUpdate: true },
   );
 
   if (n === 0) return null;
   const first = copies[((start % n) + n) % n];
 
   return (
-    <section ref={root} className="turning-shelf" aria-roledescription="carousel" aria-label={label}>
+    <section ref={root} className="turning-shelf" aria-label={label}>
       <span className="ts-probe" aria-hidden="true" />
 
-      <nav className="ts-tabs" aria-label="Give or lend">
+      <div className="ts-tabs" role="group" aria-label="Jump to books to give or to lend">
         <span className="ts-tab-ink" aria-hidden="true" />
         {gives >= 0 ? (
           <button type="button" className="ts-tab lbl" data-mode="give" data-first={gives} aria-pressed={first.mode === "give"}>
@@ -449,10 +472,10 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
             To lend
           </button>
         ) : null}
-      </nav>
+      </div>
 
       {/* Focusable so the arrow keys move the shelf and Enter opens the book in front. */}
-      <div className="ts-shelf" tabIndex={0} aria-describedby="ts-help">
+      <div className="ts-shelf" tabIndex={0} role="group" aria-roledescription="shelf" aria-label={label} aria-describedby={helpId}>
         <div className="ts-stage">
           {Array.from({ length: total }, (_, v) => {
             const copy = copies[v % n];
@@ -470,9 +493,11 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
           })}
         </div>
       </div>
-      <p id="ts-help" className="sr-only">
+      <p id={helpId} className="sr-only">
         Use the left and right arrow keys to move along the shelf, and Enter to open the book in front.
       </p>
+      {/* Announced once the shelf settles on a book (the visible caption changes too often to be live). */}
+      <p className="ts-live sr-only" aria-live="polite" />
 
       <button type="button" className="ts-open" aria-label="Open this book" tabIndex={-1}>
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
@@ -480,7 +505,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         </svg>
       </button>
 
-      <div className="ts-caption" aria-live="polite">
+      <div className="ts-caption" aria-hidden="true">
         <Caption copy={first} />
       </div>
 

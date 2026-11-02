@@ -40,7 +40,7 @@ export default function ShelfPage() {
     <AppShell>
       <div className="flex flex-col gap-12">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">My shelf.</h1>
+          <h1 className="page-title">My shelf</h1>
           <Link href="/add" className="btn-primary">
             Add a book
           </Link>
@@ -85,7 +85,7 @@ async function Shelf() {
   return (
     <div className="flex flex-col gap-14">
       <section aria-labelledby="mine-heading" className="flex flex-col gap-5">
-        <h2 id="mine-heading" className="font-display text-2xl font-semibold">
+        <h2 id="mine-heading" className="section-title">
           Your books ({current.length})
         </h2>
         {current.length === 0 ? (
@@ -99,7 +99,7 @@ async function Shelf() {
               return (
                 <li key={c.id} className="flex flex-col gap-3 card p-5 sm:flex-row sm:justify-between">
                   <div className="flex flex-col gap-1">
-                    <p className="font-display text-xl font-semibold">
+                    <p className="font-display text-[22px] leading-[1.15]">
                       <Link href={`/browse/${c.id}`} className="no-underline hover:underline">
                         {title}
                       </Link>
@@ -125,7 +125,7 @@ async function Shelf() {
       </section>
 
       <section aria-labelledby="borrowing-heading" className="flex flex-col gap-5">
-        <h2 id="borrowing-heading" className="font-display text-2xl font-semibold">
+        <h2 id="borrowing-heading" className="section-title">
           Borrowing ({borrowed.length})
         </h2>
         {borrowed.length === 0 ? (
@@ -136,7 +136,7 @@ async function Shelf() {
           <ul className="flex flex-col gap-3">
             {borrowed.map((b) => (
               <li key={b.id} className="flex flex-wrap items-baseline justify-between gap-2 card p-5">
-                <span className="font-display text-xl font-semibold">{b.copy?.books?.title ?? "A book"}</span>
+                <span className="font-display text-[22px] leading-[1.15]">{b.copy?.books?.title ?? "A book"}</span>
                 <span className="text-[15px] text-ink/80">
                   From {b.owner?.display_name ?? "a reader"} · back by {b.return_by ? pretty(b.return_by) : "—"} ·{" "}
                   <Link href="/activity" className="underline underline-offset-4">

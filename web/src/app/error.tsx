@@ -18,9 +18,9 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
     heading.current?.focus();
   }, [error]);
   return (
-    <main className="on-dark flex min-h-svh flex-col items-start justify-center gap-6 bg-paper px-6 text-ink sm:px-16">
+    <main className="flex min-h-svh flex-col items-start justify-center gap-6 bg-paper px-6 text-ink sm:px-16">
       <BayuMark className="h-12 w-12" />
-      <h1 ref={heading} tabIndex={-1} className="font-display text-[clamp(2.2rem,5vw,3.4rem)] leading-[1.04] font-medium tracking-[-0.02em] outline-none">
+      <h1 ref={heading} tabIndex={-1} className="page-title outline-none">
         A gust knocked this over.
       </h1>
       <p className="max-w-[30rem] text-[17px] leading-relaxed text-ink/80">

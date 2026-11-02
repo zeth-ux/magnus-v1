@@ -7,7 +7,7 @@ import type { ShelfCopy } from "@/content/shelf";
 import { smooth } from "@/lib/smooth";
 import { gsap, MOTION_OK, useGSAP } from "@/lib/gsap";
 import { BayuMark } from "@/components/bayu-mark";
-import { PrintCover } from "./print-art";
+import { InkPoster } from "./ink-poster";
 
 /**
  * An opened book. A sheet of paper the size and tilt of the cover grows out of
@@ -16,17 +16,6 @@ import { PrintCover } from "./print-art";
  * Closing folds the sheet back into the cover. A modal dialog: Esc or Close
  * returns to the shelf, and the page behind is inert.
  */
-
-/** Ink blots that grow to reveal the cover: centre (in a 474 x 900 cover) and delay (ms). */
-const BLOTS: [number, number, number][] = [
-  [150, 330, 0],
-  [340, 600, 120],
-  [250, 120, 220],
-  [90, 760, 300],
-  [400, 250, 360],
-  [260, 860, 420],
-  [230, 470, 180],
-];
 
 function insetFrom(rect: DOMRect) {
   const W = window.innerWidth;
@@ -69,8 +58,6 @@ export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTML
     () => {
       const el = root.current!;
       el.querySelector<HTMLElement>("#book-sheet-title")?.focus({ preventScroll: true });
-      const poster = el.querySelector<HTMLElement>("[data-poster]")!;
-      const circles = Array.from(el.querySelectorAll<SVGCircleElement>("[data-blot]"));
       const mm = gsap.matchMedia();
       mm.add(MOTION_OK, () => {
         const rect = from.getBoundingClientRect();
@@ -83,23 +70,6 @@ export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTML
         );
         tl.fromTo("[data-rise]", { yPercent: 110 }, { yPercent: 0, duration: 0.9, ease: "paper", stagger: 0.075 }, 0.62);
 
-        // The ink: blots in the cover's own space, scaled to the poster's size.
-        const pr = poster.getBoundingClientRect();
-        const k = pr.width / 474;
-        circles.forEach((c, i) => {
-          c.setAttribute("cx", String(BLOTS[i][0] * k));
-          c.setAttribute("cy", String(BLOTS[i][1] * k));
-          c.setAttribute("r", "0");
-          tl.to(c, { attr: { r: 720 * k }, duration: 1.25, ease: "power3.out" }, 0.52 + BLOTS[i][2] / 1000);
-        });
-        el.querySelector("feDisplacementMap")?.setAttribute("scale", String(120 * k));
-        poster.style.maskImage = "url(#book-sheet-ink)";
-        poster.style.webkitMaskImage = "url(#book-sheet-ink)";
-        // Drop the mask once the ink has spread, so the cover never depends on it.
-        tl.call(() => {
-          poster.style.maskImage = "";
-          poster.style.webkitMaskImage = "";
-        }, [], 2.4);
       });
       return () => mm.revert();
     },
@@ -134,22 +104,6 @@ export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTML
       data-lenis-prevent=""
       className="book-sheet fixed inset-0 z-[300] overflow-y-auto bg-sheet text-ink"
     >
-      <svg width="0" height="0" className="absolute" aria-hidden="true">
-        <defs>
-          <filter id="book-sheet-ink-filter" x="-50%" y="-50%" width="200%" height="200%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="3" seed="7" />
-            <feDisplacementMap in="SourceGraphic" scale="120" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-          <mask id="book-sheet-ink" maskUnits="userSpaceOnUse" x="-400" y="-400" width="2400" height="3200">
-            <g filter="url(#book-sheet-ink-filter)">
-              {BLOTS.map((_, i) => (
-                <circle key={i} data-blot="" r="0" fill="#fff" />
-              ))}
-            </g>
-          </mask>
-        </defs>
-      </svg>
-
       <div className="sticky top-0 z-10 grid h-16 grid-cols-[1fr_auto_1fr] items-center px-4 sm:h-[84px] sm:px-8">
         <button type="button" onClick={close} className="box lbl justify-self-start bg-sheet">
           Close
@@ -163,9 +117,7 @@ export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTML
 
       <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 items-center gap-8 px-[22px] pb-12 md:min-h-[calc(100svh-84px)] md:grid-cols-2 md:gap-[4vw] md:px-[6vw] md:pb-14">
         <div className="flex justify-center md:order-2">
-          <div data-poster="" className="relative aspect-[2/3] h-[46svh] max-w-full md:h-[min(78vh,780px)]">
-            <PrintCover copy={copy} className="rounded-[2px]" />
-          </div>
+          <InkPoster copy={copy} delay={0.52} className="relative aspect-[2/3] h-[46svh] max-w-full md:h-[min(78vh,780px)]" />
         </div>
 
         <div className="flex max-w-[520px] flex-col gap-[18px] md:order-1">

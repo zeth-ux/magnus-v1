@@ -31,7 +31,7 @@ export async function WaitingBadge({ corner = false }: { corner?: boolean }) {
     <>
       <span
         aria-hidden="true"
-        className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cobalt px-1 text-[11px] leading-none font-bold text-ink ${
+        className={`inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-vermilion px-1 text-[11px] leading-none font-bold text-white ${
           corner ? "absolute -top-3.5 -right-5" : "ml-1.5"
         }`}
       >

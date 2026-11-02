@@ -22,7 +22,7 @@ export default function ActivityPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-12">
-        <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Activity.</h1>
+        <h1 className="page-title">Activity</h1>
         <Announcer>
           <Suspense fallback={<p className="text-ink/70">Checking your requests…</p>}>
             <Requests />
@@ -114,8 +114,8 @@ async function Requests() {
   return (
     <div className="flex flex-col gap-14">
       {wished.length > 0 ? (
-        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 rounded-[10px] border border-cobalt/60 p-5">
-          <h2 id="wished-heading" className="font-display text-2xl font-semibold text-cobalt">
+        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 border border-cobalt p-5">
+          <h2 id="wished-heading" className="font-display text-[24px] leading-[1.15] text-cobalt">
             From your wishlist, on the shelf now
           </h2>
           <ul className="flex flex-col gap-2 text-[17px]">
@@ -187,7 +187,7 @@ async function Requests() {
 function Section({ title, empty, children }: { title: string; empty: React.ReactNode; children: React.ReactNode[] }) {
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="font-display text-2xl font-semibold">{title}</h2>
+      <h2 className="section-title">{title}</h2>
       {children.length === 0 ? <p className="text-[17px] text-ink/80">{empty}</p> : <ul className="flex flex-col gap-4">{children}</ul>}
     </section>
   );
@@ -214,7 +214,7 @@ function Item({
   return (
     <li className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col gap-1">
-        <p className="font-display text-xl font-semibold">
+        <p className="font-display text-[22px] leading-[1.15]">
           {row.copy ? (
             <Link href={`/browse/${row.copy.id}`} className="no-underline hover:underline">
               {title}

@@ -15,7 +15,7 @@ export const viewport: Viewport = { themeColor: "#edebe6", colorScheme: "light" 
  */
 export default function PrivacyPage() {
   return (
-    <div className="on-dark min-h-svh bg-paper text-ink">
+    <div className="min-h-svh bg-paper text-ink">
       <header className="mx-auto flex w-full max-w-[760px] items-center px-6 py-5">
         <Link href="/" className="flex items-center gap-3 text-ink no-underline">
           <BayuMark className="h-8 w-8" />
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
       </header>
       <main className="mx-auto flex w-full max-w-[760px] flex-col gap-10 px-6 pt-6 pb-24 text-[17px] leading-relaxed">
         <div className="flex flex-col gap-3">
-          <h1 className="font-display text-[clamp(2.2rem,5vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Privacy</h1>
+          <h1 className="page-title">Privacy</h1>
           <p className="text-ink/80">
             Bayu is a small pilot run by Zarith Imran for readers in Ansan. This page says, in plain words, what we keep,
             who can see it, and how to have it removed. Last updated 1 November 2026.
@@ -148,7 +148,7 @@ export default function PrivacyPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="font-display text-2xl font-semibold">{title}</h2>
+      <h2 className="section-title">{title}</h2>
       {children}
     </section>
   );

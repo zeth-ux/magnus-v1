@@ -76,7 +76,7 @@ export function CopyControls({ copy }: { copy: Copy }) {
       </form>
       {/* A separate form, so no double-click on the first button can land on "Yes". */}
       {confirmWithdraw && canToggle ? (
-        <form action={action} className="flex flex-col gap-2 rounded-[8px] border border-vermilion/60 p-4">
+        <form action={action} className="flex flex-col gap-2 border border-vermilion p-4">
           <input type="hidden" name="copy" value={copy.id} />
           <p id={`withdraw-warning-${copy.id}`} className="text-[15px] text-ink/80">
             It disappears from the shelf for good and open requests for it are cancelled. Your credits don&apos;t change.
@@ -98,7 +98,7 @@ export function CopyControls({ copy }: { copy: Copy }) {
               disabled={pending}
               aria-describedby={`withdraw-warning-${copy.id}`}
               aria-label={`Yes, take it off: ${copy.title}`}
-              className="h-11 rounded-full bg-vermilion px-5 text-[15px] font-semibold text-ink disabled:opacity-60"
+              className="btn-primary !min-h-11 !bg-vermilion disabled:opacity-60"
             >
               Yes, take it off
             </button>

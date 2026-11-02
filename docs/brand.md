@@ -52,7 +52,7 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 | `paper` | The page | `#EDEBE6` |
 | `sheet` | Raised paper: cards, dialogs, fields | `#F4F2ED` |
 | `ink` | Text, rules, labels | `#141414` |
-| `muted` | Secondary text | `#6D6A63` |
+| `muted` | Secondary text | `#66635C` |
 | `cobalt` | The one accent: primary buttons, active tab, links that act, the mark | `#1F3FB0` |
 | `cobalt-deep` | Hover and pressed | `#18328C` |
 | `vermilion` | Errors, stamps (text-safe) | `#B7351B` |
@@ -61,11 +61,13 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 `#D9472B` (covers use `#C23A1E` where text sits on it), `mustard` `#E2B23A`,
 `cream` `#F1E9D6`, `kraft` `#D9CDB4`, plus ink and cobalt.
 
-**Contrast** (WCAG AA ≥ 4.5 for text): ink on paper 15.5 · muted on paper 4.5 ·
-muted on sheet 4.8 · cobalt on paper 7.4 · white on cobalt 8.8 · vermilion on
+**Contrast** (WCAG AA ≥ 4.5 for text): ink on paper 15.5 · muted on paper 5.0
+(about 4.8 under the paper grain) · muted on sheet 5.3 · cobalt on paper 7.4 · white on cobalt 8.8 · vermilion on
 paper 4.9 · ink on kraft 11.7 · ink on mustard 9.4 · cream on ink 15.2 · cream
-on cobalt 7.3 · cream on `#C23A1E` 4.4 (spine and cover titles only, which are
-large text: ≥ 3).
+on cobalt 7.3 · cream on `#C23A1E` 4.4 (fine for the large titles, ≥ 3; the small
+author and Give/Lend text on those covers is decorative: the art is hidden from
+screen readers and every fact is repeated in the caption or page beside it) ·
+vermilion on sheet 5.3 · white on vermilion 5.9.
 
 **Type**
 - **Newsreader** (variable, optical sizes): book titles, headings, reading text.

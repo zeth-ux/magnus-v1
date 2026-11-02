@@ -25,12 +25,14 @@ export default function LandingPage() {
     <div className="bg-paper">
       <LinkErrorRedirect />
       <SmoothScroll />
-      <main className="relative">
+      <div className="relative">
         <SiteHeader />
-        <LandingShelf />
-        <HowItWorks />
-        <SafetyFaq />
-      </main>
+        <main>
+          <LandingShelf />
+          <HowItWorks />
+          <SafetyFaq />
+        </main>
+      </div>
       <Closing />
     </div>
   );

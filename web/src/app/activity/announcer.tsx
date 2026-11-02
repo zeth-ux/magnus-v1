@@ -19,7 +19,7 @@ export function Announcer({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <Ctx.Provider value={announce}>
-      <p ref={region} tabIndex={-1} role="status" className="min-h-6 text-[17px] text-ink outline-none">
+      <p ref={region} tabIndex={-1} role="status" className="text-[17px] text-ink outline-none empty:sr-only">
         {message}
       </p>
       {children}

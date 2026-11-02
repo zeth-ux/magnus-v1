@@ -76,12 +76,12 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
             : "When someone asks to borrow it, you'll agree a meet-up and a return date."}
         </p>
         {state.starter ? (
-          <span className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-vermilion bg-sheet px-3 py-1 font-display text-[17px] font-semibold text-vermilion">
+          <span className="stamp absolute -top-4 right-5 bg-sheet">
             +1 starter credit
           </span>
         ) : null}
         <div className="flex flex-wrap gap-4 pt-1">
-          <button type="button" onClick={onAgain} className="rounded-full bg-paper px-6 py-3 text-[17px] font-semibold text-ink">
+          <button type="button" onClick={onAgain} className="btn-quiet">
             Add another
           </button>
           <Link href="/me" className="self-center text-[15px] font-semibold text-ink underline underline-offset-4">
@@ -103,7 +103,7 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
     <div className="flex max-w-[34rem] flex-col gap-8">
       {/* Step 1: find the book */}
       <section aria-labelledby="find-heading" className="flex flex-col gap-4">
-        <h2 id="find-heading" className="font-display text-xl font-semibold">
+        <h2 id="find-heading" className="font-display text-[22px] leading-[1.15]">
           1. Find your book
         </h2>
         <div className="flex flex-wrap items-end gap-3">
@@ -172,7 +172,7 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
           className="flex flex-col gap-6"
           noValidate
         >
-          <h2 className="font-display text-xl font-semibold">2. Give or lend</h2>
+          <h2 className="font-display text-[22px] leading-[1.15]">2. Give or lend</h2>
           <input type="hidden" name="isbn" value={found.isbn} />
 
           <Field id="title" label="Title" error={errors.title}>

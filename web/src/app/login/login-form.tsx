@@ -152,7 +152,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
 export function LoginFormPlaceholder() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true">
-      <div className="h-13 rounded-full border-[1.5px] border-ink/30" />
+      <div className="h-12 border border-ink/30" />
       <div className="h-px" />
       <div className="flex flex-col gap-3">
         <span className="text-[15px] font-semibold text-ink/70">Email</span>

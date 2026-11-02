@@ -56,7 +56,7 @@ async function Welcome() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h1 className="font-display text-[clamp(2.4rem,4vw,3.4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+        <h1 className="page-title">
           {returning ? "Welcome back." : "You're in."}
         </h1>
         <p className="text-[17px] leading-relaxed text-ink/80">
@@ -74,7 +74,7 @@ async function Welcome() {
       {/* A library card, stamped with the day the shelf opens (for readers still setting up). */}
       {returning ? null : (
         <div className="relative card p-7 text-ink">
-          <p className="font-display text-xl font-semibold">
+          <p className="font-display text-[22px] leading-[1.15]">
             Before 9 November
           </p>
           <p className="mt-2 max-w-[30ch] text-[17px] leading-relaxed">
@@ -84,7 +84,7 @@ async function Welcome() {
           </p>
           <span
             aria-hidden="true"
-            className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-vermilion bg-sheet px-3 py-1 font-display text-[17px] font-semibold text-vermilion"
+            className="stamp absolute -top-4 right-5 bg-sheet"
           >
             Opens 9 Nov
           </span>

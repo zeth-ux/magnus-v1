@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ShelfCopy } from "@/content/shelf";
 import { TurningShelf } from "@/components/turning-shelf/turning-shelf";
 import { BookSheet } from "@/components/turning-shelf/book-sheet";
@@ -13,6 +13,14 @@ export function ShelfHero({ copies }: { copies: ShelfCopy[] }) {
   const [open, setOpen] = useState<{ copy: ShelfCopy; from: HTMLElement } | null>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const samples = copies.every((c) => c.sample);
+  const restore = useRef(false);
+
+  // Give focus back to the shelf after the sheet has gone (and the page is no longer inert).
+  useEffect(() => {
+    if (open || !restore.current) return;
+    restore.current = false;
+    wrap.current?.querySelector<HTMLElement>(".ts-shelf")?.focus({ preventScroll: true });
+  }, [open]);
 
   const pause = (on: boolean) => {
     const shelf = wrap.current?.querySelector<HTMLElement>(".turning-shelf");
@@ -41,9 +49,9 @@ export function ShelfHero({ copies }: { copies: ShelfCopy[] }) {
           copy={open.copy}
           from={open.from}
           onClose={() => {
+            restore.current = true;
             setOpen(null);
             pause(false);
-            wrap.current?.querySelector<HTMLElement>(".ts-shelf")?.focus({ preventScroll: true });
           }}
         />
       ) : null}

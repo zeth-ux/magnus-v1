@@ -29,7 +29,7 @@ export function InstallHint() {
   if (platform === "other" && !prompt) return null;
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3 rounded-[10px] border border-ink/25 p-6">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3 card p-6">
       <h2 id={headingId} className="font-display text-xl font-semibold">
         Put Bayu on your home screen
       </h2>

@@ -16,8 +16,8 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
     <AppShell>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-3">
-          <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">
-            Your library card.
+          <h1 className="page-title">
+            Your library card
           </h1>
           <p className="max-w-[32rem] text-[17px] leading-relaxed text-ink/80">
             Tell other readers who you are and roughly where you are in Ansan.
@@ -61,7 +61,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
       </div>
       {profile ? (
         <aside aria-label="Your credits" className="h-fit card p-7 text-ink lg:col-span-4 lg:col-start-9">
-          <p className="font-display text-xl font-semibold">Credits</p>
+          <p className="font-display text-[22px] leading-[1.15]">Credits</p>
           {creditsError ? (
             <p className="mt-4 text-[15px]">Couldn&apos;t load your credits just now. Refresh to try again.</p>
           ) : (
@@ -123,18 +123,18 @@ async function CardHistory() {
     if (r.copy?.books) titles.set(r.id, r.copy.books.title);
 
   const stamps = toStamps(rows, (r) => titles.get(r.ref_id) ?? null);
-  // All at least 4.5:1 on paper (pandan-deep 5.5, merah 9.3, kopi 5.3).
+  // All at least 4.5:1 on the sheet (cobalt 7.8, vermilion 5.2, muted 4.8).
   const tone = { plus: "border-cobalt text-cobalt", minus: "border-vermilion text-vermilion", held: "border-muted text-muted" } as const;
 
   return (
     <section aria-labelledby="history-heading" className="card p-7 text-ink">
-      <h2 id="history-heading" className="font-display text-xl font-semibold">
+      <h2 id="history-heading" className="font-display text-[22px] leading-[1.15]">
         Stamps on your card
       </h2>
       <ol className="mt-5 flex flex-col divide-y divide-ink/10">
         {stamps.map((s) => (
           <li key={s.id} className="flex items-center gap-4 py-3">
-            <span className={`w-20 shrink-0 -rotate-3 rounded-[4px] border-2 px-2 py-1 text-center font-display text-[15px] font-semibold ${tone[s.tone]}`}>
+            <span className={`w-20 shrink-0 -rotate-3 border-2 px-2 py-1 text-center font-text text-[13px] font-bold tracking-[0.06em] ${tone[s.tone]}`}>
               {s.amount}
             </span>
             <span className="min-w-0 flex-1 text-[15px]">{s.text}</span>
@@ -159,7 +159,7 @@ async function Blocked() {
   const rows = data as unknown as { blocked_id: string; profiles: { display_name: string } | null }[];
   return (
     <section className="flex max-w-[34rem] flex-col gap-4">
-      <h2 className="font-display text-2xl font-semibold">Readers you&apos;ve blocked</h2>
+      <h2 className="section-title">Readers you&apos;ve blocked</h2>
       <p className="text-[15px] text-ink/80">You can&apos;t ask each other for books. They aren&apos;t told.</p>
       <ul className="flex flex-col gap-3">
         {rows.map((r) => {

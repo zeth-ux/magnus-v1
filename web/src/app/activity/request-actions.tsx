@@ -45,10 +45,10 @@ export function RequestActions({ request, title, ops }: { request: string; title
               aria-label={`${o.op === "report" ? "Yes, report it" : o.label}: ${title}`}
               className={
                 o.op === "report"
-                  ? "h-11 rounded-full bg-vermilion px-5 text-[15px] font-semibold text-ink"
+                  ? "btn-primary !min-h-11 !bg-vermilion"
                   : o.primary
                     ? "btn-primary !min-h-10 !px-4"
-                    : "h-11 rounded-full border-[1.5px] border-ink/60 px-5 text-[15px] font-semibold"
+                    : "btn-quiet !min-h-11"
               }
             >
               {o.op === "report" ? "Yes, report it" : o.label}

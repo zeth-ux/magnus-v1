@@ -10,7 +10,7 @@
   --color-paper: #edebe6; /* the page */
   --color-sheet: #f4f2ed; /* raised paper: cards, dialogs, fields */
   --color-ink: #141414; /* text, rules */
-  --color-muted: #6d6a63; /* secondary text (4.5:1 on paper) */
+  --color-muted: #66635c; /* secondary text (5.0:1 on paper, still AA under the grain) */
   --color-cobalt: #1f3fb0; /* the one accent: actions, active state, the mark */
   --color-cobalt-deep: #18328c; /* pressed / hover */
   --color-vermilion: #b7351b; /* errors and stamps (text-safe) */
@@ -42,6 +42,8 @@ html {
 body {
   margin: 0;
   caret-color: var(--color-cobalt);
+  /* Full-bleed bands (the browse shelf) are 100vw wide; never let them scroll sideways. */
+  overflow-x: clip;
 }
 
 /*
@@ -101,7 +103,8 @@ a {
   .box {
     display: inline-flex;
     align-items: center;
-    min-height: 22px;
+    /* 24px: the smallest comfortable tap target (WCAG 2.5.8) when a box is a link or button. */
+    min-height: 24px;
     padding: 0 8px;
     border: 1px solid rgb(20 20 20 / 0.9);
     white-space: nowrap;
@@ -593,9 +596,24 @@ a {
 .turning-shelf[data-fine="1"]:not(:hover) .ts-cursor {
   visibility: hidden;
 }
-.turning-shelf[data-fine="1"],
-.turning-shelf[data-fine="1"] * {
+/* The ring replaces the pointer over the books only; buttons keep the system cursor,
+   and anyone using forced colours (often with a custom cursor) keeps theirs everywhere. */
+.turning-shelf[data-fine="1"] .ts-shelf,
+.turning-shelf[data-fine="1"] .ts-book {
   cursor: none;
+}
+@media (forced-colors: active) {
+  .turning-shelf[data-fine="1"] .ts-shelf,
+  .turning-shelf[data-fine="1"] .ts-book {
+    cursor: auto;
+  }
+  .ts-cursor {
+    display: none !important;
+  }
+  .ts-tab.is-on {
+    outline: 2px solid CanvasText;
+    outline-offset: -4px;
+  }
 }
 .ts-cursor-ring,
 .ts-cursor-dot,
@@ -662,4 +680,73 @@ a {
   text-transform: uppercase;
   rotate: -5deg;
   white-space: nowrap;
+}
+
+/* Inside the app the shelf is a full-bleed band, not the whole screen. */
+.browse-shelf {
+  margin-inline: calc(50% - 50vw);
+}
+.browse-shelf .turning-shelf {
+  --H: min(40vh, 28vw);
+  height: calc(var(--H) + 300px);
+  min-height: 0;
+}
+@media (max-width: 767px) {
+  .browse-shelf .turning-shelf {
+    --H: min(62vw, 38svh);
+    height: calc(var(--H) + 290px);
+  }
+}
+
+/* App navigation: catalogue tabs; the current page is the cobalt block. */
+.app-tab {
+  min-height: 30px;
+  padding: 0 12px;
+  color: var(--color-ink);
+  transition:
+    background-color 0.3s var(--ease-paper),
+    color 0.3s var(--ease-paper);
+}
+.app-tab:hover {
+  background: rgb(20 20 20 / 0.06);
+}
+.app-tab[aria-current="page"] {
+  position: relative;
+  z-index: 1;
+  border-color: var(--color-cobalt);
+  background: var(--color-cobalt);
+  color: #fff;
+}
+.app-tab-phone[aria-current="page"] {
+  color: var(--color-cobalt);
+  box-shadow: inset 0 3px 0 var(--color-cobalt);
+}
+
+/* Page and section titles in the app. */
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.section-title {
+  border-top: 1px solid rgb(20 20 20 / 0.9);
+  padding-top: 14px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Reduced motion: state changes still happen, they just don't slide or grow. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

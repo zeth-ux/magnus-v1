@@ -19,7 +19,7 @@ export default function WishlistPage() {
     <AppShell>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-3">
-          <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Your wishlist.</h1>
+          <h1 className="page-title">Your wishlist</h1>
           <p className="max-w-[34rem] text-[17px] leading-relaxed text-ink/80">
             Books you&apos;d love to read. When someone puts one on the shelf, it shows up here and in Activity.
           </p>
@@ -63,7 +63,7 @@ async function Wishes() {
         return (
           <li key={w.isbn} className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-1">
-              <p className="font-display text-xl font-semibold">{title}</p>
+              <p className="font-display text-[22px] leading-[1.15]">{title}</p>
               {w.books?.authors?.length ? <p className="text-[15px] text-ink/80">{w.books.authors.join(", ")}</p> : null}
               {copy ? (
                 <p className="text-[15px] font-semibold text-cobalt">

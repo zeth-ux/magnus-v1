@@ -10,7 +10,7 @@ export default function FeedbackPage() {
   return (
     <AppShell>
       <div className="flex flex-col gap-8">
-        <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Send feedback.</h1>
+        <h1 className="page-title">Send feedback</h1>
         <FeedbackForm />
       </div>
     </AppShell>

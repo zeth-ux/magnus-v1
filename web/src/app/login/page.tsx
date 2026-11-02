@@ -24,7 +24,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
     <AuthShell>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-4">
-          <h1 className="font-display text-[clamp(2.4rem,4vw,3.4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+          <h1 className="page-title">
             Join the Ansan pilot.
           </h1>
           <p className="max-w-[26rem] text-[17px] leading-relaxed text-ink/80">
