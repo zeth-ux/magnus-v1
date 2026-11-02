@@ -275,12 +275,13 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         line.replaceChildren();
         fillCaption(line, line.dataset.line as "title" | "author" | "facts", copies[active]);
       }
-      const announce = () => {
+      const announce = (speak = true) => {
         const c = copies[active];
-        live.textContent = `${c.title} by ${c.author}. ${captionParts(c).facts.join(", ")}.`;
+        // Silent at setup, so a page load (or coming back to the page) doesn't announce a book.
+        if (speak) live.textContent = `${c.title} by ${c.author}. ${captionParts(c).facts.join(", ")}.`;
         ring.setAttribute("aria-label", `Open ${c.title}`);
       };
-      announce();
+      announce(false);
       measure();
       setTabs();
       render(0);
@@ -457,7 +458,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
   const first = copies[((start % n) + n) % n];
 
   return (
-    <section ref={root} className="turning-shelf" aria-label={label}>
+    <section ref={root} className="turning-shelf">
       <span className="ts-probe" aria-hidden="true" />
 
       <div className="ts-tabs" role="group" aria-label="Jump to books to give or to lend">
@@ -494,7 +495,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         </div>
       </div>
       <p id={helpId} className="sr-only">
-        Use the left and right arrow keys to move along the shelf, and Enter to open the book in front.
+        Use the left and right arrow keys to move along the shelf, and Enter or Space to open the book in front.
       </p>
       {/* Announced once the shelf settles on a book (the visible caption changes too often to be live). */}
       <p className="ts-live sr-only" aria-live="polite" />

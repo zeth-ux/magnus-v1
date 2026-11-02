@@ -27,7 +27,8 @@ function Print({ copy, id }: { copy: ShelfCopy; id: string }) {
 export function PrintCover({ copy, className = "" }: { copy: ShelfCopy; className?: string }) {
   const id = `pc-${useId().replace(/:/g, "")}`;
   return (
-    <div className={`print-cover ${className}`} style={{ background: copy.colour, color: copy.text }}>
+    // Decorative everywhere: the title, author and mode are always written out beside it.
+    <div aria-hidden="true" className={`print-cover ${className}`} style={{ background: copy.colour, color: copy.text }}>
       <svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <PatternDef id={id} pattern={copy.pattern} ink={copy.ink} base={copy.colour} scale={0.9} />
@@ -53,7 +54,7 @@ export function PrintSpine({ copy, className = "" }: { copy: ShelfCopy; classNam
   const id = `ps-${useId().replace(/:/g, "")}`;
   const surname = copy.author.split(",")[0].trim().split(" ").slice(-1)[0];
   return (
-    <div className={`print-spine ${className}`} style={{ background: copy.colour, color: copy.text }}>
+    <div aria-hidden="true" className={`print-spine ${className}`} style={{ background: copy.colour, color: copy.text }}>
       <svg viewBox="0 0 60 60" className="mx-auto mt-[22cqw] block w-[64%]" aria-hidden="true">
         <defs>
           <PatternDef id={id} pattern={copy.pattern === "matahari" ? "songket" : copy.pattern} ink={copy.ink} base={copy.colour} scale={0.6} />

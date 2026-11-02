@@ -9,19 +9,34 @@ import { growSheetThen } from "@/components/turning-shelf/sheet-navigate";
 /** The browse results as a turning shelf. Opening a book grows a sheet from its cover into the book's page. */
 export function BrowseShelf({ copies }: { copies: ShelfCopy[] }) {
   const router = useRouter();
-  const lift = useRef<(() => void) | null>(null);
-  // When this page goes away (the book page has arrived), take the sheet off.
-  useEffect(() => () => lift.current?.(), []);
+  const wrap = useRef<HTMLDivElement>(null);
+  const cancel = useRef<(() => void) | null>(null);
+
+  // When this page goes away (the book page arrived, or the reader went elsewhere
+  // mid-grow), stop the sheet: it must never navigate after the reader moved on.
+  useEffect(
+    () => () => {
+      cancel.current?.();
+      cancel.current = null;
+      const shelf = wrap.current?.querySelector<HTMLElement>(".turning-shelf");
+      if (shelf) shelf.dataset.paused = "0";
+    },
+    [],
+  );
+
   return (
-    <div className="browse-shelf">
+    <div ref={wrap} className="browse-shelf">
       <TurningShelf
         copies={copies}
         label="Books on the shelf"
         onOpen={(copy, from) => {
-          if (!copy.copyId) return;
+          // One book at a time: ignore a second open while the sheet grows.
+          if (cancel.current || !copy.copyId) return;
+          const shelf = wrap.current?.querySelector<HTMLElement>(".turning-shelf");
+          if (shelf) shelf.dataset.paused = "1";
           const href = `/browse/${copy.copyId}`;
           router.prefetch(href);
-          lift.current = growSheetThen(from, () => router.push(href)) ?? null;
+          cancel.current = growSheetThen(from, () => router.push(href));
         }}
       />
     </div>
