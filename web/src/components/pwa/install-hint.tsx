@@ -29,16 +29,16 @@ export function InstallHint() {
   if (platform === "other" && !prompt) return null;
 
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-3 rounded-[10px] border border-paper/25 p-6">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3 rounded-[10px] border border-ink/25 p-6">
       <h2 id={headingId} className="font-display text-xl font-semibold">
         Put Bayu on your home screen
       </h2>
       {platform === "ios" ? (
-        <p className="text-[17px] leading-relaxed text-paper/80">
-          Open Bayu in Safari, tap the Share button (the square with an arrow), then <strong className="text-paper">Add to Home Screen</strong>.
+        <p className="text-[17px] leading-relaxed text-ink/80">
+          Open Bayu in Safari, tap the Share button (the square with an arrow), then <strong className="text-ink">Add to Home Screen</strong>.
         </p>
       ) : (
-        <button type="button" onClick={() => void showInstallPrompt()} className="h-11 self-start rounded-full bg-paper px-5 text-[15px] font-semibold text-malam">
+        <button type="button" onClick={() => void showInstallPrompt()} className="btn-primary self-start">
           Install Bayu
         </button>
       )}

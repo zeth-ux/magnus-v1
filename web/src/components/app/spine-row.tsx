@@ -24,9 +24,9 @@ export function SpineRow({ copy, href, owner, mine }: { copy: ShelfCopy; href: s
             <span className="min-w-0 flex-1 truncate font-display text-[17px] font-medium">{copy.title}</span>
           </span>
         </span>
-        <span className="flex flex-wrap items-baseline gap-x-3 text-[15px] text-paper">
+        <span className="flex flex-wrap items-baseline gap-x-3 text-[15px] text-ink">
           <span className="font-semibold">{copy.mode === "give" ? "To give" : `To lend · ${copy.lendFor}`}</span>
-          <span className="text-paper/70">
+          <span className="text-ink/70">
             {mine ? "Yours" : owner} · {copy.area}
           </span>
         </span>

@@ -36,7 +36,7 @@ export function Closing() {
   );
 
   return (
-    <footer ref={root} className="bg-malam text-paper">
+    <footer ref={root} className="bg-paper text-ink">
       <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-14 px-4 pt-14 pb-10 sm:px-8">
         <div
           data-blocks=""
@@ -60,21 +60,21 @@ export function Closing() {
 
         <div className="grid grid-cols-2 gap-8 text-[15px] md:grid-cols-12">
           <nav aria-label="Footer" className="col-span-2 flex flex-wrap gap-x-8 gap-y-3 md:col-span-8">
-            <a href="#how" className="text-paper hover:text-songket">How it works</a>
-            <a href="#safety" className="text-paper hover:text-songket">Safety</a>
-            <a href="#faq" className="text-paper hover:text-songket">FAQ</a>
-            <Link href="/login" className="text-paper hover:text-songket">Sign in</Link>
-            <Link href="/privacy" className="text-paper hover:text-songket">Privacy</Link>
+            <a href="#how" className="text-ink hover:text-cobalt">How it works</a>
+            <a href="#safety" className="text-ink hover:text-cobalt">Safety</a>
+            <a href="#faq" className="text-ink hover:text-cobalt">FAQ</a>
+            <Link href="/login" className="text-ink hover:text-cobalt">Sign in</Link>
+            <Link href="/privacy" className="text-ink hover:text-cobalt">Privacy</Link>
           </nav>
-          <p className="col-span-2 text-paper/70 md:col-span-4 md:text-right">
+          <p className="col-span-2 text-ink/70 md:col-span-4 md:text-right">
             A breeze between readers, made in Ansan.
           </p>
         </div>
-        <div className="flex items-center justify-between text-[15px] text-paper/70">
+        <div className="flex items-center justify-between text-[15px] text-ink/70">
           <span>© 2026 Bayu</span>
           <Link
             href="/login"
-            className="rounded-full bg-paper px-5 py-2.5 font-semibold text-malam no-underline transition-transform duration-200 hover:scale-[1.03]"
+            className="btn-primary"
           >
             Join the pilot
           </Link>

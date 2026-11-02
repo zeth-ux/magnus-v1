@@ -12,7 +12,7 @@ export function FeedbackForm() {
   }, [state.status]);
   if (state.status === "done") {
     return (
-      <p ref={done} tabIndex={-1} role="status" className="max-w-[34rem] rounded-[10px] bg-paper p-6 text-[17px] text-malam outline-none">
+      <p ref={done} tabIndex={-1} role="status" className="max-w-[34rem] card p-6 text-[17px] text-ink outline-none">
         Thank you! The pilot team reads every one.
       </p>
     );
@@ -33,11 +33,11 @@ export function FeedbackForm() {
         className={`${inputClass} h-auto py-3`}
       />
       {state.status === "error" ? (
-        <p role="alert" className="text-[15px] text-merah-light">
+        <p role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}
-      <button type="submit" disabled={pending} className="h-13 self-start rounded-full bg-paper px-7 text-[17px] font-semibold text-malam disabled:opacity-60">
+      <button type="submit" disabled={pending} className="btn-primary self-start disabled:opacity-60">
         {pending ? "Sending…" : "Send feedback"}
       </button>
     </form>

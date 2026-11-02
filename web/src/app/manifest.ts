@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/browse",
     scope: "/",
     display: "standalone",
-    background_color: "#1c1614",
-    theme_color: "#1c1614",
+    background_color: "#edebe6",
+    theme_color: "#edebe6",
     shortcuts: [
       { name: "Add a book", url: "/add", icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
       { name: "Activity", url: "/activity", icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }] },

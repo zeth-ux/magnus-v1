@@ -33,11 +33,11 @@ export default function BrowsePage({ searchParams }: PageProps<"/browse">) {
           <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">
             The Ansan shelf.
           </h1>
-          <Link href="/wishlist" className="text-[17px] font-semibold text-paper underline underline-offset-4">
+          <Link href="/wishlist" className="text-[17px] font-semibold text-ink underline underline-offset-4">
             Your wishlist
           </Link>
         </div>
-        <Suspense fallback={<p className="text-paper/70">Reading the shelf…</p>}>
+        <Suspense fallback={<p className="text-ink/70">Reading the shelf…</p>}>
           <Results searchParams={searchParams} />
         </Suspense>
       </div>
@@ -84,17 +84,17 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
             <option value="wish">On my wishlist</option>
           </select>
         </div>
-        <button type="submit" className="h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam">
+        <button type="submit" className="btn-primary">
           Search
         </button>
       </form>
 
       {error ? (
-        <p role="alert" className="text-[17px] text-merah-light">
+        <p role="alert" className="text-[17px] text-vermilion">
           Couldn&apos;t read the shelf just now. Try again in a moment.
         </p>
       ) : rows.length === 0 ? (
-        <p className="text-[17px] text-paper/80">
+        <p className="text-[17px] text-ink/80">
           {wishOnly && !q ? (
             <>
               None of your wishlist books are on the shelf yet. <Link href="/wishlist" className="underline underline-offset-4">See your wishlist</Link>.
@@ -107,7 +107,7 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
         </p>
       ) : (
         <>
-          <p className="text-[15px] text-paper/70">
+          <p className="text-[15px] text-ink/70">
             {rows.length} {rows.length === 1 ? "book" : "books"}
           </p>
           <ul className="flex flex-col gap-5">

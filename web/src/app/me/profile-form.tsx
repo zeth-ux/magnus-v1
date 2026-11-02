@@ -75,19 +75,19 @@ export function ProfileForm({
         />
       </Field>
       {state.status === "error" && state.message ? (
-        <p role="alert" className="text-[15px] text-merah-light">
+        <p role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}
       {state.status === "saved" ? (
-        <p role="status" className="text-[15px] text-paper">
+        <p role="status" className="text-[15px] text-ink">
           Saved.
         </p>
       ) : null}
       <button
         type="submit"
         disabled={pending}
-        className="h-13 self-start rounded-full bg-paper px-7 text-[17px] font-semibold text-malam motion-safe:transition-transform motion-safe:hover:scale-[1.02] disabled:opacity-60"
+        className="btn-primary self-start disabled:opacity-60"
       >
         {pending ? "Saving…" : "Save"}
       </button>

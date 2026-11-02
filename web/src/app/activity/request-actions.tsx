@@ -32,7 +32,7 @@ export function RequestActions({ request, title, ops }: { request: string; title
               type="button"
               onClick={() => setConfirmReport(true)}
               aria-label={`${o.label}: ${title}`}
-              className="h-11 rounded-full border-[1.5px] border-merah-light px-5 text-[15px] font-semibold text-merah-light"
+              className="btn-quiet border-vermilion text-vermilion"
             >
               {o.label}
             </button>
@@ -45,10 +45,10 @@ export function RequestActions({ request, title, ops }: { request: string; title
               aria-label={`${o.op === "report" ? "Yes, report it" : o.label}: ${title}`}
               className={
                 o.op === "report"
-                  ? "h-11 rounded-full bg-merah-light px-5 text-[15px] font-semibold text-malam"
+                  ? "h-11 rounded-full bg-vermilion px-5 text-[15px] font-semibold text-ink"
                   : o.primary
-                    ? "h-11 rounded-full bg-paper px-5 text-[15px] font-semibold text-malam"
-                    : "h-11 rounded-full border-[1.5px] border-paper/60 px-5 text-[15px] font-semibold"
+                    ? "btn-primary !min-h-10 !px-4"
+                    : "h-11 rounded-full border-[1.5px] border-ink/60 px-5 text-[15px] font-semibold"
               }
             >
               {o.op === "report" ? "Yes, report it" : o.label}
@@ -57,12 +57,12 @@ export function RequestActions({ request, title, ops }: { request: string; title
         )}
       </div>
       {confirmReport ? (
-        <p className="max-w-[30rem] text-[15px] text-paper/80">
+        <p className="max-w-[30rem] text-[15px] text-ink/80">
           The borrower keeps the book and their held credit becomes yours. This can&apos;t be undone.
         </p>
       ) : null}
-      <p role={state.status === "error" ? "alert" : undefined} className="text-[15px] text-merah-light">
-        {pending ? <span className="text-paper/80">Working…</span> : state.status === "error" ? state.message : ""}
+      <p role={state.status === "error" ? "alert" : undefined} className="text-[15px] text-vermilion">
+        {pending ? <span className="text-ink/80">Working…</span> : state.status === "error" ? state.message : ""}
       </p>
     </form>
   );

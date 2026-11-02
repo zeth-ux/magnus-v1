@@ -50,7 +50,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
     return (
       <div
         role="status"
-        className="flex flex-col gap-3 rounded-[10px] bg-paper p-7 text-malam"
+        className="flex flex-col gap-3 card p-7 text-ink"
       >
         <h2
           ref={sentHeading}
@@ -74,7 +74,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
       {notice ? (
         <p
           role="alert"
-          className="rounded-[10px] bg-paper/10 px-4 py-3 text-[15px] leading-relaxed"
+          className="card px-4 py-3 text-[15px] leading-relaxed"
         >
           {notice}
         </p>
@@ -85,23 +85,23 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           <button
             type="button"
             onClick={signInWithGoogle}
-            className="h-13 rounded-full border-[1.5px] border-paper/70 bg-transparent px-6 text-[17px] font-semibold text-paper transition-colors duration-200 hover:bg-paper hover:text-malam active:scale-[0.98]"
+            className="btn-quiet"
           >
             Continue with Google
           </button>
           {googleError ? (
-            <p role="alert" className="text-[15px] text-merah-light">
+            <p role="alert" className="text-[15px] text-vermilion">
               {googleError}
             </p>
           ) : null}
 
           <div
-            className="flex items-center gap-4 text-[15px] text-paper/70"
+            className="flex items-center gap-4 text-[15px] text-ink/70"
             aria-hidden="true"
           >
-            <span className="h-px flex-1 bg-paper/25" />
+            <span className="h-px flex-1 bg-ink/25" />
             or
-            <span className="h-px flex-1 bg-paper/25" />
+            <span className="h-px flex-1 bg-ink/25" />
           </div>
         </>
       ) : null}
@@ -125,13 +125,13 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
           placeholder="you@example.com"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "email-error" : undefined}
-          className="field-dark h-13 rounded-xl px-4 text-[17px] outline-none aria-invalid:border-merah-light"
+          className="field h-13 px-4 text-[17px] outline-none aria-invalid:border-vermilion"
         />
         {error ? (
           <p
             id="email-error"
             role="alert"
-            className="text-[15px] text-merah-light"
+            className="text-[15px] text-vermilion"
           >
             {error.message}
           </p>
@@ -139,7 +139,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="mt-2 h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam transition-transform duration-200 motion-safe:hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+          className="btn-primary mt-2 disabled:opacity-60"
         >
           {pending ? "Sending…" : "Email me a sign-in link"}
         </button>
@@ -152,12 +152,12 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
 export function LoginFormPlaceholder() {
   return (
     <div className="flex flex-col gap-6" aria-busy="true">
-      <div className="h-13 rounded-full border-[1.5px] border-paper/30" />
+      <div className="h-13 rounded-full border-[1.5px] border-ink/30" />
       <div className="h-px" />
       <div className="flex flex-col gap-3">
-        <span className="text-[15px] font-semibold text-paper/70">Email</span>
-        <div className="field-dark h-13 rounded-xl" />
-        <div className="mt-2 h-13 rounded-full bg-paper/40" />
+        <span className="text-[15px] font-semibold text-ink/70">Email</span>
+        <div className="field h-13" />
+        <div className="mt-2 h-12 bg-ink/10" />
       </div>
     </div>
   );

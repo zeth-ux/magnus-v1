@@ -66,7 +66,7 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
 
   if (state.status === "added") {
     return (
-      <div role="status" className="relative flex max-w-[32rem] flex-col gap-4 rounded-[10px] bg-paper p-7 text-malam">
+      <div role="status" className="relative flex max-w-[32rem] flex-col gap-4 card p-7 text-ink">
         <p ref={doneHeading} tabIndex={-1} className="font-display text-2xl font-semibold outline-none">
           {state.title} is on the shelf.
         </p>
@@ -76,15 +76,15 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
             : "When someone asks to borrow it, you'll agree a meet-up and a return date."}
         </p>
         {state.starter ? (
-          <span className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-merah bg-paper px-3 py-1 font-display text-[17px] font-semibold text-merah">
+          <span className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-vermilion bg-sheet px-3 py-1 font-display text-[17px] font-semibold text-vermilion">
             +1 starter credit
           </span>
         ) : null}
         <div className="flex flex-wrap gap-4 pt-1">
-          <button type="button" onClick={onAgain} className="rounded-full bg-malam px-6 py-3 text-[17px] font-semibold text-paper">
+          <button type="button" onClick={onAgain} className="rounded-full bg-paper px-6 py-3 text-[17px] font-semibold text-ink">
             Add another
           </button>
-          <Link href="/me" className="self-center text-[15px] font-semibold text-malam underline underline-offset-4">
+          <Link href="/me" className="self-center text-[15px] font-semibold text-ink underline underline-offset-4">
             See your credits
           </Link>
         </div>
@@ -134,7 +134,7 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
             type="button"
             onClick={() => find(query)}
             disabled={finding || query.trim() === ""}
-            className="h-13 rounded-full border-[1.5px] border-paper/70 px-6 text-[17px] font-semibold disabled:opacity-50"
+            className="btn-quiet disabled:opacity-50"
           >
             {finding ? "Looking…" : "Find"}
           </button>
@@ -142,13 +142,13 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
             type="button"
             aria-expanded={scanning}
             onClick={() => setScanning((s) => !s)}
-            className="h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam"
+            className="btn-primary"
           >
             {scanning ? "Stop scanning" : "Scan barcode"}
           </button>
         </div>
         {scanning ? <Scanner onDetected={onDetected} onClose={() => setScanning(false)} /> : null}
-        <p id="find-result" aria-live="polite" className="text-[15px] text-paper/80">
+        <p id="find-result" aria-live="polite" className="text-[15px] text-ink/80">
           {lookup === "invalid"
             ? "That isn't a book ISBN. Check the 13 digits starting with 978 or 979."
             : lookup === "unknown"
@@ -158,7 +158,7 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
                 : ""}
         </p>
         {errors.isbn ? (
-          <p id="isbn-error" className="text-[15px] text-merah-light">
+          <p id="isbn-error" className="text-[15px] text-vermilion">
             {errors.isbn}
           </p>
         ) : null}
@@ -199,11 +199,11 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
 
           <fieldset className="flex flex-col gap-3" aria-describedby={errors.mode ? "mode-error" : undefined}>
             <legend className="mb-2 text-[15px] font-semibold">I want to</legend>
-            <div className="grid grid-cols-2 gap-1 rounded-full bg-paper/10 p-1">
+            <div className="grid grid-cols-2 gap-1 border border-ink/30 p-1">
               {(["give", "lend"] as const).map((m) => (
                 <label
                   key={m}
-                  className={`flex h-11 cursor-pointer items-center justify-center rounded-full text-[15px] font-semibold capitalize has-focus-visible:outline-3 has-focus-visible:outline-songket ${mode === m ? "bg-paper text-malam" : "text-paper"}`}
+                  className={`flex h-11 cursor-pointer items-center justify-center rounded-[2px] text-[15px] font-semibold capitalize has-focus-visible:outline-2 has-focus-visible:outline-cobalt ${mode === m ? "bg-cobalt text-white" : "text-ink"}`}
                 >
                   <input
                     type="radio"
@@ -218,11 +218,11 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
               ))}
             </div>
             {errors.mode ? (
-              <p id="mode-error" className="text-[15px] text-merah-light">
+              <p id="mode-error" className="text-[15px] text-vermilion">
                 {errors.mode}
               </p>
             ) : null}
-            <p className="text-[15px] text-paper/70">
+            <p className="text-[15px] text-ink/70">
               {lendSelected
                 ? "It comes back to you. The borrower's credit is held until it does."
                 : "It becomes the next reader's. You earn 1 credit when you hand it over."}
@@ -281,14 +281,14 @@ function AddBookFlow({ onAgain }: { onAgain: () => void }) {
           </Field>
 
           {state.status === "error" && state.message ? (
-            <p role="alert" className="text-[15px] text-merah-light">
+            <p role="alert" className="text-[15px] text-vermilion">
               {state.message}
             </p>
           ) : null}
           <button
             type="submit"
             disabled={pending}
-            className="h-13 self-start rounded-full bg-paper px-7 text-[17px] font-semibold text-malam motion-safe:transition-transform motion-safe:hover:scale-[1.02] disabled:opacity-60"
+            className="btn-primary self-start disabled:opacity-60"
           >
             {pending ? "Adding…" : "Put it on the shelf"}
           </button>

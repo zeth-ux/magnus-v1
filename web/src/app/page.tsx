@@ -16,13 +16,13 @@ import { LinkErrorRedirect } from "@/components/auth/link-error-redirect";
 export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { url: "/" } };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1614",
-  colorScheme: "dark",
+  themeColor: "#edebe6",
+  colorScheme: "light",
 };
 
 export default function LandingPage() {
   return (
-    <div className="page-malam bg-malam">
+    <div className="bg-paper">
       <LinkErrorRedirect />
       <SmoothScroll />
       <SiteHeader />

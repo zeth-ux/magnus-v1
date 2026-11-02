@@ -34,10 +34,10 @@ type CopyRow = {
 export default function CopyPage({ params }: PageProps<"/browse/[id]">) {
   return (
     <AppShell>
-      <Link href="/browse" className="text-[15px] text-paper/80 underline underline-offset-4">
+      <Link href="/browse" className="text-[15px] text-ink/80 underline underline-offset-4">
         &larr; Back to the shelf
       </Link>
-      <Suspense fallback={<p className="mt-10 text-paper/70">Taking it off the shelf…</p>}>
+      <Suspense fallback={<p className="mt-10 text-ink/70">Taking it off the shelf…</p>}>
         <CopyDetail params={params} />
       </Suspense>
     </AppShell>
@@ -107,30 +107,30 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
           {copy.books.title}
         </h1>
         <p className="font-display text-xl italic">{look.author}</p>
-        <dl className="grid grid-cols-2 gap-4 border-y border-paper/30 py-5 text-[15px] sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-4 border-y border-ink/30 py-5 text-[15px] sm:grid-cols-3">
           <div>
-            <dt className="text-paper/70">{copy.mode === "give" ? "To give" : "To lend"}</dt>
+            <dt className="text-ink/70">{copy.mode === "give" ? "To give" : "To lend"}</dt>
             <dd className="text-[17px] font-semibold">{copy.mode === "give" ? "Yours to keep" : `Up to ${look.lendFor?.toLowerCase()}`}</dd>
           </div>
           <div>
-            <dt className="text-paper/70">From</dt>
+            <dt className="text-ink/70">From</dt>
             <dd className="text-[17px] font-semibold">
               {isMine ? "You" : copy.profiles.display_name}, {copy.profiles.area}
               {smoothCount > 0 ? (
-                <span className="block text-[15px] font-normal text-paper/80">
+                <span className="block text-[15px] font-normal text-ink/80">
                   {smoothCount === 1 ? "1 reader had a smooth handover with them" : `${smoothCount} readers had a smooth handover with them`}
                 </span>
               ) : null}
             </dd>
           </div>
           <div>
-            <dt className="text-paper/70">Condition</dt>
+            <dt className="text-ink/70">Condition</dt>
             <dd className="text-[17px] font-semibold">{CONDITIONS[copy.condition]}</dd>
           </div>
         </dl>
         {copy.note ? (
           <figure className="flex flex-col gap-2">
-            <figcaption className="text-[15px] font-semibold text-paper/80">
+            <figcaption className="text-[15px] font-semibold text-ink/80">
               {/* Not "from <owner>": a given book keeps its note, so the owner may not be who wrote it. */}
               Warkah: the note that travels with this book
             </figcaption>
@@ -140,19 +140,19 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
           </figure>
         ) : null}
         {wanted > 0 ? (
-          <p className="text-[15px] text-paper/80">
+          <p className="text-[15px] text-ink/80">
             {wanted === 1 ? "1 other reader wants this book." : `${wanted} other readers want this book.`}
           </p>
         ) : null}
         {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}
         {copies && copies > 1 ? (
-          <p className="text-[15px] text-paper/80">{copies} copies of this book are on the shelf.</p>
+          <p className="text-[15px] text-ink/80">{copies} copies of this book are on the shelf.</p>
         ) : null}
 
         {isMine ? (
-          <p className="text-[17px] text-paper/80">This is your book. Requests for it appear in Activity.</p>
+          <p className="text-[17px] text-ink/80">This is your book. Requests for it appear in Activity.</p>
         ) : myRequest ? (
-          <p role="status" className="rounded-[10px] bg-paper p-6 text-[17px] text-malam">
+          <p role="status" className="card p-6 text-[17px] text-ink">
             {myRequest.status === "requested"
               ? "You've asked for this book. Waiting for the owner to answer."
               : myRequest.status === "accepted"
@@ -160,7 +160,7 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
                 : "You're borrowing this book."}
           </p>
         ) : copy.status !== "available" ? (
-          <p className="text-[17px] text-paper/80">This book isn&apos;t available right now.</p>
+          <p className="text-[17px] text-ink/80">This book isn&apos;t available right now.</p>
         ) : (
           <RequestForm
             copyId={copy.id}

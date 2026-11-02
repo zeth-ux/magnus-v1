@@ -3,8 +3,8 @@ import Link from "next/link";
 import { BayuMark } from "@/components/bayu-mark";
 import { AuthBooks } from "./auth-books";
 
-/** Dark browser chrome for the sign-in pages (matches the malam token). */
-export const AUTH_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "dark" };
+/** Paper-coloured browser chrome for the sign-in pages. */
+export const AUTH_VIEWPORT: Viewport = { themeColor: "#edebe6", colorScheme: "light" };
 
 /**
  * The frame for sign-in and the first signed-in page: the same night shelf as
@@ -12,9 +12,9 @@ export const AUTH_VIEWPORT: Viewport = { themeColor: "#1c1614", colorScheme: "da
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="page-malam min-h-svh bg-malam text-paper on-dark">
+    <div className="min-h-svh bg-paper text-ink on-dark">
       <header className="mx-auto flex w-full max-w-[1200px] items-center px-6 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-3 text-paper no-underline">
+        <Link href="/" className="flex items-center gap-3 text-ink no-underline">
           <BayuMark className="h-8 w-8" />
           <span className="flex flex-col leading-tight">
             <span className="font-display text-[17px] font-semibold">Bayu</span>

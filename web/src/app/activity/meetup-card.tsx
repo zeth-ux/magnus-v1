@@ -66,7 +66,7 @@ export function MeetupCard({
   const error = proposeState.status === "error" ? proposeState.message : agreeState.status === "error" ? agreeState.message : "";
 
   return (
-    <div className="flex flex-col gap-3 rounded-[8px] bg-paper/[0.06] p-4">
+    <div className="flex flex-col gap-3 card p-4">
       <p className="text-[15px] font-semibold">{purpose === "handover" ? "Meet-up" : "Meet-up to return it"}</p>
 
       {meetup ? (
@@ -74,8 +74,8 @@ export function MeetupCard({
           <p className="font-display text-[17px]">
             {meetup.place} · {meetup.when}
           </p>
-          {meetup.note ? <p className="text-[15px] text-paper/80">&ldquo;{meetup.note}&rdquo;</p> : null}
-          <p className="text-[15px] text-paper/80">
+          {meetup.note ? <p className="text-[15px] text-ink/80">&ldquo;{meetup.note}&rdquo;</p> : null}
+          <p className="text-[15px] text-ink/80">
             {meetup.expired
               ? "That time has passed. Suggest a new one."
               : meetup.status === "agreed"
@@ -86,7 +86,7 @@ export function MeetupCard({
           </p>
         </div>
       ) : (
-        <p className="text-[15px] text-paper/80">No place or time yet. Suggest one.</p>
+        <p className="text-[15px] text-ink/80">No place or time yet. Suggest one.</p>
       )}
 
       {meetup && !editing ? (
@@ -98,7 +98,7 @@ export function MeetupCard({
                 type="submit"
                 disabled={agreeing}
                 aria-label={`Sounds good: ${title}`}
-                className="h-11 rounded-full bg-paper px-5 text-[15px] font-semibold text-malam disabled:opacity-60"
+                className="btn-primary disabled:opacity-60"
               >
                 Sounds good
               </button>
@@ -109,7 +109,7 @@ export function MeetupCard({
             type="button"
             onClick={() => setEditing(true)}
             aria-label={`${changeLabel}: ${title}`}
-            className="h-11 rounded-full border-[1.5px] border-paper/60 px-5 text-[15px] font-semibold"
+            className="btn-quiet"
           >
             {changeLabel}
           </button>
@@ -164,7 +164,7 @@ export function MeetupCard({
             <input id={`note-${request}`} name="note" maxLength={200} defaultValue={values?.note ?? ""} placeholder="How they'll recognise you" className={inputClass} />
           </div>
           <div className="flex flex-wrap gap-3">
-            <button type="submit" disabled={proposing} className="h-11 rounded-full bg-paper px-5 text-[15px] font-semibold text-malam disabled:opacity-60">
+            <button type="submit" disabled={proposing} className="btn-primary disabled:opacity-60">
               {proposing ? "Sending…" : "Suggest this"}
             </button>
             {meetup ? (
@@ -184,7 +184,7 @@ export function MeetupCard({
         </form>
       ) : null}
 
-      <p id={`meetup-error-${request}`} role={error ? "alert" : undefined} className="text-[15px] text-merah-light">
+      <p id={`meetup-error-${request}`} role={error ? "alert" : undefined} className="text-[15px] text-vermilion">
         {error}
       </p>
     </div>

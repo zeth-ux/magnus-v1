@@ -51,9 +51,9 @@ export function Scanner({ onDetected, onClose }: { onDetected: (isbn: string) =>
   }, []);
 
   return (
-    <div className="flex flex-col gap-3 rounded-[10px] bg-paper/10 p-4">
+    <div className="flex flex-col gap-3 card p-4">
       <video ref={video} className="aspect-[4/3] w-full rounded-lg bg-black object-cover" muted playsInline aria-label="Camera preview" />
-      <p aria-live="polite" className="text-[15px] text-paper/80">
+      <p aria-live="polite" className="text-[15px] text-ink/80">
         {problem ?? "Point the camera at the barcode on the back cover."}
       </p>
       <button type="button" onClick={onClose} className="self-start text-[15px] font-semibold underline underline-offset-4">

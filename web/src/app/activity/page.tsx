@@ -24,7 +24,7 @@ export default function ActivityPage() {
       <div className="flex flex-col gap-12">
         <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Activity.</h1>
         <Announcer>
-          <Suspense fallback={<p className="text-paper/70">Checking your requests…</p>}>
+          <Suspense fallback={<p className="text-ink/70">Checking your requests…</p>}>
             <Requests />
           </Suspense>
         </Announcer>
@@ -52,7 +52,7 @@ async function Requests() {
   ]);
   if (open.error || past.error) {
     return (
-      <p role="alert" className="text-[17px] text-merah-light">
+      <p role="alert" className="text-[17px] text-vermilion">
         Couldn&apos;t load your requests just now. Refresh to try again.
       </p>
     );
@@ -114,8 +114,8 @@ async function Requests() {
   return (
     <div className="flex flex-col gap-14">
       {wished.length > 0 ? (
-        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 rounded-[10px] border border-songket/60 p-5">
-          <h2 id="wished-heading" className="font-display text-2xl font-semibold text-songket">
+        <section aria-labelledby="wished-heading" className="flex flex-col gap-4 rounded-[10px] border border-cobalt/60 p-5">
+          <h2 id="wished-heading" className="font-display text-2xl font-semibold text-cobalt">
             From your wishlist, on the shelf now
           </h2>
           <ul className="flex flex-col gap-2 text-[17px]">
@@ -124,7 +124,7 @@ async function Requests() {
                 <Link href={`/browse/${w.copy_id}`} className="font-semibold underline underline-offset-4">
                   {w.title}
                 </Link>{" "}
-                <span className="text-paper/80">
+                <span className="text-ink/80">
                   · {w.mode === "give" ? "to give" : "to lend"} · {w.owner_name}, {w.area}
                 </span>
               </li>
@@ -188,7 +188,7 @@ function Section({ title, empty, children }: { title: string; empty: React.React
   return (
     <section className="flex flex-col gap-5">
       <h2 className="font-display text-2xl font-semibold">{title}</h2>
-      {children.length === 0 ? <p className="text-[17px] text-paper/80">{empty}</p> : <ul className="flex flex-col gap-4">{children}</ul>}
+      {children.length === 0 ? <p className="text-[17px] text-ink/80">{empty}</p> : <ul className="flex flex-col gap-4">{children}</ul>}
     </section>
   );
 }
@@ -212,7 +212,7 @@ function Item({
 }) {
   const title = row.copy?.books?.title ?? "A book";
   return (
-    <li className="flex flex-col gap-3 rounded-[10px] bg-paper/[0.06] p-5 sm:flex-row sm:items-start sm:justify-between">
+    <li className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col gap-1">
         <p className="font-display text-xl font-semibold">
           {row.copy ? (
@@ -223,15 +223,15 @@ function Item({
             title
           )}
         </p>
-        <p className="text-[15px] text-paper/80">
+        <p className="text-[15px] text-ink/80">
           {row.mode === "give" ? "Give" : "Lend"} · {who}
         </p>
-        <p className="text-[15px] text-paper">{line}</p>
+        <p className="text-[15px] text-ink">{line}</p>
       </div>
       <div className="flex flex-col gap-4 sm:max-w-[26rem]">
         <RequestActions request={row.id} title={title} ops={ops} />
         {meetup?.unavailable ? (
-          <p className="text-[15px] text-paper/70">Couldn&apos;t load the meet-up just now. Refresh to try again.</p>
+          <p className="text-[15px] text-ink/70">Couldn&apos;t load the meet-up just now. Refresh to try again.</p>
         ) : meetup &&
           ((row.status === "accepted" && !(row.mode === "lend" && row.return_by !== null && row.return_by <= seoulToday())) ||
             (row.status === "on_loan" && !row.owner_got_back && !row.requester_returned)) ? (
@@ -248,7 +248,7 @@ function Item({
           />
         ) : null}
         {extension === "unavailable" ? (
-          <p className="text-[15px] text-paper/70">Couldn&apos;t load &ldquo;more time&rdquo; just now. Refresh to try again.</p>
+          <p className="text-[15px] text-ink/70">Couldn&apos;t load &ldquo;more time&rdquo; just now. Refresh to try again.</p>
         ) : extension && extension.kind !== "none" ? (
           <ExtensionCard
             key={(extension.kind === "borrower" ? extension.waiting?.id : extension.open?.id) ?? "none"}
@@ -260,7 +260,7 @@ function Item({
         ) : null}
         {after ?? (
           // Rows with a rating card already link to the report page from there.
-          <Link href={`/report?request=${row.id}`} className="self-start text-[15px] text-paper/80 underline underline-offset-4">
+          <Link href={`/report?request=${row.id}`} className="self-start text-[15px] text-ink/80 underline underline-offset-4">
             Report a problem<span className="sr-only"> with {title}</span>
           </Link>
         )}

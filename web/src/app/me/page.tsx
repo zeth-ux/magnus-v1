@@ -19,11 +19,11 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
           <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">
             Your library card.
           </h1>
-          <p className="max-w-[32rem] text-[17px] leading-relaxed text-paper/80">
+          <p className="max-w-[32rem] text-[17px] leading-relaxed text-ink/80">
             Tell other readers who you are and roughly where you are in Ansan.
           </p>
         </div>
-        <Suspense fallback={<p className="text-paper/70">Opening your card…</p>}>
+        <Suspense fallback={<p className="text-ink/70">Opening your card…</p>}>
           <Profile searchParams={searchParams} />
         </Suspense>
         <Suspense fallback={null}>
@@ -60,7 +60,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
         />
       </div>
       {profile ? (
-        <aside aria-label="Your credits" className="h-fit rounded-[10px] bg-paper p-7 text-malam lg:col-span-4 lg:col-start-9">
+        <aside aria-label="Your credits" className="h-fit card p-7 text-ink lg:col-span-4 lg:col-start-9">
           <p className="font-display text-xl font-semibold">Credits</p>
           {creditsError ? (
             <p className="mt-4 text-[15px]">Couldn&apos;t load your credits just now. Refresh to try again.</p>
@@ -87,7 +87,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
       ) : null}
     </div>
     {profile ? (
-      <Suspense fallback={<p className="text-paper/70">Reading your stamps…</p>}>
+      <Suspense fallback={<p className="text-ink/70">Reading your stamps…</p>}>
         <CardHistory />
       </Suspense>
     ) : null}
@@ -104,7 +104,7 @@ async function CardHistory() {
     .eq("user_id", user.id)
     .order("id", { ascending: false }) // identity: insert order, unique
     .limit(41);
-  if (error) return <p className="text-[15px] text-paper/70">Couldn&apos;t load your history just now.</p>;
+  if (error) return <p className="text-[15px] text-ink/70">Couldn&apos;t load your history just now.</p>;
   const all = (data ?? []) as LedgerRow[];
   if (all.length === 0) return null;
   const more = all.length > 40;
@@ -124,14 +124,14 @@ async function CardHistory() {
 
   const stamps = toStamps(rows, (r) => titles.get(r.ref_id) ?? null);
   // All at least 4.5:1 on paper (pandan-deep 5.5, merah 9.3, kopi 5.3).
-  const tone = { plus: "border-pandan-deep text-pandan-deep", minus: "border-merah text-merah", held: "border-kopi text-kopi" } as const;
+  const tone = { plus: "border-cobalt text-cobalt", minus: "border-vermilion text-vermilion", held: "border-muted text-muted" } as const;
 
   return (
-    <section aria-labelledby="history-heading" className="rounded-[10px] bg-paper p-7 text-malam">
+    <section aria-labelledby="history-heading" className="card p-7 text-ink">
       <h2 id="history-heading" className="font-display text-xl font-semibold">
         Stamps on your card
       </h2>
-      <ol className="mt-5 flex flex-col divide-y divide-malam/10">
+      <ol className="mt-5 flex flex-col divide-y divide-ink/10">
         {stamps.map((s) => (
           <li key={s.id} className="flex items-center gap-4 py-3">
             <span className={`w-20 shrink-0 -rotate-3 rounded-[4px] border-2 px-2 py-1 text-center font-display text-[15px] font-semibold ${tone[s.tone]}`}>
@@ -160,12 +160,12 @@ async function Blocked() {
   return (
     <section className="flex max-w-[34rem] flex-col gap-4">
       <h2 className="font-display text-2xl font-semibold">Readers you&apos;ve blocked</h2>
-      <p className="text-[15px] text-paper/80">You can&apos;t ask each other for books. They aren&apos;t told.</p>
+      <p className="text-[15px] text-ink/80">You can&apos;t ask each other for books. They aren&apos;t told.</p>
       <ul className="flex flex-col gap-3">
         {rows.map((r) => {
           const name = r.profiles?.display_name ?? "A reader";
           return (
-            <li key={r.blocked_id} className="flex items-center justify-between gap-4 rounded-[10px] bg-paper/[0.06] px-5 py-3">
+            <li key={r.blocked_id} className="flex items-center justify-between gap-4 card px-5 py-3">
               <span className="text-[17px]">{name}</span>
               <UnblockButton reader={r.blocked_id} name={name} />
             </li>

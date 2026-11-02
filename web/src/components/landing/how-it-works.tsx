@@ -80,7 +80,7 @@ export function HowItWorks() {
   }
 
   return (
-    <section ref={root} id="how" aria-labelledby="how-heading" className="scroll-mt-0 bg-malam text-paper">
+    <section ref={root} id="how" aria-labelledby="how-heading" className="scroll-mt-0 bg-paper text-ink">
       <div className="mx-auto w-full max-w-[1400px] px-4 py-28 sm:px-8 lg:py-40">
         <div data-how-heading="" className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <h2
@@ -89,7 +89,7 @@ export function HowItWorks() {
           >
             Four steps, one fair rule.
           </h2>
-          <p className="max-w-[34rem] text-[17px] leading-relaxed text-paper/80 lg:col-span-5 lg:col-start-7">
+          <p className="max-w-[34rem] text-[17px] leading-relaxed text-ink/80 lg:col-span-5 lg:col-start-7">
             Give a book and you earn a credit; spend it on any book on the shelf. Nobody needs a
             perfect one-for-one match. Open each step to see how it works.
           </p>
@@ -117,7 +117,7 @@ export function HowItWorks() {
                     aria-controls={`stage-${i}`}
                     disabled={!live}
                     onClick={() => choose(i)}
-                    className={`flex h-16 w-full items-center justify-between px-6 text-left disabled:cursor-default ${dark ? "" : "focus-visible:outline-malam"} ${live ? "lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7" : ""}`}
+                    className={`flex h-16 w-full items-center justify-between px-6 text-left disabled:cursor-default ${dark ? "" : "focus-visible:outline-ink"} ${live ? "lg:absolute lg:inset-0 lg:h-full lg:items-start lg:justify-start lg:p-7" : ""}`}
                   >
                     <span
                       className={`font-display font-medium ${isOpen ? "text-[clamp(1.75rem,2.6vw,2.5rem)]" : "text-[17px] lg:absolute lg:bottom-7 lg:left-7 lg:origin-bottom-left lg:-rotate-90 lg:text-xl lg:whitespace-nowrap"}`}

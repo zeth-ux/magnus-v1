@@ -43,7 +43,7 @@ export function SafetyFaq() {
   );
 
   return (
-    <section ref={root} aria-label="Safety and questions" className="bg-malam text-paper">
+    <section ref={root} aria-label="Safety and questions" className="bg-paper text-ink">
       <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-20 px-4 py-28 sm:px-8 lg:grid-cols-12 lg:gap-6 lg:py-40">
         <div className="flex flex-col gap-8 lg:col-span-4">
           <h2
@@ -55,7 +55,7 @@ export function SafetyFaq() {
           <ul data-safe-list="" className="flex flex-col gap-6">
             {SAFETY_POINTS.map((point) => (
               <li key={point} data-safe="" className="flex gap-4 text-xl leading-snug font-semibold">
-                <span aria-hidden="true" className="arch mt-1.5 inline-block h-[0.8em] w-[0.55em] shrink-0 bg-songket" />
+                <span aria-hidden="true" className="arch mt-1.5 inline-block h-[0.8em] w-[0.55em] shrink-0 bg-cobalt" />
                 {point}
               </li>
             ))}

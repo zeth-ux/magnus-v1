@@ -1,68 +1,79 @@
 @import "tailwindcss";
 
 /*
-  Bayu design tokens. Source of truth: docs/brand.md.
-  Every colour here was contrast-checked (WCAG AA) in brand.md.
+  Bayu design tokens: "printed paper". Source of truth: docs/brand.md.
+  A warm paper sheet, ink type, and one cobalt accent, like a library
+  catalogue card or a screen-printed book jacket. Every text colour pair was
+  contrast-checked (WCAG AA) in brand.md.
 */
 @theme {
-  --color-bone: #eeeeea;
-  --color-bone-deep: #e2e1db;
-  --color-ink: #2b2a28;
-  --color-muted: #5c574e;
-  --color-sky: #9cc9e3;
-  --color-sky-light: #dceef7;
-  --color-pandan: #2f7a4d;
-  --color-pandan-deep: #276843;
-  --color-kopi: #7a5838;
-  --color-kayu: #3b2618;
-  --color-kayu-muted: #cdbfa8;
-  --color-songket: #c9a24a;
-  --color-merah: #6e1f1f;
-  --color-malam: #1c1614;
-  --color-paper: #efe9df;
-  --color-merah-light: #ff9e8f;
+  --color-paper: #edebe6; /* the page */
+  --color-sheet: #f4f2ed; /* raised paper: cards, dialogs, fields */
+  --color-ink: #141414; /* text, rules */
+  --color-muted: #6d6a63; /* secondary text (4.5:1 on paper) */
+  --color-cobalt: #1f3fb0; /* the one accent: actions, active state, the mark */
+  --color-cobalt-deep: #18328c; /* pressed / hover */
+  --color-vermilion: #b7351b; /* errors and stamps (text-safe) */
+  /* Print inks: book covers and spines only, never body text. */
+  --color-print-vermilion: #d9472b;
+  --color-cream: #f1e9d6;
+  --color-kraft: #d9cdb4;
+  --color-mustard: #e2b23a;
 
-  --font-display: "Literata Variable", Georgia, serif;
-  --font-text: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-display: "Newsreader Variable", Georgia, serif;
+  --font-text: "Inter Tight Variable", system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* From the shelf reference: text slides and turns, and the sheet unfolding. */
+  --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sheet: cubic-bezier(0.76, 0, 0.18, 1);
 }
 
 html {
   scrollbar-gutter: stable;
-  background: var(--color-bone);
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-text);
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--color-kopi) var(--color-bone);
-}
-
-/* The landing is dark end to end, including overscroll bounce. */
-html:has(.page-malam) {
-  background: var(--color-malam);
-  scrollbar-color: var(--color-songket) var(--color-malam);
+  scrollbar-color: var(--color-ink) var(--color-paper);
 }
 
 body {
   margin: 0;
-  caret-color: var(--color-pandan);
+  caret-color: var(--color-cobalt);
 }
 
-/* Browser surfaces carry the design too. */
+/*
+  Paper grain: a fixed layer of fine noise multiplied over everything, so the
+  whole app reads as printed paper (books and buttons pick it up too). It never
+  takes clicks. Dialogs sit above it (z-index > 40).
+*/
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .42 0 0 0 0 .38 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (forced-colors: active) {
+  body::after {
+    display: none;
+  }
+}
+
 ::selection {
-  background: var(--color-songket);
-  color: var(--color-kayu);
+  background: var(--color-cobalt);
+  color: #fff;
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-pandan);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 3px;
-  border-radius: 4px;
-}
-
-.on-dark :focus-visible {
-  outline-color: var(--color-songket);
+  border-radius: 2px;
 }
 
 a {
@@ -70,6 +81,99 @@ a {
   text-decoration-thickness: 1px;
 }
 
+/*
+  Labels, like the small boxed tags in a printed catalogue. They carry facts
+  (give or lend, how long, the area, condition, a step's state), never decoration.
+  .lbl is the type; .box draws the 1px frame.
+*/
+@layer components {
+  .lbl {
+    font-family: var(--font-text);
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .box {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border: 1px solid rgb(20 20 20 / 0.9);
+    white-space: nowrap;
+  }
+
+  /* One primary action per view: cobalt, square-cornered like a printed block. */
+  .btn-primary,
+  .btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 2px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    transition:
+      background-color 0.3s var(--ease-paper),
+      color 0.3s var(--ease-paper),
+      transform 0.2s var(--ease-paper);
+  }
+  .btn-primary {
+    background: var(--color-cobalt);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-cobalt-deep);
+  }
+  .btn-quiet {
+    border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+    background: transparent;
+  }
+  .btn-quiet:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-primary:active,
+  .btn-quiet:active {
+    transform: scale(0.98);
+  }
+
+  /* Raised paper with a printed rule. */
+  .card {
+    background: var(--color-sheet);
+    border: 1px solid rgb(20 20 20 / 0.14);
+    border-radius: 2px;
+  }
+
+  /* Form fields: a sheet of paper with an ink rule. */
+  .field {
+    background: var(--color-sheet);
+    border: 1px solid rgb(20 20 20 / 0.45);
+    border-radius: 2px;
+    color: var(--color-ink);
+  }
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+  .field:focus-visible {
+    border-color: var(--color-cobalt);
+  }
+}
+
+/* Text that rises through its own mask (components/motion/rise.tsx). */
+.mask {
+  display: block;
+  overflow: hidden;
+  /* Room for descenders so the mask never clips a g or y. */
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
 
 /* The arch of a carved Malay panel: FAQ tabs, bullets, the footer wordmark. */
 .arch {
@@ -183,7 +287,7 @@ a {
   outline: none;
 }
 .shelf-stack [data-book]:focus-visible .f-spine {
-  outline: 3px solid var(--color-songket);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 4px;
 }
 
@@ -206,27 +310,6 @@ a {
   to {
     transform: rotateZ(calc((var(--i) - 1.5) * -2deg)) translateX(calc((var(--i) - 1.5) * -10px)) translateY(-8px) rotateY(5deg);
   }
-}
-
-/* Form fields on the night ground. In a layer so Tailwind utilities
-   (aria-invalid:border-…) can still override them. */
-@layer components {
-  .field-dark {
-    background: rgb(239 233 223 / 0.08);
-    border: 1px solid rgb(239 233 223 / 0.4);
-    color: var(--color-paper);
-  }
-  .field-dark::placeholder {
-    color: rgb(239 233 223 / 0.55);
-  }
-  .field-dark:focus-visible {
-    border-color: var(--color-songket);
-  }
-}
-
-/* A light card on the dark ground keeps a dark focus ring. */
-.on-dark .bg-paper :focus-visible {
-  outline-color: var(--color-malam);
 }
 
 /* Phones: keep focused controls clear of the fixed tab bar (WCAG 2.4.11). */

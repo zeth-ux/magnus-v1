@@ -136,7 +136,7 @@ export function Shelf({ copies }: { copies: ShelfCopy[] }) {
   }
 
   return (
-    <section ref={root} aria-labelledby="shelf-title" className="relative bg-malam text-paper">
+    <section ref={root} aria-labelledby="shelf-title" className="relative bg-paper text-ink">
       <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-10 px-4 pb-32 sm:px-8 lg:grid-cols-12 lg:gap-6">
         {/* Intro: sticks beside the stack on a wide screen. */}
         <div className="pt-[8vh] lg:col-span-4 lg:pt-[6vh]">
@@ -144,19 +144,19 @@ export function Shelf({ copies }: { copies: ShelfCopy[] }) {
             <h1 id="shelf-title" className="font-display text-[clamp(2.6rem,4.6vw,4.4rem)] leading-[1] font-medium tracking-[-0.02em]">
               Your next book is on a friend&rsquo;s shelf.
             </h1>
-            <p className="max-w-[24rem] text-[17px] leading-relaxed text-paper/80">
+            <p className="max-w-[24rem] text-[17px] leading-relaxed text-ink/80">
               Give and lend English books with readers near you in Ansan. Credits keep every swap fair.
             </p>
             <div className="flex flex-wrap items-center gap-5">
               <Link
                 href="/login"
-                className="rounded-full bg-paper px-6 py-3 text-[17px] font-semibold text-malam no-underline transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                className="btn-primary"
               >
                 Join the Ansan pilot
               </Link>
-              <span className="font-display text-[17px] italic text-paper/80">or pick a book &rarr;</span>
+              <span className="font-display text-[17px] italic text-ink/80">or pick a book &rarr;</span>
             </div>
-            <p className="text-[15px] text-paper/60">
+            <p className="text-[15px] text-ink/60">
               {realCount === 0
                 ? "Sample shelf until the pilot opens on 9 November."
                 : realCount === copies.length
