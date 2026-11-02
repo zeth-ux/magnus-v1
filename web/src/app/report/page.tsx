@@ -13,8 +13,8 @@ export default function ReportPage({ searchParams }: PageProps<"/report">) {
   return (
     <AppShell>
       <div className="flex flex-col gap-8">
-        <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Report a problem.</h1>
-        <Suspense fallback={<p className="text-paper/70">One moment…</p>}>
+        <h1 className="page-title">Report a problem</h1>
+        <Suspense fallback={<p className="text-ink/70">One moment…</p>}>
           <Report searchParams={searchParams} />
         </Suspense>
       </div>

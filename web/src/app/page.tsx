@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Shelf } from "@/components/shelf/shelf";
+import { ShelfHero } from "@/components/landing/shelf-hero";
 import { getLandingShelf } from "@/lib/shelf/landing-shelf";
 import { SiteHeader } from "@/components/landing/site-header";
 import { HowItWorks } from "@/components/landing/how-it-works";
@@ -16,21 +16,23 @@ import { LinkErrorRedirect } from "@/components/auth/link-error-redirect";
 export const metadata: Metadata = { alternates: { canonical: "/" }, openGraph: { url: "/" } };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1614",
-  colorScheme: "dark",
+  themeColor: "#edebe6",
+  colorScheme: "light",
 };
 
 export default function LandingPage() {
   return (
-    <div className="page-malam bg-malam">
+    <div className="bg-paper">
       <LinkErrorRedirect />
       <SmoothScroll />
-      <SiteHeader />
-      <main>
-        <LandingShelf />
-        <HowItWorks />
-        <SafetyFaq />
-      </main>
+      <div className="relative">
+        <SiteHeader />
+        <main>
+          <LandingShelf />
+          <HowItWorks />
+          <SafetyFaq />
+        </main>
+      </div>
       <Closing />
     </div>
   );
@@ -39,5 +41,7 @@ export default function LandingPage() {
 /** The shelf's books are cached data (getLandingShelf), so this stays in the static shell. */
 async function LandingShelf() {
   const copies = await getLandingShelf();
-  return <Shelf copies={copies} />;
+  // Books to give first, then books to lend, so the Give / Lend tabs each lead to a run of books.
+  const ordered = [...copies.filter((c) => c.mode === "give"), ...copies.filter((c) => c.mode === "lend")];
+  return <ShelfHero copies={ordered} />;
 }

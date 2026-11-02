@@ -19,15 +19,15 @@ export default function WishlistPage() {
     <AppShell>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-3">
-          <h1 className="font-display text-[clamp(2.2rem,4vw,3.2rem)] leading-[1.04] font-medium tracking-[-0.02em]">Your wishlist.</h1>
-          <p className="max-w-[34rem] text-[17px] leading-relaxed text-paper/80">
+          <h1 className="page-title">Your wishlist</h1>
+          <p className="max-w-[34rem] text-[17px] leading-relaxed text-ink/80">
             Books you&apos;d love to read. When someone puts one on the shelf, it shows up here and in Activity.
           </p>
         </div>
         <Announcer>
           <div className="flex flex-col gap-10">
             <AddWishForm />
-            <Suspense fallback={<p className="text-paper/70">Reading your wishlist…</p>}>
+            <Suspense fallback={<p className="text-ink/70">Reading your wishlist…</p>}>
               <Wishes />
             </Suspense>
           </div>
@@ -45,7 +45,7 @@ async function Wishes() {
   ]);
   if (wishes.error) {
     return (
-      <p role="alert" className="text-[17px] text-merah-light">
+      <p role="alert" className="text-[17px] text-vermilion">
         Couldn&apos;t load your wishlist just now. Refresh to try again.
       </p>
     );
@@ -53,7 +53,7 @@ async function Wishes() {
   const rows = (wishes.data ?? []) as unknown as Wish[];
   const onShelf = new Map<string, Available>();
   for (const a of (available.data ?? []) as Available[]) if (!onShelf.has(a.isbn)) onShelf.set(a.isbn, a);
-  if (rows.length === 0) return <p className="text-[17px] text-paper/80">Nothing yet. Add a book above, or tap &ldquo;Add to wishlist&rdquo; on any book page.</p>;
+  if (rows.length === 0) return <p className="text-[17px] text-ink/80">Nothing yet. Add a book above, or tap &ldquo;Add to wishlist&rdquo; on any book page.</p>;
 
   return (
     <ul className="flex flex-col gap-4">
@@ -61,19 +61,19 @@ async function Wishes() {
         const title = w.books?.title ?? "A book";
         const copy = onShelf.get(w.isbn);
         return (
-          <li key={w.isbn} className="flex flex-col gap-3 rounded-[10px] bg-paper/[0.06] p-5 sm:flex-row sm:items-start sm:justify-between">
+          <li key={w.isbn} className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-1">
-              <p className="font-display text-xl font-semibold">{title}</p>
-              {w.books?.authors?.length ? <p className="text-[15px] text-paper/80">{w.books.authors.join(", ")}</p> : null}
+              <p className="font-display text-[22px] leading-[1.15]">{title}</p>
+              {w.books?.authors?.length ? <p className="text-[15px] text-ink/80">{w.books.authors.join(", ")}</p> : null}
               {copy ? (
-                <p className="text-[15px] font-semibold text-songket">
+                <p className="text-[15px] font-semibold text-cobalt">
                   On the shelf now: {copy.mode === "give" ? "to give" : "to lend"}, from {copy.owner_name} ·{" "}
-                  <Link href={`/browse/${copy.copy_id}`} className="text-songket underline underline-offset-4">
+                  <Link href={`/browse/${copy.copy_id}`} className="text-cobalt underline underline-offset-4">
                     See it
                   </Link>
                 </p>
               ) : (
-                <p className="text-[15px] text-paper/70">Not on the shelf yet.</p>
+                <p className="text-[15px] text-ink/70">Not on the shelf yet.</p>
               )}
             </div>
             <WishButton isbn={w.isbn} title={title} wished />

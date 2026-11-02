@@ -8,10 +8,10 @@ export default function GlobalError({ retry }: { error: unknown; retry: () => vo
   return (
     <html lang="en">
       <title>Bayu couldn&apos;t load</title>
-      <body style={{ margin: 0, minHeight: "100svh", background: "#1c1614", color: "#efe9df", fontFamily: "system-ui, sans-serif", display: "flex", flexDirection: "column", justifyContent: "center", gap: 20, padding: 24 }}>
+      <body style={{ margin: 0, minHeight: "100svh", background: "#edebe6", color: "#141414", fontFamily: "system-ui, sans-serif", display: "flex", flexDirection: "column", justifyContent: "center", gap: 20, padding: 24 }}>
         <h1 style={{ margin: 0, fontFamily: "Georgia, serif", fontWeight: 500, fontSize: "2.4rem" }}>A gust knocked this over.</h1>
         <p style={{ margin: 0, maxWidth: "30rem", lineHeight: 1.6, opacity: 0.8 }}>Bayu couldn&apos;t load just now. Try again in a moment.</p>
-        <button type="button" onClick={() => retry()} style={{ alignSelf: "flex-start", border: 0, borderRadius: 999, padding: "12px 24px", background: "#efe9df", color: "#1c1614", fontWeight: 600, fontSize: 17 }}>
+        <button type="button" onClick={() => retry()} style={{ alignSelf: "flex-start", border: 0, borderRadius: 2, padding: "12px 24px", background: "#1f3fb0", color: "#ffffff", fontWeight: 600, fontSize: 17 }}>
           Try again
         </button>
       </body>

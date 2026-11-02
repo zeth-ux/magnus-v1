@@ -18,7 +18,7 @@ export default function WelcomePage() {
   return (
     <AuthShell>
       <Suspense
-        fallback={<p className="text-paper/70">Opening your library card…</p>}
+        fallback={<p className="text-ink/70">Opening your library card…</p>}
       >
         <Welcome />
       </Suspense>
@@ -56,25 +56,25 @@ async function Welcome() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <h1 className="font-display text-[clamp(2.4rem,4vw,3.4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+        <h1 className="page-title">
           {returning ? "Welcome back." : "You're in."}
         </h1>
-        <p className="text-[17px] leading-relaxed text-paper/80">
-          Signed in as <strong className="text-paper">{email}</strong>. Put a
+        <p className="text-[17px] leading-relaxed text-ink/80">
+          Signed in as <strong className="text-ink">{email}</strong>. Put a
           few books on the shelf now; the pilot opens for requests on{" "}
-          <strong className="text-paper">9 November</strong>.
+          <strong className="text-ink">9 November</strong>.
         </p>
       </div>
       <Link
         href={step.href}
-        className="self-start rounded-full bg-paper px-7 py-3.5 text-[17px] font-semibold text-malam no-underline motion-safe:transition-transform motion-safe:hover:scale-[1.02]"
+        className="btn-primary self-start"
       >
         {step.label}
       </Link>
       {/* A library card, stamped with the day the shelf opens (for readers still setting up). */}
       {returning ? null : (
-        <div className="relative rounded-[10px] bg-paper p-7 text-malam">
-          <p className="font-display text-xl font-semibold">
+        <div className="relative card p-7 text-ink">
+          <p className="font-display text-[22px] leading-[1.15]">
             Before 9 November
           </p>
           <p className="mt-2 max-w-[30ch] text-[17px] leading-relaxed">
@@ -84,7 +84,7 @@ async function Welcome() {
           </p>
           <span
             aria-hidden="true"
-            className="absolute -top-4 right-5 rotate-[8deg] rounded-[4px] border-[3px] border-merah bg-paper px-3 py-1 font-display text-[17px] font-semibold text-merah"
+            className="stamp absolute -top-4 right-5 bg-sheet"
           >
             Opens 9 Nov
           </span>
@@ -93,7 +93,7 @@ async function Welcome() {
       <form action="/auth/signout" method="post">
         <button
           type="submit"
-          className="text-[15px] font-semibold text-paper/80 underline underline-offset-4 hover:text-paper"
+          className="text-[15px] font-semibold text-ink/80 underline underline-offset-4 hover:text-ink"
         >
           Sign out
         </button>

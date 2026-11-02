@@ -1,68 +1,84 @@
 @import "tailwindcss";
 
 /*
-  Bayu design tokens. Source of truth: docs/brand.md.
-  Every colour here was contrast-checked (WCAG AA) in brand.md.
+  Bayu design tokens: "printed paper". Source of truth: docs/brand.md.
+  A warm paper sheet, ink type, and one cobalt accent, like a library
+  catalogue card or a screen-printed book jacket. Every text colour pair was
+  contrast-checked (WCAG AA) in brand.md.
 */
 @theme {
-  --color-bone: #eeeeea;
-  --color-bone-deep: #e2e1db;
-  --color-ink: #2b2a28;
-  --color-muted: #5c574e;
-  --color-sky: #9cc9e3;
-  --color-sky-light: #dceef7;
-  --color-pandan: #2f7a4d;
-  --color-pandan-deep: #276843;
-  --color-kopi: #7a5838;
-  --color-kayu: #3b2618;
-  --color-kayu-muted: #cdbfa8;
-  --color-songket: #c9a24a;
-  --color-merah: #6e1f1f;
-  --color-malam: #1c1614;
-  --color-paper: #efe9df;
-  --color-merah-light: #ff9e8f;
+  --color-paper: #edebe6; /* the page */
+  --color-sheet: #f4f2ed; /* raised paper: cards, dialogs, fields */
+  --color-ink: #141414; /* text, rules */
+  --color-muted: #66635c; /* secondary text (5.0:1 on paper, still AA under the grain) */
+  --color-cobalt: #1f3fb0; /* the one accent: actions, active state, the mark */
+  --color-cobalt-deep: #18328c; /* pressed / hover */
+  --color-vermilion: #b7351b; /* errors and stamps (text-safe) */
+  /* Print inks: book covers and spines only, never body text. */
+  --color-print-vermilion: #d9472b;
+  --color-cream: #f1e9d6;
+  --color-kraft: #d9cdb4;
+  --color-mustard: #e2b23a;
 
-  --font-display: "Literata Variable", Georgia, serif;
-  --font-text: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+  --font-display: "Newsreader Variable", Georgia, serif;
+  --font-text: "Inter Tight Variable", system-ui, sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* From the shelf reference: text slides and turns, and the sheet unfolding. */
+  --ease-paper: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sheet: cubic-bezier(0.76, 0, 0.18, 1);
 }
 
 html {
   scrollbar-gutter: stable;
-  background: var(--color-bone);
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-text);
   -webkit-text-size-adjust: 100%;
-  scrollbar-color: var(--color-kopi) var(--color-bone);
-}
-
-/* The landing is dark end to end, including overscroll bounce. */
-html:has(.page-malam) {
-  background: var(--color-malam);
-  scrollbar-color: var(--color-songket) var(--color-malam);
+  scrollbar-color: var(--color-ink) var(--color-paper);
 }
 
 body {
   margin: 0;
-  caret-color: var(--color-pandan);
+  caret-color: var(--color-cobalt);
+  /* Full-bleed bands (the browse shelf) are 100vw wide; never let them scroll sideways. */
+  overflow-x: clip;
 }
 
-/* Browser surfaces carry the design too. */
+/*
+  Paper grain: a fixed layer of fine noise multiplied over everything, so the
+  whole app reads as printed paper (books and buttons pick it up too). It never
+  takes clicks. Dialogs sit above it (z-index > 40).
+*/
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .42 0 0 0 0 .38 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (forced-colors: active) {
+  body::after {
+    display: none;
+  }
+}
+
 ::selection {
-  background: var(--color-songket);
-  color: var(--color-kayu);
+  background: var(--color-cobalt);
+  color: #fff;
 }
 
-:focus-visible {
-  outline: 3px solid var(--color-pandan);
-  outline-offset: 3px;
-  border-radius: 4px;
-}
-
-.on-dark :focus-visible {
-  outline-color: var(--color-songket);
+/* In the base layer so a utility (e.g. outline-none on a heading that takes
+   focus programmatically) can still override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 3px;
+  }
 }
 
 a {
@@ -70,6 +86,100 @@ a {
   text-decoration-thickness: 1px;
 }
 
+/*
+  Labels, like the small boxed tags in a printed catalogue. They carry facts
+  (give or lend, how long, the area, condition, a step's state), never decoration.
+  .lbl is the type; .box draws the 1px frame.
+*/
+@layer components {
+  .lbl {
+    font-family: var(--font-text);
+    font-weight: 600;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .box {
+    display: inline-flex;
+    align-items: center;
+    /* 24px: the smallest comfortable tap target (WCAG 2.5.8) when a box is a link or button. */
+    min-height: 24px;
+    padding: 0 8px;
+    border: 1px solid rgb(20 20 20 / 0.9);
+    white-space: nowrap;
+  }
+
+  /* One primary action per view: cobalt, square-cornered like a printed block. */
+  .btn-primary,
+  .btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 2px;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    transition:
+      background-color 0.3s var(--ease-paper),
+      color 0.3s var(--ease-paper),
+      transform 0.2s var(--ease-paper);
+  }
+  .btn-primary {
+    background: var(--color-cobalt);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-cobalt-deep);
+  }
+  .btn-quiet {
+    border: 1px solid var(--color-ink);
+    color: var(--color-ink);
+    background: transparent;
+  }
+  .btn-quiet:hover {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-primary:active,
+  .btn-quiet:active {
+    transform: scale(0.98);
+  }
+
+  /* Raised paper with a printed rule. */
+  .card {
+    background: var(--color-sheet);
+    border: 1px solid rgb(20 20 20 / 0.14);
+    border-radius: 2px;
+  }
+
+  /* Form fields: a sheet of paper with an ink rule. */
+  .field {
+    background: var(--color-sheet);
+    border: 1px solid rgb(20 20 20 / 0.45);
+    border-radius: 2px;
+    color: var(--color-ink);
+  }
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+  .field:focus-visible {
+    border-color: var(--color-cobalt);
+  }
+}
+
+/* Text that rises through its own mask (components/motion/rise.tsx). */
+.mask {
+  display: block;
+  overflow: hidden;
+  /* Room for descenders so the mask never clips a g or y. */
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
 
 /* The arch of a carved Malay panel: FAQ tabs, bullets, the footer wordmark. */
 .arch {
@@ -183,7 +293,7 @@ a {
   outline: none;
 }
 .shelf-stack [data-book]:focus-visible .f-spine {
-  outline: 3px solid var(--color-songket);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 4px;
 }
 
@@ -208,30 +318,435 @@ a {
   }
 }
 
-/* Form fields on the night ground. In a layer so Tailwind utilities
-   (aria-invalid:border-…) can still override them. */
-@layer components {
-  .field-dark {
-    background: rgb(239 233 223 / 0.08);
-    border: 1px solid rgb(239 233 223 / 0.4);
-    color: var(--color-paper);
-  }
-  .field-dark::placeholder {
-    color: rgb(239 233 223 / 0.55);
-  }
-  .field-dark:focus-visible {
-    border-color: var(--color-songket);
-  }
-}
-
-/* A light card on the dark ground keeps a dark focus ring. */
-.on-dark .bg-paper :focus-visible {
-  outline-color: var(--color-malam);
-}
-
 /* Phones: keep focused controls clear of the fixed tab bar (WCAG 2.4.11). */
 @media (max-width: 639px) {
   html:has(.app-tabs) {
     scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+}
+
+/*
+  The turning shelf (components/turning-shelf). Everything is placed from the
+  middle of the section using --H, the tallest book's height, so the
+  composition is the same at any size. JS writes each book's transform.
+*/
+.turning-shelf {
+  --H: min(46vh, 31vw);
+  position: relative;
+  /* Keep the books' z-index order inside the shelf, under the grain and any open book. */
+  isolation: isolate;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+@media (max-width: 767px) {
+  .turning-shelf {
+    --H: min(66vw, 44svh);
+    min-height: 560px;
+  }
+}
+.ts-probe {
+  position: absolute;
+  width: 0;
+  height: var(--H);
+  visibility: hidden;
+}
+
+/* Give / Lend: the cobalt block slides and stretches to the active mode. */
+.ts-tabs {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - var(--H) / 2 - 86px);
+  z-index: 130;
+  display: flex;
+  transform: translateX(-50%);
+}
+.ts-tab {
+  position: relative;
+  z-index: 1;
+  height: 25px;
+  padding: 0 12px;
+  margin-left: -1px;
+  border: 1px solid rgb(20 20 20 / 0.9);
+  background: transparent;
+  color: var(--color-ink);
+  white-space: nowrap;
+  transition: color 0.45s var(--ease-paper);
+}
+.ts-tab.is-on {
+  color: #fff;
+}
+.ts-tab-ink {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 25px;
+  background: var(--color-cobalt);
+  transition:
+    width 0.6s var(--ease-paper),
+    transform 0.6s var(--ease-paper);
+}
+
+.ts-shelf {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% - var(--H) / 2 - 40px);
+  height: calc(var(--H) + 80px);
+  perspective: 2200px;
+  perspective-origin: 50% 50%;
+}
+.ts-shelf:focus-visible {
+  outline-offset: -6px;
+}
+.ts-stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+.ts-book {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+  cursor: pointer;
+}
+.ts-face {
+  position: absolute;
+  top: calc(var(--H) * var(--h) / -2);
+  height: calc(var(--H) * var(--h));
+  /* No overflow clipping here: in Chrome it stops a turned face from receiving clicks. */
+  border-radius: 2px;
+  backface-visibility: hidden;
+}
+/* Light across a turning book: the spine darkens as it turns away, the cover lights up. */
+.ts-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #000;
+  pointer-events: none;
+}
+.ts-spine {
+  left: calc(var(--ws) / -2);
+  width: var(--ws);
+  transform: translateZ(calc(var(--d) / 2));
+}
+.ts-spine::after {
+  opacity: calc(var(--o, 0) * 0.55);
+}
+.ts-cover {
+  left: calc(var(--d) / -2);
+  width: var(--d);
+  transform: rotateY(90deg) translateZ(calc(var(--ws) / 2));
+  box-shadow: 0 30px 60px -28px rgb(20 16 10 / 0.55);
+}
+.ts-cover::after {
+  opacity: calc((1 - var(--o, 0)) * 0.5);
+}
+/* Page block on top, seen when a book lifts. */
+.ts-top {
+  left: calc(var(--ws) / -2);
+  top: calc(var(--d) / -2);
+  width: var(--ws);
+  height: var(--d);
+  background: var(--color-cream) repeating-linear-gradient(90deg, rgb(0 0 0 / 0.08) 0 1px, transparent 1px 3px);
+  transform: rotateX(90deg) translateZ(calc(var(--H) * var(--h) / 2));
+}
+.ts-top::after {
+  opacity: 0.12;
+}
+
+.print-cover,
+.print-spine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  container-type: inline-size;
+}
+.print-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.spine-title {
+  flex: 1;
+  min-height: 0;
+  margin: 12cqw 0 10cqw;
+  overflow: hidden;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.spine-author {
+  margin-bottom: 12cqw;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+
+/* The open button on the turned-out cover's corner. */
+.ts-open {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-cobalt);
+  border-radius: 50%;
+  background: rgb(237 235 230 / 0.8);
+  color: var(--color-cobalt);
+  transform: translate(-50%, -50%) scale(0);
+}
+
+.ts-caption {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + var(--H) / 2 + 30px);
+  z-index: 130;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(92vw, 760px);
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+/* Each line is a mask; items stack in one grid cell so old and new overlap while they swap. */
+.ts-cap-line {
+  display: grid;
+  width: 100%;
+  overflow: hidden;
+  padding-bottom: 0.1em;
+}
+.ts-cap-item {
+  grid-area: 1 / 1;
+  justify-self: center;
+}
+.ts-cap-title {
+  font-size: 31px;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+.ts-cap-facts .ts-cap-item {
+  display: inline-flex;
+}
+.ts-cap-facts .box + .box {
+  margin-left: -1px;
+}
+
+.ts-arrow {
+  position: absolute;
+  top: calc(50% + var(--H) / 2 + 34px);
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-ink);
+}
+.ts-prev {
+  left: 20px;
+}
+.ts-next {
+  right: 20px;
+}
+@media (max-width: 767px) {
+  .ts-tabs {
+    top: calc(50% - var(--H) / 2 - 72px);
+  }
+  .ts-cap-title {
+    font-size: 24px;
+  }
+  .ts-prev {
+    left: 6px;
+  }
+  .ts-next {
+    right: 6px;
+  }
+}
+
+/* The ring cursor, on mouse and trackpad only, and only over the shelf. */
+.ts-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 200;
+  display: none;
+  width: 58px;
+  height: 58px;
+  margin: -29px 0 0 -29px;
+  pointer-events: none;
+}
+.turning-shelf[data-fine="1"] .ts-cursor {
+  display: block;
+}
+.turning-shelf[data-fine="1"]:not(:hover) .ts-cursor {
+  visibility: hidden;
+}
+/* The ring replaces the pointer over the books only; buttons keep the system cursor,
+   and anyone using forced colours (often with a custom cursor) keeps theirs everywhere. */
+.turning-shelf[data-fine="1"] .ts-shelf,
+.turning-shelf[data-fine="1"] .ts-book {
+  cursor: none;
+}
+@media (forced-colors: active) {
+  .turning-shelf[data-fine="1"] .ts-shelf,
+  .turning-shelf[data-fine="1"] .ts-book {
+    cursor: auto;
+  }
+  .ts-cursor {
+    display: none !important;
+  }
+  .ts-tab.is-on {
+    outline: 2px solid CanvasText;
+    outline-offset: -4px;
+  }
+}
+.ts-cursor-ring,
+.ts-cursor-dot,
+.ts-cursor-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+.ts-cursor-ring {
+  width: 58px;
+  height: 58px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 50%;
+  transition:
+    scale 0.5s var(--ease-paper),
+    background-color 0.4s var(--ease-paper),
+    border-color 0.4s var(--ease-paper);
+}
+.ts-cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  transition: scale 0.4s var(--ease-paper);
+}
+.ts-cursor-label {
+  color: #fff;
+  scale: 0;
+  transition: scale 0.45s var(--ease-paper);
+}
+.ts-cursor[data-state="spine"] .ts-cursor-ring {
+  scale: 0.72;
+}
+.ts-cursor[data-state="btn"] .ts-cursor-ring {
+  scale: 0.55;
+}
+.ts-cursor[data-state="btn"] .ts-cursor-dot,
+.ts-cursor[data-state="open"] .ts-cursor-dot {
+  scale: 0;
+}
+.ts-cursor[data-state="open"] .ts-cursor-ring {
+  scale: 1.75;
+  background: var(--color-cobalt);
+  border-color: var(--color-cobalt);
+}
+.ts-cursor[data-state="open"] .ts-cursor-label {
+  scale: 1;
+}
+
+/* A library stamp: vermilion ink, tilted, a double rule like a rubber stamp's border. */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border: 2px solid var(--color-vermilion);
+  outline: 1px solid var(--color-vermilion);
+  outline-offset: 2px;
+  color: var(--color-vermilion);
+  font-family: var(--font-text);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  rotate: -5deg;
+  white-space: nowrap;
+}
+
+/* Inside the app the shelf is a full-bleed band, not the whole screen. */
+.browse-shelf {
+  margin-inline: calc(50% - 50vw);
+}
+.browse-shelf .turning-shelf {
+  --H: min(40vh, 28vw);
+  height: calc(var(--H) + 300px);
+  min-height: 0;
+}
+@media (max-width: 767px) {
+  .browse-shelf .turning-shelf {
+    --H: min(62vw, 38svh);
+    height: calc(var(--H) + 290px);
+  }
+}
+
+/* App navigation: catalogue tabs; the current page is the cobalt block. */
+.app-tab {
+  min-height: 30px;
+  padding: 0 12px;
+  color: var(--color-ink);
+  transition:
+    background-color 0.3s var(--ease-paper),
+    color 0.3s var(--ease-paper);
+}
+.app-tab:hover {
+  background: rgb(20 20 20 / 0.06);
+}
+.app-tab[aria-current="page"] {
+  position: relative;
+  z-index: 1;
+  border-color: var(--color-cobalt);
+  background: var(--color-cobalt);
+  color: #fff;
+}
+.app-tab-phone[aria-current="page"] {
+  color: var(--color-cobalt);
+  box-shadow: inset 0 3px 0 var(--color-cobalt);
+}
+
+/* Page and section titles in the app. */
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+.section-title {
+  border-top: 1px solid rgb(20 20 20 / 0.9);
+  padding-top: 14px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Reduced motion: state changes still happen, they just don't slide or grow. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

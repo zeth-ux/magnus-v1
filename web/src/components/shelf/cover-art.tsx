@@ -108,7 +108,7 @@ const TILES: Record<Exclude<CoverPattern, "matahari">, Tile> = {
   },
 };
 
-function PatternDef({ id, pattern, ink, base, scale = 1 }: { id: string; pattern: CoverPattern; ink: string; base: string; scale?: number }) {
+export function PatternDef({ id, pattern, ink, base, scale = 1 }: { id: string; pattern: CoverPattern; ink: string; base: string; scale?: number }) {
   const tile = TILES[pattern === "matahari" ? "songket" : pattern];
   return (
     <pattern id={id} width={tile.w * scale} height={tile.h * scale} patternUnits="userSpaceOnUse">
@@ -118,7 +118,7 @@ function PatternDef({ id, pattern, ink, base, scale = 1 }: { id: string; pattern
 }
 
 /** A sun with rays, for Klara and the Sun. */
-function Sun({ ink, cx, cy, r }: { ink: string; cx: number; cy: number; r: number }) {
+export function Sun({ ink, cx, cy, r }: { ink: string; cx: number; cy: number; r: number }) {
   return (
     <g>
       {Array.from({ length: 24 }, (_, i) => {

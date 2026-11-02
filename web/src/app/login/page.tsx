@@ -24,10 +24,10 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
     <AuthShell>
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-4">
-          <h1 className="font-display text-[clamp(2.4rem,4vw,3.4rem)] leading-[1.02] font-medium tracking-[-0.02em]">
+          <h1 className="page-title">
             Join the Ansan pilot.
           </h1>
-          <p className="max-w-[26rem] text-[17px] leading-relaxed text-paper/80">
+          <p className="max-w-[26rem] text-[17px] leading-relaxed text-ink/80">
             New or returning, it&apos;s the same step. List your first book and you get 1 starter
             credit.
           </p>
@@ -56,7 +56,7 @@ async function LoginFormWithParams({ searchParams }: Pick<PageProps<"/login">, "
           <input type="hidden" name="then" value="login" />
           <button
             type="submit"
-            className="text-[15px] font-semibold text-paper/80 underline underline-offset-4 hover:text-paper"
+            className="text-[15px] font-semibold text-ink/80 underline underline-offset-4 hover:text-ink"
           >
             Sign out of this browser
           </button>

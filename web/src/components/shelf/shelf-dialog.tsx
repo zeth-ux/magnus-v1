@@ -191,7 +191,7 @@ export function ShelfDialog({
             <button
               type="button"
               onClick={() => onNavigate(next)}
-              className="rounded-full border px-5 py-3 text-[15px] font-semibold"
+              className="btn-quiet"
               style={{ borderColor: `${copy.floodText}80` }}
             >
               Next: {copies[next].title} &rarr;

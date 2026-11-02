@@ -4,6 +4,27 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-02: Paper redesign: foundation, turning shelf, browse and every page
+
+**Why:** Zarith wants a beautiful, functional app before the pilot (no rush on 9 November now), using the concept in `Design.md`. Choices: Give/Lend tabs, English only, new brand colours (the reference's paper and cobalt).
+
+**Done**
+- New design foundation: paper `#EDEBE6`, sheet, ink, muted, one cobalt accent, vermilion for errors and stamps, print inks for covers (brand.md, with contrast checks). Newsreader + Inter Tight. Paper grain. Boxed catalogue labels (`.lbl`, `.box`), square printed buttons, cards and fields, a library stamp.
+- Every page moved from the dark ground to paper (a mechanical pass; the careful page-by-page polish is next).
+- Landing rebuilt around the **turning shelf**: 3D standing books, the centre one turned out to its cover, Give/Lend tabs, rolling caption, arrows/keys/drag/sideways scroll, ring cursor with OPEN on the cover. Opening a book grows a sheet from the cover with an ink-blot reveal. How it works, safety, questions and the footer redone as ruled, static sections. docs/landing.md rewritten.
+- **Browse** is now the turning shelf of real copies (full-bleed band), then search, then a catalogue list. Opening a book grows a sheet from its cover into the **book page**, which has the cover bleeding in as ink and its lines rising (`InkPoster`, `Rise`).
+- **Every app page** polished: catalogue-tab navigation (cobalt block on the current page), page and section titles, square buttons, ruled lists, stamps, a still from the shelf on the sign-in pages, the share card repainted.
+- Steve's review fixed: four unreadable buttons from the colour pass, focus back to the shelf after closing a book, the shelf loop re-runs cleanly when its books change, screen readers hear one announcement when the shelf stops, Space opens, the ring cursor only over the books, CSS transitions off for reduced motion, darker muted text (AA under the grain), 24px tap targets.
+- Checked in headless Chromium at 1440 and 390 px (with a local fake Supabase for signed-in pages), and with reduced motion.
+
+**Decisions**
+- Concept and motion from Design.md, not its images (someone else's VHS art on their CDN) or its "no libraries" rule (GSAP per CLAUDE.md).
+- Native cursor stays everywhere except over the shelf; text selection stays on except on the shelf.
+
+**Next**
+- [ ] Zarith: try it on a real phone (Safari especially: the ink reveal uses an SVG mask on HTML; if Safari can't, the cover just appears).
+- [ ] Zarith: OK to delete the old landing stack (`components/shelf/shelf.tsx`, `shelf-dialog.tsx`), now unused?
+
 ## 2026-11-01 (afternoon): The email link finally signs you in
 
 **What happened**

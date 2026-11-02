@@ -1,43 +1,36 @@
-# Landing page: the shelf
+# Landing page: the turning shelf
 
-*Third version, 2026-10-31. Zarith's verdict on the first two ("generic,
-plain, boring colours") pointed at one reference: [Stripe Press](https://press.stripe.com).
-We studied it live in the browser and rebuilt the landing around the same idea.*
+*Fourth version, 2026-11-02. Zarith asked for a redesign from `Design.md`, a
+reference page whose shelf of spines turns the chosen item out to face you. We
+took its concept and motion, not its assets (its images are someone else's
+VHS art). Palette and type: [brand.md](brand.md).*
 
-## What we took from Stripe Press
-Studied on 2026-10-31 at 1440 px:
-- **The books are the page.** A warm near-black ground, a vertical stack of
-  3D books lying flat with their spines towards you, each with its own bold cover art.
-- **A camera at the middle of the screen.** Books above it show their
-  undersides, books below show their covers. Scrolling moves the stack past the camera.
-- **Pick a book and the page becomes it.** The background floods with the
-  book's colour, the book turns to show its cover, and the details arrive beside it.
-- Quiet serif type, very little chrome, no stock photos.
-
-## Bayu's version
+## The page
 | Piece | File | What happens |
 |---|---|---|
-| **Shelf** (first screen) | `components/shelf/shelf.tsx` | Headline left ("Your next book is on a friend's shelf."), the stack right. On load the books fall into place. Scrolling makes the **bayu blow through the stack**: books drift and turn with your scroll speed, then settle, with a faint idle sway. Hover pulls a book towards you |
-| **3D book** | `components/shelf/book-3d.tsx` | A real CSS 3D box: spine, covers, page block. Size from `--w`, `--t`, `--k` |
-| **Cover art** | `components/shelf/cover-art.tsx` | Drawn patterns from Malay craft: songket, awan larat, pucuk rebung, kain pelikat, tikar, bunga, ombak, plus stars and a sun |
-| **Book dialog** | `components/shelf/shelf-dialog.tsx` | Colour flood from the click point, book turns to its cover, owner, give/lend, the owner's warkah, "Join to borrow it", "Next book" |
-| **How it works** | `components/landing/how-it-works.tsx` | Accordion in the book colours, stamp slam |
-| **Safety + FAQ** | `components/landing/safety-faq.tsx` | Native `<details>` index cards in the books' light tints |
-| **Footer** | `components/landing/closing.tsx` | B-a-y-u arch blocks rise in |
+| **Header** | `components/landing/site-header.tsx` | Boxed links left, the cobalt mark centred, "Join" right |
+| **Turning shelf** (first screen) | `components/turning-shelf/turning-shelf.tsx`, maths in `geometry.ts` | Books stand spine out, endlessly. The middle one turns in 3D to show its cover, leans -4.5°, lifts and comes forward; neighbours slide apart. Arrows, ← →, a drag, a sideways scroll or a click on a spine moves along. Give / Lend tabs jump to each run, and a cobalt block slides under the active one. The caption (title, author, facts as boxed labels) rolls through a mask |
+| **Covers and spines** | `components/turning-shelf/print-art.tsx` | Screen-print style: card colour, a pattern disc overprinted by an ink disc a little off register, big serif title, Give/Lend box. Malay craft patterns from `shelf/cover-art.tsx` |
+| **Book sheet** | `components/turning-shelf/book-sheet.tsx` | Click the open cover (or the round button, or Enter): a sheet the size and tilt of the cover grows to fill the screen, each line rises out of its mask, and the cover bleeds in as ink blots (an SVG mask with turbulence). Close or Esc folds it back into the cover |
+| **How a book moves** | `components/landing/how-it-works.tsx` | Four steps on a ruled card, each with its vermilion library stamp |
+| **Safety + questions** | `components/landing/safety-faq.tsx` | Ruled lists; answers in native `<details>` |
+| **Footer** | `components/landing/closing.tsx` | One invitation, boxed links |
 
-Real copies come first (`public_shelf()`, newest first, owners anonymous),
-each dressed in one of the drawn designs picked by its ISBN
-(`web/src/lib/shelf/dress.ts`). SAMPLE books from `web/src/content/shelf.ts`
-fill the stack up to 9, labelled "sample" when opened. The data is cached for
-a minute, so the landing stays a static page.
+Books come from `getLandingShelf()` as before (real copies first, samples to
+fill), ordered gives then lends.
 
 ## Rules
-- Native scroll; Lenis smoothing for mouse wheels only.
-- Small looping or one-off decoration (FAQ cards opening, the sign-in books drifting) may be plain CSS under `prefers-reduced-motion: no-preference`; anything scroll-driven or sequenced uses GSAP via `lib/gsap.ts`.
-- Animate transforms, opacity and clip-path only. The breeze uses `gsap.quickSetter` and skips work while the stack is off screen.
-- **Reduced motion:** a fixed camera, no drop-in, no breeze, instant dialog. Still 3D, still colourful.
-- **No JavaScript:** the stack and every section render; the book buttons simply don't open.
-- Every colour pair used for text is at least WCAG AA (checked in `brand.md`).
+- **One moving moment:** the shelf. Sections below are static: no scroll-triggered entrances.
+- One GSAP ticker loop writes the shelf's transforms straight to the DOM, and only
+  while the shelf is on screen and something changed. Animate transforms and clip-path only.
+- Sideways scrolling moves the shelf; up and down always scroll the page.
+- The ring cursor appears only for a mouse or trackpad, and only over the shelf.
+- **Reduced motion:** the shelf snaps instead of gliding, no tilt, the caption swaps
+  without sliding, the sheet opens and closes instantly.
+- **Keyboard:** the shelf is one focusable group (← → to move, Enter to open);
+  the arrows, tabs and open button are real buttons; the caption is a live region.
+- **No JavaScript:** the first book's caption and the spines render; nothing turns.
+- Chrome quirk: a 3D face must not clip its overflow, or a turned face stops receiving clicks.
 
 ## Cultural care
 - Patterns appear as linework and pattern only.

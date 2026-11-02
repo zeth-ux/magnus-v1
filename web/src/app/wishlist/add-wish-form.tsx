@@ -36,12 +36,12 @@ export function AddWishForm() {
             className={inputClass}
           />
         </div>
-        <button type="submit" disabled={pending} className="h-13 rounded-full bg-paper px-6 text-[17px] font-semibold text-malam disabled:opacity-60">
+        <button type="submit" disabled={pending} className="btn-primary disabled:opacity-60">
           {pending ? "Adding…" : "Add"}
         </button>
       </div>
       {state.status === "error" ? (
-        <p id="wish-error" role="alert" className="text-[15px] text-merah-light">
+        <p id="wish-error" role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}

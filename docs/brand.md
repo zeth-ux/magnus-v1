@@ -28,58 +28,63 @@ learn the words as they go.
 
 Warkah, Rantau and Penglipur are **v0.2+ features**. The pilot uses credits only.
 
-## Vibe: a night shelf of bright books
-Two moods, one brand:
-- **The app** (where people get things done): calm, light and airy. Like a friend
-  handing you a book on a breezy afternoon, not a marketplace.
-- **The landing page** (where people decide to join, updated 2026-10-31): a warm
-  near-black **malam** ground where the books themselves bring the colour, each
-  with a bold cover patterned from Malay craft (after Stripe Press). See [landing.md](landing.md).
+## Vibe: printed paper and a turning shelf
+*Updated 2026-11-02. Replaces the night shelf (malam ground) and the bone
+palette, which Zarith found boring. Direction from `Design.md`, a reference
+page of a shelf whose chosen item turns out to face you.*
 
-Malay touches stay **subtle**: palette and linework, not costume.
+Everything is **printed paper**: a warm paper sheet with fine grain, ink type,
+small boxed labels like a library catalogue card, and **one cobalt accent**.
+The colour lives in the **books**: covers and spines are screen-printed in a
+few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 
-**Colour tokens** (updated 2026-10-31)
+- **The memorable thing:** the shelf. Spines stand side by side and the chosen
+  book turns in 3D to show its cover. Everything around it stays quiet.
+- **Motion answers people:** text rises through masks when it changes, a sheet
+  of paper grows out of a cover when you open it. No fades for their own sake,
+  no decoration that moves by itself.
+- **Labels carry facts** (give or lend, how long, area, condition, a step's state),
+  never decoration, and never an eyebrow above every heading.
+
+**Colour tokens** (`web/src/app/globals.css`)
 | Token | Use | Hex |
 |---|---|---|
-| `bone` | Paper ground (replaces the old cream `#FBF7EF` and `#F1EFEA`, which taste-skill still read as cream) | `#EEEEEA` |
-| `bone-deep` | Second paper tone (inputs, toggles, FAQ cards) | `#E2E1DB` |
-| `muted` | Secondary text on bone | `#5C574E` |
-| `ink` | Text | `#2B2A28` |
-| `sky` | Airy backgrounds, decoration only | `#9CC9E3` (light: `#DCEEF7`) |
-| `pandan` | Primary buttons on light grounds | `#2F7A4D` |
-| `kopi` | Secondary accents in the app | `#7A5838` |
-| `kayu` | Full fields on the landing (carved cengal timber) | `#3B2618` |
-| `kayu-muted` | Secondary text on kayu | `#CDBFA8` |
-| `songket` | Gold linework, large text and buttons on kayu | `#C9A24A` |
-| `merah-hati` | Oxblood, stamps | `#6E1F1F` |
-| `malam` | Landing ground (night) | `#1C1614` |
-| `paper` | Text on malam | `#EFE9DF` |
-| `merah-light` | Error text and borders on malam (9.0:1) | `#FF9E8F` |
+| `paper` | The page | `#EDEBE6` |
+| `sheet` | Raised paper: cards, dialogs, fields | `#F4F2ED` |
+| `ink` | Text, rules, labels | `#141414` |
+| `muted` | Secondary text | `#66635C` |
+| `cobalt` | The one accent: primary buttons, active tab, links that act, the mark | `#1F3FB0` |
+| `cobalt-deep` | Hover and pressed | `#18328C` |
+| `vermilion` | Errors, stamps (text-safe) | `#B7351B` |
 
-**Book colours (landing):** each sample book has a spine colour, a pattern ink,
-a text colour and a flood colour for its open page, in `web/src/content/shelf.ts`.
-Text contrast: spines 5.4 to 13.4, open pages 4.6 to 13.4 (all ≥ 4.5). Paper on
-malam 14.8.
+**Print inks** (book covers and spines only, never body text): `print-vermilion`
+`#D9472B` (covers use `#C23A1E` where text sits on it), `mustard` `#E2B23A`,
+`cream` `#F1E9D6`, `kraft` `#D9CDB4`, plus ink and cobalt.
 
-**Why bone, not cream:** a yellow-cream ground with a brown or terracotta accent
-is now the most recognisable "AI-generated" look (taste-skill research). Our warmth
-comes from **real materials used as full fields** (timber, songket gold, oxblood),
-and the paper is a low-saturation bone (20% vs the old cream's 60%).
+**Contrast** (WCAG AA ≥ 4.5 for text): ink on paper 15.5 · muted on paper 5.0
+(about 4.8 under the paper grain) · muted on sheet 5.3 · cobalt on paper 7.4 · white on cobalt 8.8 · vermilion on
+paper 4.9 · ink on kraft 11.7 · ink on mustard 9.4 · cream on ink 15.2 · cream
+on cobalt 7.3 · cream on `#C23A1E` 4.4 (fine for the large titles, ≥ 3; the small
+author and Give/Lend text on those covers is decorative: the art is hidden from
+screen readers and every fact is repeated in the caption or page beside it) ·
+vermilion on sheet 5.3 · white on vermilion 5.9.
 
-Contrast checked (WCAG AA needs ≥ 4.5 for text): ink on bone 12.3 · bone on kayu
-12.2 · songket on kayu 5.9 · kayu on songket (button text) 5.9 · kayu-muted on
-kayu 7.9 · bone on merah hati 9.6 · songket on merah hati 4.7 · white on pandan
-5.2 · kopi on bone 5.5 · muted on bone 6.2 · muted on bone-deep 5.5 · bone on the
-how-it-works timber tints `#53371F` 9.3 and `#6B4A2C` 6.8 · ink on sky 8.1. Sky is too light for text on bone; use
-it only for backgrounds and decoration.
+**Type**
+- **Newsreader** (variable, optical sizes): book titles, headings, reading text.
+- **Inter Tight**: the interface: labels, buttons, form text.
+- Labels (`.lbl`): Inter Tight 600, 11px, tracked .09em, uppercase; boxed with a
+  1px ink rule (`.box`). Only for short facts.
+
+**Shapes:** 2px corners everywhere (printed blocks, not pills). One primary
+button per view (`.btn-primary`, cobalt); everything else `.btn-quiet` (1px ink rule).
 
 **Malay motifs (linework only)**
 - **Awan larat** ("drifting clouds"): the flowing spiral motif from Malay
   woodcarving and songket. Used as the wind lines.
 - **Ukiran tebuk tembus**: the pierced carved panels of a Malay house that let
   the breeze through. The landing's signature moment.
-- **The arch** (from the carved panel's top): the one shape of the brand.
-  Buttons (`.btn-arch`), windows, tabs and stages use it (`.arch`).
+- **The arch** (from the carved panel's top): retired from buttons in the
+  paper redesign; may return as a cover motif.
 - **Pucuk rebung** (bamboo shoot): the gold-on-oxblood triangle band from
   songket borders. Used as a band on the closing section.
 - No Quranic verses or religious calligraphy as decoration. No invented Jawi;
@@ -89,8 +94,8 @@ it only for backgrounds and decoration.
 - **Logo idea:** a book with a few pages lifted by the wind.
 - **Library-card touches:** due dates look like a library **due-date stamp**,
   and credits and history look like a stamped **library card**.
-- **Type:** a serif for book titles (bookish), a clean sans-serif for the UI.
-- **Dark mode:** night breeze, with a deep navy background and cream text.
+- **Type:** see above.
+- **Dark mode:** not now. If it comes back: ink ground, cream text, cobalt lifted to a lighter tint.
 
 ## Voice
 English first, with friendly Malaysian touches, like a group chat of friends:

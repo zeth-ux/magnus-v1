@@ -26,13 +26,13 @@ export function WishButton({ isbn, title, wished }: { isbn: string; title: strin
         type="submit"
         disabled={pending}
         aria-label={`${text}: ${title}`}
-        className={`h-11 self-start rounded-full px-5 text-[15px] font-semibold disabled:opacity-60 ${on ? "bg-songket text-kayu" : "border-[1.5px] border-paper/60"}`}
+        className={`${on ? "btn-primary" : "btn-quiet"} self-start !min-h-11 disabled:opacity-60`}
       >
         <span aria-hidden="true">{on ? "★ " : "☆ "}</span>
         {text}
       </button>
       {state.status === "error" ? (
-        <p role="alert" className="text-[15px] text-merah-light">
+        <p role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}

@@ -15,7 +15,7 @@ export function ReportForm({ request, other }: { request: string | null; other: 
   if (state.status === "done") {
     return (
       <div className="flex flex-col gap-4">
-        <p ref={done} tabIndex={-1} role="status" className="rounded-[10px] bg-paper p-6 text-[17px] text-malam outline-none">
+        <p ref={done} tabIndex={-1} role="status" className="card p-6 text-[17px] text-ink outline-none">
           Thanks for telling us. The pilot team will look at it{state.blocked && other ? `, and you've blocked ${other}` : ""}.
         </p>
         <Link href="/activity" className="self-start text-[17px] underline underline-offset-4">
@@ -42,13 +42,13 @@ export function ReportForm({ request, other }: { request: string | null; other: 
           aria-describedby="reason-hint"
           className={`${inputClass} h-auto py-3`}
         />
-        <p id="reason-hint" className="text-[15px] text-paper/70">
+        <p id="reason-hint" className="text-[15px] text-ink/70">
           Only the pilot team reads this{other ? `; ${other} isn't told who reported` : ""}.
         </p>
       </div>
       {request && other ? (
         <label className="flex items-start gap-3 text-[17px]">
-          <input type="checkbox" name="block" className="mt-1 h-5 w-5 accent-songket" />
+          <input type="checkbox" name="block" className="mt-1 h-5 w-5 accent-cobalt" />
           <span>
             Also block {other}: no more requests between you, and open ones are cancelled. A book on loan between you
             still needs to come back.
@@ -56,11 +56,11 @@ export function ReportForm({ request, other }: { request: string | null; other: 
         </label>
       ) : null}
       {state.status === "error" ? (
-        <p role="alert" className="text-[15px] text-merah-light">
+        <p role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}
-      <button type="submit" disabled={pending} className="h-13 self-start rounded-full bg-paper px-7 text-[17px] font-semibold text-malam disabled:opacity-60">
+      <button type="submit" disabled={pending} className="btn-primary self-start disabled:opacity-60">
         {pending ? "Sending…" : "Send report"}
       </button>
     </form>

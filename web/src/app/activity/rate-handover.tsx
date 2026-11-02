@@ -19,7 +19,7 @@ export function RateHandover({ request, title, other, rated }: { request: string
       <form action={action} className="flex flex-wrap items-center gap-2" aria-busy={pending}>
         <input type="hidden" name="request" value={request} />
         <div role="group" aria-label={`${groupLabel} (${title})`} className="flex flex-wrap items-center gap-2">
-          <span aria-hidden="true" className="text-[15px] text-paper/80">
+          <span aria-hidden="true" className="text-[15px] text-ink/80">
             {groupLabel}
           </span>
           {([true, false] as const).map((up) => (
@@ -29,7 +29,7 @@ export function RateHandover({ request, title, other, rated }: { request: string
               name="up"
               value={String(up)}
               aria-pressed={current === up}
-              className={`h-10 rounded-full px-4 text-[15px] font-semibold ${pending ? "opacity-60" : ""} ${current === up ? "bg-paper text-malam" : "border-[1.5px] border-paper/60"}`}
+              className={`h-10 rounded-[2px] px-4 text-[15px] font-semibold ${pending ? "opacity-60" : ""} ${current === up ? "bg-cobalt text-white" : "border border-ink/60"}`}
             >
               <span aria-hidden="true">{up ? "👍 " : "👎 "}</span>
               {up ? "Went well" : "Didn't go well"}
@@ -37,15 +37,15 @@ export function RateHandover({ request, title, other, rated }: { request: string
           ))}
         </div>
       </form>
-      <p role="status" className="text-[15px] text-paper/80">
+      <p role="status" className="text-[15px] text-ink/80">
         {state.status === "done" ? "Thanks, saved." : ""}
       </p>
       {state.status === "error" ? (
-        <p role="alert" className="text-[15px] text-merah-light">
+        <p role="alert" className="text-[15px] text-vermilion">
           {state.message}
         </p>
       ) : null}
-      <Link href={`/report?request=${request}`} className="self-start text-[15px] text-paper/80 underline underline-offset-4">
+      <Link href={`/report?request=${request}`} className="self-start text-[15px] text-ink/80 underline underline-offset-4">
         Report a problem<span className="sr-only"> with {title}</span>
       </Link>
     </div>

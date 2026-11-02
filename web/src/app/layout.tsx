@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/literata";
-import "@fontsource-variable/literata/wght-italic.css";
-import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource-variable/inter-tight";
 import "./globals.css";
 import { RegisterServiceWorker } from "@/components/pwa/register-sw";
 import { SITE_URL } from "@/lib/site/url";
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     locale: "en_GB",
   },
   twitter: { card: "summary_large_image" },
-  appleWebApp: { capable: true, title: "Bayu", statusBarStyle: "black" },
+  appleWebApp: { capable: true, title: "Bayu", statusBarStyle: "default" },
 };
 
-// Every page is on the dark "malam" ground now.
+// Every page is printed paper.
 export const viewport: Viewport = {
-  themeColor: "#1c1614",
-  colorScheme: "dark",
+  themeColor: "#edebe6",
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

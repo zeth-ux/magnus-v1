@@ -23,12 +23,12 @@ export function Field({
       </label>
       {children}
       {hint ? (
-        <p id={`${id}-hint`} className="text-[15px] text-paper/70">
+        <p id={`${id}-hint`} className="text-[15px] text-ink/70">
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p id={`${id}-error`} className="text-[15px] text-merah-light">
+        <p id={`${id}-error`} className="text-[15px] text-vermilion">
           {error}
         </p>
       ) : null}
@@ -48,4 +48,4 @@ export function focusFirstInvalid(form: HTMLFormElement | null) {
 }
 
 export const inputClass =
-  "field-dark h-13 w-full rounded-xl px-4 text-[17px] outline-none aria-invalid:border-merah-light [&>option]:text-malam";
+  "field h-13 w-full px-4 text-[17px] outline-none aria-invalid:border-vermilion [&>option]:text-ink";

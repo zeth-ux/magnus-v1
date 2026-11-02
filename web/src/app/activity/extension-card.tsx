@@ -31,9 +31,9 @@ export function ExtensionCard({ request, title, other, view }: { request: string
   const book = <span className="sr-only">: {title}</span>;
 
   return (
-    <div className="flex flex-col gap-3 rounded-[8px] bg-paper/[0.06] p-4">
+    <div className="flex flex-col gap-3 card p-4">
       <h3 className="text-[15px] font-semibold">More time</h3>
-      {view.lastAnswer ? <p className="text-[15px] text-paper/80">{view.lastAnswer}</p> : null}
+      {view.lastAnswer ? <p className="text-[15px] text-ink/80">{view.lastAnswer}</p> : null}
 
       {view.kind === "lender" ? (
         view.open ? (
@@ -48,7 +48,7 @@ export function ExtensionCard({ request, title, other, view }: { request: string
                 name="answer"
                 value="yes"
                 disabled={answering}
-                className="h-10 rounded-full bg-paper px-4 text-[15px] font-semibold text-malam disabled:opacity-60"
+                className="btn-primary disabled:opacity-60"
               >
                 Yes, that&apos;s fine{book}
               </button>
@@ -57,7 +57,7 @@ export function ExtensionCard({ request, title, other, view }: { request: string
                 name="answer"
                 value="no"
                 disabled={answering}
-                className="h-10 rounded-full border-[1.5px] border-paper/60 px-4 text-[15px] font-semibold disabled:opacity-60"
+                className="btn-quiet disabled:opacity-60"
               >
                 No, keep {view.open.due}
                 {book}
@@ -65,7 +65,7 @@ export function ExtensionCard({ request, title, other, view }: { request: string
             </div>
           </form>
         ) : (
-          <p className="text-[15px] text-paper/70">If {other} needs longer, they can ask here.</p>
+          <p className="text-[15px] text-ink/70">If {other} needs longer, they can ask here.</p>
         )
       ) : (
         <>
@@ -96,7 +96,7 @@ export function ExtensionCard({ request, title, other, view }: { request: string
                 />
               </div>
               <div className="flex flex-wrap gap-3">
-                <button type="submit" disabled={asking} className="h-10 rounded-full bg-paper px-4 text-[15px] font-semibold text-malam disabled:opacity-60">
+                <button type="submit" disabled={asking} className="btn-primary disabled:opacity-60">
                   {asking ? "Sending…" : `Ask ${other}`}
                   {book}
                 </button>
@@ -118,19 +118,19 @@ export function ExtensionCard({ request, title, other, view }: { request: string
               ref={opener}
               type="button"
               onClick={() => setOpen(true)}
-              className="h-10 self-start rounded-full border-[1.5px] border-paper/60 px-4 text-[15px] font-semibold"
+              className="btn-quiet self-start"
             >
               {view.waiting ? "Ask for a different date" : "Ask for more time"}
               {book}
             </button>
           ) : view.blocked === "limit" ? (
-            <p className="text-[15px] text-paper/70">You&apos;ve asked 5 times on this loan. Talk to {other} if you need longer.</p>
+            <p className="text-[15px] text-ink/70">You&apos;ve asked 5 times on this loan. Talk to {other} if you need longer.</p>
           ) : !view.waiting ? (
-            <p className="text-[15px] text-paper/70">This is as long as {other} lends it for. Talk to them if you need longer.</p>
+            <p className="text-[15px] text-ink/70">This is as long as {other} lends it for. Talk to them if you need longer.</p>
           ) : null}
         </>
       )}
-      <p id={errorId} role={error ? "alert" : undefined} className="text-[15px] text-merah-light">
+      <p id={errorId} role={error ? "alert" : undefined} className="text-[15px] text-vermilion">
         {error}
       </p>
     </div>

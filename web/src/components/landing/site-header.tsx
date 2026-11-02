@@ -1,32 +1,29 @@
 import Link from "next/link";
 import { BayuMark } from "@/components/bayu-mark";
 
-/** The site bar: the mark and tagline (after Stripe Press's "Ideas for progress"), and the way in. */
+/** The site bar over the shelf: a way to the explanations, the mark, and the way in. */
 export function SiteHeader() {
   return (
-    <header className="bg-malam text-paper">
-      <nav aria-label="Main" className="mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-3 text-paper no-underline">
-          <BayuMark className="h-8 w-8" />
-          <span className="flex flex-col leading-tight">
-            <span className="font-display text-[17px] font-semibold">Bayu</span>
-            <span className="font-display text-[15px] italic opacity-80">Books that breeze through</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-6 text-[15px]">
-          <a href="#how" className="hidden text-paper no-underline hover:underline sm:inline">
+    <header className="absolute inset-x-0 top-0 z-[140]">
+      <nav aria-label="Main" className="grid h-16 grid-cols-[1fr_auto_1fr] items-center px-4 sm:h-[84px] sm:px-8">
+        <span className="flex items-center gap-1 justify-self-start">
+          <a href="#how" className="box lbl text-ink no-underline">
             How it works
           </a>
-          <a href="#faq" className="hidden text-paper no-underline hover:underline sm:inline">
+          <a href="#faq" className="box lbl -ml-px hidden text-ink no-underline sm:inline-flex">
             Questions
           </a>
-          <Link
-            href="/login"
-            className="rounded-full border border-paper/60 px-4 py-2 font-semibold text-paper no-underline transition-colors duration-200 hover:bg-paper hover:text-malam"
-          >
-            Join the pilot
-          </Link>
-        </div>
+        </span>
+        <Link href="/" className="flex flex-col items-center gap-1 text-cobalt no-underline" aria-label="Bayu, home">
+          <span className="flex items-center gap-2">
+            <BayuMark className="h-6 w-6 sm:h-7 sm:w-7" />
+            <span className="font-display text-[20px] font-medium tracking-[0.01em] sm:text-[23px]">Bayu</span>
+          </span>
+          <span className="lbl hidden !text-[9px] !tracking-[0.3em] sm:block">Books that breeze through</span>
+        </Link>
+        <Link href="/login" className="box lbl justify-self-end bg-cobalt !border-cobalt text-white no-underline">
+          Join
+        </Link>
       </nav>
     </header>
   );
