@@ -58,7 +58,11 @@ export async function finishSignInFromUrl(
     // Tokens out of the address bar and history before anything else.
     nav.replaceUrl(loc.pathname + loc.search);
     const session = parseSessionHash(loc.hash);
-    const client = session ? await getClient() : null;
+    // The client may be loaded on demand: if that fails (offline, a chunk that won't load),
+    // fall through to the "link didn't work" page rather than leaving the reader stuck.
+    const client = session ? await Promise.resolve()
+      .then(getClient)
+      .catch(() => null) : null;
     if (!session || !client) return fail(), true;
     const next = safeRedirectPath(params.get("next"));
     try {

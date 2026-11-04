@@ -62,7 +62,7 @@ export function nearestTarget(T: number, i: number, n: number): number {
 }
 
 /** How many copies of the books to render so wrapping happens off screen. */
-export function copiesFor(n: number, minBooks = 24): number {
+export function copiesFor(n: number, minBooks = 30): number {
   return Math.max(3, Math.ceil(minBooks / Math.max(1, n)));
 }
 

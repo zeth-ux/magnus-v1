@@ -39,7 +39,7 @@ describe("turning shelf geometry", () => {
   });
 
   it("renders enough copies for a short shelf", () => {
-    expect(copiesFor(4)).toBe(6);
+    expect(copiesFor(4)).toBe(8);
     expect(copiesFor(20)).toBe(3);
   });
 });
