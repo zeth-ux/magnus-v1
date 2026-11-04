@@ -26,14 +26,15 @@ Navigation: **Browse · Activity · ➕ Add · Shelf · Me**
 ## Request lifecycle
 
 ```
-requested ──accept──► accepted ──meet-up agreed──► meeting ──both confirm──► handed_over
-    │                    │                                                      │
-    ├─decline──► declined│                                         (give) done ◄┤
-    ├─cancel───► cancelled◄─cancel (credit hold released)                       │
-    └─3 days, no reply──► expired (R11, proposed)            (lend) on_loan ────┤
-                                                              ├─both confirm──► returned (credit unlocked)
-                                                              └─due + 14 days, reported──► forfeited (R4)
+requested ──accept──► accepted ──meet-up agreed, both confirm──┬─(give)──► handed_over (done)
+    │                    │                                     └─(lend)──► on_loan
+    ├─decline──► declined│                                                   ├─both confirm──► returned (credit unlocked)
+    ├─cancel───► cancelled◄─cancel (credit hold released)                    └─due + 14 days, reported──► forfeited (R4)
+    └─3 days, no reply──► expired (R11, proposed)
 ```
+A lend goes straight from `accepted` to `on_loan` (it never sits in `handed_over`). Activity shows these as a strip
+(Asked → Accepted → Handed over, or Asked → Accepted → On loan → Returned) with "Your turn" or "Waiting for …",
+using the same rules as the Activity badge (`whoseTurn()` in `web/src/lib/activity/steps.ts` mirrors `my_waiting_count()`).
 
 ## Proposed rules (waiting for Zarith's OK, then added to ADR 003)
 
