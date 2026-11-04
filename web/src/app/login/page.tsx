@@ -14,7 +14,9 @@ export const viewport: Viewport = AUTH_VIEWPORT;
 
 /** Plain-language explanations for /login?error=… (set by /auth/callback). */
 const NOTICES: Record<string, string> = {
+  signout: "You're signed out here, but we couldn't sign out your other devices. Sign in and try \"Sign out everywhere\" again from Me.",
   link: `That sign-in link has expired or was already used. Get a new code below. ${OPEN_LINK_HINT}`,
+  // Set by /auth/signout when "Sign out everywhere" couldn't reach every session.
   account:
     "You're already signed in as someone else on this browser. Sign out, then get a new code below.",
 };
@@ -42,7 +44,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
 async function LoginFormWithParams({ searchParams }: Pick<PageProps<"/login">, "searchParams">) {
   const params = await searchParams;
   const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-  const errorKey = first(params.error);
+  const errorKey = first(params.signout) === "failed" ? "signout" : first(params.error);
   return (
     <>
       <LoginForm

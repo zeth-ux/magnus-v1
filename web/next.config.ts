@@ -21,6 +21,9 @@ import type { NextConfig } from "next";
  * reports on every page, it can be switched to enforcing (OWASP ASVS V3.4).
  * script-src keeps 'unsafe-inline' because Next's inline scripts would need
  * per-request nonces; the policy still stops scripts from any other site.
+ * Expected reports, not bugs: Vercel's preview toolbar (vercel.live) on preview
+ * deployments. Don't loosen the production policy for them. Reports appear in
+ * the browser console only (no report-to endpoint yet).
  */
 const SUPABASE = (() => {
   try {
@@ -31,11 +34,13 @@ const SUPABASE = (() => {
 })();
 const FULL_CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  // next dev's React runtime uses eval; production never does, so it's allowed in dev only.
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://books.google.com https://books.googleusercontent.com https://covers.openlibrary.org",
   "font-src 'self' data:",
-  `connect-src 'self'${SUPABASE ? ` https://${SUPABASE} wss://${SUPABASE}` : ""} https://www.googleapis.com https://openlibrary.org`,
+  // Book lookups run on the server (lib/books/lookup.ts), so the browser only talks to us and Supabase.
+  `connect-src 'self'${SUPABASE ? ` https://${SUPABASE} wss://${SUPABASE}` : ""}`,
   "media-src 'self' blob:",
   "worker-src 'self'",
   "manifest-src 'self'",

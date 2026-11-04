@@ -35,7 +35,7 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
             Signing out
           </h2>
           <p className="max-w-[46ch] text-[16px] leading-relaxed text-ink/80">
-            Lost your phone, or signed in on a shared computer? &ldquo;Sign out everywhere&rdquo; ends every sign-in to your account, on every device.
+            Lost your phone, or signed in on a shared computer? &ldquo;Sign out everywhere&rdquo; ends every sign-in to your account, on every device (within the hour at most).
           </p>
           <div className="flex flex-wrap gap-3">
             <form action="/auth/signout" method="post">
