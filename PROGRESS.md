@@ -4,6 +4,17 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-05 (overnight): Sign in with a code
+
+**Done**
+- Sign-in (and sign-up) is now two steps: your email, then the code we email you (`app/login/login-form.tsx`, `lib/auth/otp.ts` with tests). Number keypad, iPhone autofill (`one-time-code`), paste with spaces or full-width digits, 6 to 10 digits, clear errors read out on every try, "Send a new code" after 60 s (a refused resend keeps you on the code step), "Use a different email".
+- **Decision (Steve):** the code is checked from the browser, not a server action, so Supabase's per-IP limit on tries is per reader. From our server every reader would share one limit, and guesses would be spread over Vercel's IPs. Typing the code keeps you in the same tab or the installed app, so phones no longer depend on which browser opens a link.
+- The email's link still works as a backup (implicit flow, finished on the landing page).
+- Checked against a local fake Supabase: wrong code shows the error, right code lands on the page you were heading to.
+
+**Needs Zarith**
+- [ ] Supabase: set up SMTP (Gmail app password), raise emails per hour, and add `{{ .Token }}` to the Magic link and Confirm signup templates (README step 3-4). Until then the email has only the link.
+
 ## 2026-11-02: Paper redesign: foundation, turning shelf, browse and every page
 
 **Why:** Zarith wants a beautiful, functional app before the pilot (no rush on 9 November now), using the concept in `Design.md`. Choices: Give/Lend tabs, English only, new brand colours (the reference's paper and cobalt).
