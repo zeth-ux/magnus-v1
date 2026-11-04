@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { FirstSteps } from "@/components/app/first-steps";
+import { EmptyState } from "@/components/app/empty-state";
 import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
@@ -45,8 +47,11 @@ export default function ShelfPage() {
             Add a book
           </Link>
         </div>
+        <Suspense fallback={null}>
+          <FirstSteps />
+        </Suspense>
         <Announcer>
-          <Suspense fallback={<p className="text-ink/70">Dusting the shelf…</p>}>
+          <Suspense fallback={<p className="text-muted">Dusting the shelf…</p>}>
             <Shelf />
           </Suspense>
         </Announcer>
@@ -89,9 +94,7 @@ async function Shelf() {
           Your books ({current.length})
         </h2>
         {current.length === 0 ? (
-          <p className="text-[17px] text-ink/80">
-            Nothing yet. <Link href="/add" className="underline underline-offset-4">Add your first book</Link> and get a starter credit.
-          </p>
+          <EmptyState action={{ href: "/add", label: "Add a book" }}>No books on your shelf yet. Your first one earns a starter credit, which you can spend on a book from someone else.</EmptyState>
         ) : (
           <ul className="flex flex-col gap-4">
             {current.map((c) => {
