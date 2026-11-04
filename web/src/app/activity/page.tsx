@@ -11,7 +11,7 @@ import { ExtensionCard } from "./extension-card";
 import { canExtend, extensionView, type Ask, type ExtensionView } from "@/lib/activity/extension";
 import { lendDays } from "@/lib/books/lend";
 import { formatSeoul, isPast, seoulPickerMax, seoulPickerMin } from "@/lib/activity/meetup-time";
-import { requestStages, ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
+import { requestStages, whoseTurn, type Stage, ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -140,6 +140,7 @@ async function Requests() {
             who={r.requester?.display_name ?? "A reader"}
             line={ownerLine(r, { today, copyBusy: busy.has(r.copy?.id) })}
             ops={ownerOps(r, { today, copyBusy: busy.has(r.copy?.id) })}
+            copyBusy={busy.has(r.copy?.id)}
             meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }}
             extension={moreTime(r, r.requester?.display_name ?? "the reader")}
           />
@@ -201,7 +202,9 @@ function Item({
   meetup,
   extension,
   after,
+  copyBusy = false,
 }: {
+  copyBusy?: boolean;
   row: Row;
   who: string;
   line: string;
@@ -212,15 +215,23 @@ function Item({
 }) {
   const title = row.copy?.books?.title ?? "A book";
   const stages = requestStages(row);
-  // A live request where one of your buttons moves it on is your turn.
-  const yourTurn = ops.some((o) => o.primary);
-  const live = stages?.some((s) => s.state === "now");
+  const me = meetup?.me;
+  const card = meetup?.card;
+  const showsMeetup = Boolean(card && card.status === "proposed" && !card.expired);
+  const turn = me
+    ? whoseTurn(row, row.owner_id === me ? "owner" : "requester", {
+        today: seoulToday(),
+        answerable: row.copy?.status === "available" && !copyBusy,
+        proposal: showsMeetup && card ? (card.proposed_by === me ? "me" : "them") : null,
+        extensionAsked: extension !== undefined && extension !== "unavailable" && extension.kind === "lender" && extension.open !== null,
+      })
+    : null;
   return (
     <li className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col gap-1">
-        {live ? (
-          <span className={`box lbl mb-1 self-start ${yourTurn ? "border-cobalt bg-cobalt text-white" : "text-muted"}`}>
-            {yourTurn ? "Your turn" : `Waiting for ${who}`}
+        {turn ? (
+          <span className={`box lbl mb-1 self-start ${turn === "you" ? "border-cobalt bg-cobalt text-white" : "text-muted"}`}>
+            {turn === "you" ? "Your turn" : `Waiting for ${who}`}
           </span>
         ) : null}
         <p className="font-display text-[22px] leading-[1.15]">
@@ -236,7 +247,7 @@ function Item({
           {row.mode === "give" ? "Give" : "Lend"} · {who}
         </p>
         <p className="text-[15px] text-ink">{line}</p>
-        {stages ? <StageStrip stages={stages} /> : null}
+        {stages ? <StageStrip stages={stages} title={title} /> : null}
       </div>
       <div className="flex flex-col gap-4 sm:max-w-[26rem]">
         <RequestActions request={row.id} title={title} ops={ops} />
@@ -280,19 +291,18 @@ function Item({
 }
 
 /** Where a request is: Asked → Accepted → Handed over (or On loan → Returned for a lend). */
-function StageStrip({ stages }: { stages: NonNullable<ReturnType<typeof requestStages>> }) {
+function StageStrip({ stages, title }: { stages: Stage[]; title: string }) {
   return (
-    <ol aria-label="Progress" className="mt-3 flex flex-wrap items-center gap-y-2">
+    <ol aria-label={`Progress: ${title}`} className="mt-3 flex flex-wrap items-center gap-y-2">
       {stages.map((s, i) => (
         <li key={s.label} className="flex items-center">
           {i > 0 ? <span aria-hidden="true" className={`mx-2 h-px w-4 ${s.state === "next" ? "bg-ink/25" : "bg-cobalt"}`} /> : null}
           <span
             className={`lbl ${s.state === "done" ? "text-cobalt" : s.state === "now" ? "border-b-2 border-cobalt pb-0.5 text-ink" : "text-muted"}`}
-            aria-current={s.state === "now" ? "step" : undefined}
           >
             {s.state === "done" ? <span aria-hidden="true">✓ </span> : null}
             {s.label}
-            <span className="sr-only">{s.state === "done" ? " (done)" : s.state === "now" ? " (now)" : ""}</span>
+            <span className="sr-only">{s.state === "done" ? " (done)" : s.state === "now" ? " (where it is now)" : " (still to come)"}</span>
           </span>
         </li>
       ))}
