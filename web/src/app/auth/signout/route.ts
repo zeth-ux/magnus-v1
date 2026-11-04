@@ -19,6 +19,9 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient();
   // "local" signs out this browser only, not the PWA on your phone too.
-  if (supabase) await supabase.auth.signOut({ scope: "local" });
+  // "Sign out everywhere" (from Me) ends every session of this account: for a
+  // lost phone or a shared computer (OWASP ASVS V7.4).
+  const everywhere = form?.get("scope") === "global";
+  if (supabase) await supabase.auth.signOut({ scope: everywhere ? "global" : "local" });
   return NextResponse.redirect(home, { status: 303 });
 }

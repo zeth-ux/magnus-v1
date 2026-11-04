@@ -1,5 +1,7 @@
 "use server";
 
+import { friendlyError } from "@/lib/supabase/friendly-error";
+
 import { requireUser } from "@/lib/supabase/user";
 import { normalizeIsbn } from "@/lib/books/isbn";
 import { cachedLookup } from "@/lib/books/cached-lookup";
@@ -66,8 +68,8 @@ export async function addCopy(_prev: AddState, form: FormData): Promise<AddState
     .select("id")
     .single();
   if (error || !copy) {
-    console.error("[add] copies insert failed", error?.code);
-    return fail({}, "Couldn't add your book. Try again.");
+    // The daily and shelf-size limits explain themselves (hint 'bayu'); anything else is logged.
+    return fail({}, error ? friendlyError(error, "Couldn't add your book. Try again.", "add:copy") : "Couldn't add your book. Try again.");
   }
 
   // Was this the listing that earned the starter credit (R5)?
