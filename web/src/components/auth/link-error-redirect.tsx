@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { finishSignInFromUrl } from "@/lib/auth/finish-sign-in";
 
 /**
@@ -12,7 +11,10 @@ import { finishSignInFromUrl } from "@/lib/auth/finish-sign-in";
  */
 export function LinkErrorRedirect() {
   useEffect(() => {
-    void finishSignInFromUrl(window.location, () => createSupabaseBrowserClient()?.auth ?? null, {
+    // supabase-js is loaded only when a sign-in link actually arrives, so the
+    // landing page doesn't download and parse it for every visitor.
+    const getClient = async () => (await import("@/lib/supabase/browser")).createSupabaseBrowserClient()?.auth ?? null;
+    void finishSignInFromUrl(window.location, getClient, {
       replaceUrl: (url) => window.history.replaceState(null, "", url),
       go: (url) => window.location.replace(url),
     });

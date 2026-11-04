@@ -64,9 +64,8 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 **Contrast** (WCAG AA ≥ 4.5 for text): ink on paper 15.5 · muted on paper 5.0
 (about 4.8 under the paper grain) · muted on sheet 5.3 · cobalt on paper 7.4 · white on cobalt 8.8 · vermilion on
 paper 4.9 · ink on kraft 11.7 · ink on mustard 9.4 · cream on ink 15.2 · cream
-on cobalt 7.3 · cream on `#C23A1E` 4.4 (fine for the large titles, ≥ 3; the small
-author and Give/Lend text on those covers is decorative: the art is hidden from
-screen readers and every fact is repeated in the caption or page beside it) ·
+on cobalt 7.3 · paper-white `#FFF6E8` on `#C23A1E` 5.0 (vermilion books use it instead of
+cream, which was 4.4) ·
 vermilion on sheet 5.3 · white on vermilion 5.9.
 
 **Type**

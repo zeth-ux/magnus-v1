@@ -45,7 +45,7 @@ export function tokenSubject(jwt: string): string | null {
 export async function finishSignInFromUrl(
   live: { pathname: string; search: string; hash: string },
   /** Called only when there are tokens to use, so ordinary landing visits load no auth client. */
-  getClient: () => SignInClient | null,
+  getClient: () => SignInClient | null | Promise<SignInClient | null>,
   nav: Nav,
 ): Promise<boolean> {
   // Copy the address first: window.location is live, and the tokens are wiped
@@ -58,7 +58,11 @@ export async function finishSignInFromUrl(
     // Tokens out of the address bar and history before anything else.
     nav.replaceUrl(loc.pathname + loc.search);
     const session = parseSessionHash(loc.hash);
-    const client = session ? getClient() : null;
+    // The client may be loaded on demand: if that fails (offline, a chunk that won't load),
+    // fall through to the "link didn't work" page rather than leaving the reader stuck.
+    const client = session ? await Promise.resolve()
+      .then(getClient)
+      .catch(() => null) : null;
     if (!session || !client) return fail(), true;
     const next = safeRedirectPath(params.get("next"));
     try {

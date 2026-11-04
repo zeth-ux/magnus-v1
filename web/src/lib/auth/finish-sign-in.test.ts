@@ -74,6 +74,15 @@ describe("finishSignInFromUrl", () => {
     expect(c.nav.went).toEqual(["/login?error=link"]);
   });
 
+  it("loads the client on demand, and a failed load still lands on /login", async () => {
+    const { nav } = fake();
+    const ok = fake();
+    await finishSignInFromUrl({ pathname: "/", search: "", hash: hashFor("u1") }, async () => ok.client(), ok.nav);
+    expect(ok.calls).toEqual(["setSession", "refresh"]);
+    await finishSignInFromUrl({ pathname: "/", search: "", hash: hashFor("u1") }, () => Promise.reject(new Error("chunk failed")), nav);
+    expect(nav.went).toEqual(["/login?error=link"]);
+  });
+
   it("leaves an ordinary visit alone, without loading an auth client", async () => {
     const { nav } = fake();
     const noClient = () => {

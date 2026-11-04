@@ -20,6 +20,7 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
   - Enforced CSP adds `form-action 'self'`; a full CSP runs report-only.
   - `/.well-known/security.txt` and `SECURITY.md`.
   - Supabase advisors re-run: only known, intentional items.
+- **Faster landing** (Lighthouse, mobile, local build): performance 70 → 81, largest paint 4.1 s → 3.1 s, because supabase-js now loads only when a sign-in link arrives (it was in every landing visit). Rendering fewer shelf copies would reach 92, but Steve showed the wrap seam would then show on wide screens and on browse at 1920 px, so the shelf keeps 30+ books. Vermilion books now use paper-white text (5.0:1), which fixed the one contrast failure Lighthouse found. Accessibility 100 on every page checked (landing, login, privacy, browse, activity, me, add, shelf); best practices and SEO 100.
 - Research: `docs/research/2026-11-05-best-practice.md`.
 
 **Needs Zarith**
