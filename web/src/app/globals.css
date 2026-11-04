@@ -750,3 +750,15 @@ a {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* The sign-in code: big, evenly spaced digits. */
+.code-input {
+  font-family: var(--font-text);
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3em;
+}
+.code-input::placeholder {
+  letter-spacing: 0.3em;
+  opacity: 0.35;
+}

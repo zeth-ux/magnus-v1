@@ -45,5 +45,5 @@ Instructions for Claude Code working in this repo.
 
 ## Code standards
 - TypeScript strict mode; Python with type hints.
-- Validate all user input on the server.
+- Validate all user input on the server. (One deliberate exception: the sign-in code is checked by Supabase's `/verify` straight from the browser, so its rate limit applies per reader; our server never sees the code. Don't move it back into a server action without a server-side check and per-reader limits.)
 - Tests for core logic (credit ledger, lending lifecycle, request limits; later payments and booking rules) are required, UI tests optional.

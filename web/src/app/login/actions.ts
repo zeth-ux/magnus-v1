@@ -9,7 +9,7 @@ import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export type MagicLinkState =
   | { status: "idle" }
-  | { status: "sent"; email: string }
+  | { status: "sent"; email: string; sentAt: number }
   | { status: "error"; message: string; email: string };
 
 // Deliberately simple: the real check is Supabase sending the email.
@@ -93,14 +93,15 @@ export async function sendMagicLink(
         status: "error",
         email,
         // Supabase uses this code for both the 60-second resend wait and the hourly cap.
-        message: "We've just sent you a link, or our email is busy right now. If you have one from us, open the newest. Otherwise try again in a few minutes.",
+        message: "We've just emailed you, or our email is busy right now. If you have an email from us, use the newest. Otherwise try again in a few minutes.",
       };
     }
     return {
       status: "error",
       email,
-      message: "We couldn't send the link just now. Wait a minute and try again.",
+      message: "We couldn't send the email just now. Wait a minute and try again.",
     };
   }
-  return { status: "sent", email };
+  return { status: "sent", email, sentAt: Date.now() };
 }
+
