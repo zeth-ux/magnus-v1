@@ -30,6 +30,27 @@ export default function MePage({ searchParams }: PageProps<"/me">) {
           <Blocked />
         </Suspense>
         <InstallHint />
+        <section aria-labelledby="account-heading" className="flex flex-col gap-4">
+          <h2 id="account-heading" className="section-title">
+            Signing out
+          </h2>
+          <p className="max-w-[46ch] text-[16px] leading-relaxed text-ink/80">
+            Lost your phone, or signed in on a shared computer? &ldquo;Sign out everywhere&rdquo; ends every sign-in to your account, on every device (within the hour at most).
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <form action="/auth/signout" method="post">
+              <button type="submit" className="btn-quiet !min-h-11">
+                Sign out on this device
+              </button>
+            </form>
+            <form action="/auth/signout" method="post">
+              <input type="hidden" name="scope" value="global" />
+              <button type="submit" className="btn-quiet !min-h-11 !border-vermilion !text-vermilion hover:!bg-vermilion hover:!text-white">
+                Sign out everywhere
+              </button>
+            </form>
+          </div>
+        </section>
       </div>
     </AppShell>
   );

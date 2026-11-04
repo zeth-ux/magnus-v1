@@ -14,9 +14,16 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - **First steps** (PR #33): a strip on Browse, My shelf and Activity (library card → add a book → ask for a book) until a new reader has done all three. One `getUser()` per request now (`getSessionUser`, React `cache()`, shared by `requireUser` and the strip).
 - **Empty pages say what to do next:** one action each, and they only promise what the next screen delivers (e.g. "Add to wishlist by ISBN"; no starter-credit claim when it may not apply).
 - **Activity progress** (PR #34): each request shows Asked → Accepted → Handed over (or On loan → Returned) and **Your turn** / **Waiting for …**. `whoseTurn()` mirrors `my_waiting_count()` rule for rule (tested), so the row label and the badge always agree. user-flow diagram corrected (lends go straight to `on_loan`).
+- **Security pass** (PR #35, OWASP ASVS 5.0):
+  - Database limits on new listings (30 a day, 200 on the shelf; withdrawn don't count) and wishlists (200), under per-reader advisory locks so parallel scripts can't slip past. Gives never hit the cap (they change owner, they don't insert). Migration `20261105000100_insert_limits.sql`, applied live.
+  - **Sign out everywhere** on Me; if it can't reach other devices, the reader is told.
+  - Enforced CSP adds `form-action 'self'`; a full CSP runs report-only.
+  - `/.well-known/security.txt` and `SECURITY.md`.
+  - Supabase advisors re-run: only known, intentional items.
 - Research: `docs/research/2026-11-05-best-practice.md`.
 
 **Needs Zarith**
+- [ ] GitHub: turn on **private vulnerability reporting** (repo Settings → Code security), so the link in `security.txt` and `SECURITY.md` works.
 - [ ] Supabase: set up SMTP (Gmail app password), raise emails per hour, and add `{{ .Token }}` to the Magic link and Confirm signup templates (README step 3-4). Until then the email has only the link.
 
 ## 2026-11-02: Paper redesign: foundation, turning shelf, browse and every page

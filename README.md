@@ -59,7 +59,7 @@ The landing page works without Supabase keys (it shows the sample shelf); sign-i
    Note: `NEXT_PUBLIC_*` values are fixed at build time, so sign-in emails sent from a *preview* deployment link to production. Test sign-in on production (or locally).
 
 ## Public pages and SEO
-`/` (landing), `/login`, `/privacy` (what Bayu keeps; keep it in step with the schema), a custom 404 and error page, `robots.txt` and `sitemap.xml` (public pages only), a generated share card (`opengraph-image.tsx`) and `public/llms.txt`. Every response carries security headers (`web/next.config.ts`).
+`/` (landing), `/login`, `/privacy` (what Bayu keeps; keep it in step with the schema), a custom 404 and error page, `robots.txt` and `sitemap.xml` (public pages only), a generated share card (`opengraph-image.tsx`) and `public/llms.txt`. Every response carries security headers (`web/next.config.ts`), including a full Content-Security-Policy in report-only mode (check a phone's console for reports before enforcing it). `/.well-known/security.txt` and `SECURITY.md` say how to report a problem.
 
 ## Database (Supabase)
 The schema lives in `supabase/migrations/` as plain SQL, applied in filename order.

@@ -14,11 +14,46 @@ import type { NextConfig } from "next";
  * - Referrer-Policy: other sites see only "magnus-v1.vercel.app", never a full URL.
  * - Permissions-Policy: camera for the barcode scanner on our own pages only;
  *   microphone, location, payments and the like are off.
- * The CSP is deliberately small (frames, base, plugins) so it can't break the
- * app's scripts, fonts, GSAP or book covers; a full script policy needs nonces.
+ * The enforced CSP is deliberately small (frames, base, plugins, where forms
+ * may post) so it can't break the app's scripts, fonts, GSAP or book covers.
+ * A full policy runs as Report-Only first: browsers log what it *would* block
+ * (in the console) without blocking anything. Once a real phone shows no
+ * reports on every page, it can be switched to enforcing (OWASP ASVS V3.4).
+ * script-src keeps 'unsafe-inline' because Next's inline scripts would need
+ * per-request nonces; the policy still stops scripts from any other site.
+ * Expected reports, not bugs: Vercel's preview toolbar (vercel.live) on preview
+ * deployments. Don't loosen the production policy for them. Reports appear in
+ * the browser console only (no report-to endpoint yet).
  */
+const SUPABASE = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").host;
+  } catch {
+    return "";
+  }
+})();
+const FULL_CSP = [
+  "default-src 'self'",
+  // next dev's React runtime uses eval; production never does, so it's allowed in dev only.
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://books.google.com https://books.googleusercontent.com https://covers.openlibrary.org",
+  "font-src 'self' data:",
+  // Book lookups run on the server (lib/books/lookup.ts), so the browser only talks to us and Supabase.
+  `connect-src 'self'${SUPABASE ? ` https://${SUPABASE} wss://${SUPABASE}` : ""}`,
+  "media-src 'self' blob:",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "frame-src 'none'",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "form-action 'self'",
+].join("; ");
+
 const SECURITY_HEADERS = [
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" },
+  { key: "Content-Security-Policy-Report-Only", value: FULL_CSP },
   { key: "X-Frame-Options", value: "DENY" },
   ...(process.env.VERCEL ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }] : []),
   { key: "X-Content-Type-Options", value: "nosniff" },
