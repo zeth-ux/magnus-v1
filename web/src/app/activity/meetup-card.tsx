@@ -68,6 +68,8 @@ export function MeetupCard({
   return (
     <div className="flex flex-col gap-3 card p-4">
       <p className="text-[15px] font-semibold">{purpose === "handover" ? "Meet-up" : "Meet-up to return it"}</p>
+      {/* Safety at the moment it matters (docs/research/2026-11-05-best-practice.md: Olio, Craigslist). */}
+      <p className="text-[14px] leading-snug text-muted">Meet somewhere public, like a station or a café, and tell a friend where you&apos;re going.</p>
 
       {meetup ? (
         <div className="flex flex-col gap-1">
