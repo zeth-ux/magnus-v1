@@ -20,6 +20,7 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
   - Enforced CSP adds `form-action 'self'`; a full CSP runs report-only.
   - `/.well-known/security.txt` and `SECURITY.md`.
   - Supabase advisors re-run: only known, intentional items.
+- **Faster landing** (Lighthouse, mobile): performance 70 → 92, largest paint 4.1 s → 1.1 s. supabase-js now loads only when a sign-in link arrives (it was in every landing visit), and the shelf renders 27 books instead of 36. Accessibility, best practices and SEO: 100 on the landing, login and privacy pages.
 - Research: `docs/research/2026-11-05-best-practice.md`.
 
 **Needs Zarith**

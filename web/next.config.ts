@@ -25,9 +25,11 @@ import type { NextConfig } from "next";
  * deployments. Don't loosen the production policy for them. Reports appear in
  * the browser console only (no report-to endpoint yet).
  */
+/** Supabase's origin and its websocket twin (https → wss; http → ws for a local Supabase). */
 const SUPABASE = (() => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").host;
+    const u = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return `${u.origin} ${u.protocol === "http:" ? "ws" : "wss"}://${u.host}`;
   } catch {
     return "";
   }
@@ -40,7 +42,7 @@ const FULL_CSP = [
   "img-src 'self' data: blob: https://books.google.com https://books.googleusercontent.com https://covers.openlibrary.org",
   "font-src 'self' data:",
   // Book lookups run on the server (lib/books/lookup.ts), so the browser only talks to us and Supabase.
-  `connect-src 'self'${SUPABASE ? ` https://${SUPABASE} wss://${SUPABASE}` : ""}`,
+  `connect-src 'self'${SUPABASE ? ` ${SUPABASE}` : ""}`,
   "media-src 'self' blob:",
   "worker-src 'self'",
   "manifest-src 'self'",
