@@ -221,9 +221,14 @@ function Item({
   const turn = me
     ? whoseTurn(row, row.owner_id === me ? "owner" : "requester", {
         today: seoulToday(),
+        // On the requester's own rows copyBusy is always false: they can't see the owner's
+        // other requests, so they keep "Waiting for…" until the owner declines.
         answerable: row.copy?.status === "available" && !copyBusy,
         proposal: showsMeetup && card ? (card.proposed_by === me ? "me" : "them") : null,
-        extensionAsked: extension !== undefined && extension !== "unavailable" && extension.kind === "lender" && extension.open !== null,
+        extensionAsked:
+          extension !== undefined &&
+          extension !== "unavailable" &&
+          ((extension.kind === "lender" && extension.open !== null) || (extension.kind === "borrower" && extension.waiting !== null)),
       })
     : null;
   return (

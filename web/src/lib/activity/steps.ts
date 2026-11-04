@@ -142,7 +142,7 @@ export type TurnContext = {
   answerable: boolean;
   /** A future meet-up suggestion, on a card the page shows, and who made it ("me" / "them"). */
   proposal: "me" | "them" | null;
-  /** The borrower has an open "more time" ask. */
+  /** There's an open "more time" ask on this loan (it waits on the lender). */
   extensionAsked: boolean;
 };
 
@@ -173,9 +173,11 @@ function waitsOn(r: Row, side: "owner" | "requester", ctx: TurnContext, as: "me"
   if (r.status === "on_loan") {
     if (owner ? !r.owner_got_back && r.requester_returned : !r.requester_returned && r.owner_got_back) return true;
   }
-  // The other reader's meet-up suggestion (the page only passes one it shows).
+  // The other reader's meet-up suggestion, while a meet-up card is still shown:
+  // before the handover, or on a loan before either side has confirmed the return.
   const theirs = as === "me" ? "them" : "me";
-  if (ctx.proposal === theirs && !(r.status === "accepted" && stale)) return true;
+  const cardShown = (r.status === "accepted" && !stale) || (r.status === "on_loan" && !r.owner_got_back && !r.requester_returned);
+  if (ctx.proposal === theirs && cardShown) return true;
   // A "more time" ask on a book they lent.
   if (owner && ctx.extensionAsked) return true;
   // A book they're borrowing, due within 3 days or overdue.

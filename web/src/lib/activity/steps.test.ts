@@ -148,6 +148,11 @@ describe("whoseTurn (mirrors my_waiting_count)", () => {
     expect(whoseTurn(row({ status: "on_loan", return_by: "2026-11-08" }), "owner", ctx)).toBe("them");
     expect(whoseTurn(row({ status: "on_loan", requester_returned: true }), "owner", ctx)).toBe("you");
   });
+  it("a meet-up suggestion stops counting once either side confirmed the return", () => {
+    expect(whoseTurn(row({ status: "on_loan" }), "requester", { ...ctx, proposal: "them" })).toBe("you");
+    expect(whoseTurn(row({ status: "on_loan", requester_returned: true }), "requester", { ...ctx, proposal: "them" })).toBe("them"); // the lender must confirm
+    expect(whoseTurn(row({ status: "on_loan", owner_got_back: true }), "owner", { ...ctx, proposal: "them" })).toBe("them"); // the borrower must confirm
+  });
   it("a 'more time' ask waits on the lender", () => {
     expect(whoseTurn(row({ status: "on_loan" }), "owner", { ...ctx, extensionAsked: true })).toBe("you");
     expect(whoseTurn(row({ status: "on_loan" }), "requester", { ...ctx, extensionAsked: true })).toBe("them");
