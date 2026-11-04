@@ -119,3 +119,68 @@ export function requesterOps(r: Row, today: string): Op[] {
   if (r.status !== "on_loan") return [];
   return r.requester_returned ? [] : [{ op: "returned", label: "I returned it", primary: true }];
 }
+
+/** The stages a request moves through, for the progress strip on each Activity row. */
+export type Stage = { label: string; state: "done" | "now" | "next" };
+
+export function requestStages(r: Pick<Row, "mode" | "status">): Stage[] | null {
+  const labels = r.mode === "give" ? ["Asked", "Accepted", "Handed over"] : ["Asked", "Accepted", "On loan", "Returned"];
+  // How many stages have been reached. The last one reached is where the request is "now";
+  // once the final stage is reached, everything is done.
+  const reached: Partial<Record<Row["status"], number>> =
+    r.mode === "give" ? { requested: 1, accepted: 2, handed_over: 3 } : { requested: 1, accepted: 2, on_loan: 3, returned: 4 };
+  const n = reached[r.status];
+  if (n === undefined) return null; // declined, cancelled, forfeited: no progress to show
+  const finished = n >= labels.length;
+  return labels.map((label, i) => ({ label, state: finished || i < n - 1 ? (i < n ? "done" : "next") : i === n - 1 ? "now" : "next" }));
+}
+
+/** What the page knows about a request beyond the row, for whoseTurn(). */
+export type TurnContext = {
+  today: string;
+  /** The copy is on the shelf and nobody else is accepted for it (an answerable request). */
+  answerable: boolean;
+  /** A future meet-up suggestion, on a card the page shows, and who made it ("me" / "them"). */
+  proposal: "me" | "them" | null;
+  /** There's an open "more time" ask on this loan (it waits on the lender). */
+  extensionAsked: boolean;
+};
+
+/**
+ * Whose move it is on a live request: "you", "them", or null when neither is
+ * waiting on the other (both are arranging, or nothing is due yet). "You"
+ * mirrors public.my_waiting_count() rule for rule
+ * (supabase/migrations/20261101000900_waiting_count.sql), so the row label and
+ * the Activity badge always agree; "them" is the same rules from their side.
+ */
+export function whoseTurn(r: Row, side: "owner" | "requester", ctx: TurnContext): "you" | "them" | null {
+  if (waitsOn(r, side, ctx, "me")) return "you";
+  if (waitsOn(r, side === "owner" ? "requester" : "owner", ctx, "them")) return "them";
+  return null;
+}
+
+/** Does the request wait on `who` (the reader on `side`)? `as` says whether that's the viewer or the other reader. */
+function waitsOn(r: Row, side: "owner" | "requester", ctx: TurnContext, as: "me" | "them"): boolean {
+  if (!["requested", "accepted", "on_loan"].includes(r.status)) return false;
+  const stale = r.mode === "lend" && r.return_by !== null && r.return_by <= ctx.today;
+  const owner = side === "owner";
+  // A request to answer.
+  if (r.status === "requested") return owner && ctx.answerable;
+  if (r.status === "accepted") {
+    if (stale) return true; // both: cancel it
+    if (owner ? !r.owner_handed_over && r.requester_received : !r.requester_received && r.owner_handed_over) return true;
+  }
+  if (r.status === "on_loan") {
+    if (owner ? !r.owner_got_back && r.requester_returned : !r.requester_returned && r.owner_got_back) return true;
+  }
+  // The other reader's meet-up suggestion, while a meet-up card is still shown:
+  // before the handover, or on a loan before either side has confirmed the return.
+  const theirs = as === "me" ? "them" : "me";
+  const cardShown = (r.status === "accepted" && !stale) || (r.status === "on_loan" && !r.owner_got_back && !r.requester_returned);
+  if (ctx.proposal === theirs && cardShown) return true;
+  // A "more time" ask on a book they lent.
+  if (owner && ctx.extensionAsked) return true;
+  // A book they're borrowing, due within 3 days or overdue.
+  if (r.status === "on_loan" && !owner && !r.requester_returned && !r.owner_got_back && r.return_by !== null && r.return_by <= addDays(ctx.today, 3)) return true;
+  return false;
+}

@@ -4,13 +4,17 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
-## 2026-11-05 (overnight): Sign in with a code
+## 2026-11-05 (overnight): Sign in with a code, first steps, request progress
 
 **Done**
 - Sign-in (and sign-up) is now two steps: your email, then the code we email you (`app/login/login-form.tsx`, `lib/auth/otp.ts` with tests). Number keypad, iPhone autofill (`one-time-code`), paste with spaces or full-width digits, 6 to 10 digits, clear errors read out on every try, "Send a new code" after 60 s (a refused resend keeps you on the code step), "Use a different email".
 - **Decision (Steve):** the code is checked from the browser, not a server action, so Supabase's per-IP limit on tries is per reader. From our server every reader would share one limit, and guesses would be spread over Vercel's IPs. Typing the code keeps you in the same tab or the installed app, so phones no longer depend on which browser opens a link.
 - The email's link still works as a backup (implicit flow, finished on the landing page).
 - Checked against a local fake Supabase: wrong code shows the error, right code lands on the page you were heading to.
+- **First steps** (PR #33): a strip on Browse, My shelf and Activity (library card → add a book → ask for a book) until a new reader has done all three. One `getUser()` per request now (`getSessionUser`, React `cache()`, shared by `requireUser` and the strip).
+- **Empty pages say what to do next:** one action each, and they only promise what the next screen delivers (e.g. "Add to wishlist by ISBN"; no starter-credit claim when it may not apply).
+- **Activity progress** (PR #34): each request shows Asked → Accepted → Handed over (or On loan → Returned) and **Your turn** / **Waiting for …**. `whoseTurn()` mirrors `my_waiting_count()` rule for rule (tested), so the row label and the badge always agree. user-flow diagram corrected (lends go straight to `on_loan`).
+- Research: `docs/research/2026-11-05-best-practice.md`.
 
 **Needs Zarith**
 - [ ] Supabase: set up SMTP (Gmail app password), raise emails per hour, and add `{{ .Token }}` to the Magic link and Confirm signup templates (README step 3-4). Until then the email has only the link.
