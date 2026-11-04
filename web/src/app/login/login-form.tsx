@@ -1,9 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { sendMagicLink, verifyCode, type CodeState, type MagicLinkState } from "./actions";
+import { useRouter } from "next/navigation";
+import { sendMagicLink, type MagicLinkState } from "./actions";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { safeRedirectPath } from "@/lib/safe-redirect";
+import { checkCodeInput, codeErrorMessage } from "@/lib/auth/otp";
 
 /**
  * Google sign-in shows only once it's enabled in Supabase (Authentication →
@@ -16,7 +18,6 @@ const GOOGLE_ON = process.env.NEXT_PUBLIC_GOOGLE_SIGNIN === "on";
 const RESEND_AFTER = 60;
 
 const initialSend: MagicLinkState = { status: "idle" };
-const initialCode: CodeState = { status: "idle" };
 
 /**
  * Sign in or sign up in two steps: your email, then the code we email you.
@@ -26,21 +27,18 @@ const initialCode: CodeState = { status: "idle" };
  */
 export function LoginForm({ next, notice }: { next: string; notice?: string }) {
   const [sent, sendAction, sending] = useActionState(sendMagicLink, initialSend);
-  // "Use a different email" hides the code step for this send; a new send shows it again.
+  // The code step belongs to the last email that really went out; "Use a
+  // different email" leaves it until the next one does.
   const [changedFrom, setChangedFrom] = useState<number | null>(null);
+  const emailInput = useRef<HTMLInputElement>(null);
+
+  // Back on the email step after "Use a different email": put the cursor in the box.
+  useEffect(() => {
+    if (changedFrom !== null) emailInput.current?.focus();
+  }, [changedFrom]);
 
   if (sent.status === "sent" && changedFrom !== sent.sentAt) {
-    return (
-      <CodeStep
-        key={sent.sentAt}
-        email={sent.email}
-        next={next}
-        sentAt={sent.sentAt}
-        sendAction={sendAction}
-        sending={sending}
-        onChangeEmail={() => setChangedFrom(sent.sentAt)}
-      />
-    );
+    return <CodeStep key={sent.sentAt} email={sent.email} next={next} onChangeEmail={() => setChangedFrom(sent.sentAt)} />;
   }
 
   const error = sent.status === "error" ? sent : null;
@@ -64,6 +62,7 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
         {/* React resets the form after each action; re-mount with the typed
             email so people don't have to retype it. */}
         <input
+          ref={emailInput}
           key={lastEmail ? `e-${lastEmail}-${sent.status}` : "fresh"}
           id="email"
           name="email"
@@ -94,70 +93,79 @@ export function LoginForm({ next, notice }: { next: string; notice?: string }) {
   );
 }
 
-function CodeStep({
-  email,
-  next,
-  sentAt,
-  sendAction,
-  sending,
-  onChangeEmail,
-}: {
-  email: string;
-  next: string;
-  sentAt: number;
-  sendAction: (fd: FormData) => void;
-  sending: boolean;
-  onChangeEmail: () => void;
-}) {
-  const [state, codeAction, checking] = useActionState(verifyCode, initialCode);
+/**
+ * Step two. The code is checked from the browser, so Supabase's per-address
+ * limit on tries applies to this reader's own connection (checked from our
+ * server, every reader would share one limit and an attacker's guesses would
+ * be spread over many). Supabase still does every check that matters.
+ */
+function CodeStep({ email, next, onChangeEmail }: { email: string; next: string; onChangeEmail: () => void }) {
+  const router = useRouter();
   const codeInput = useRef<HTMLInputElement>(null);
-  const [now, setNow] = useState(sentAt);
-  const wait = Math.max(0, Math.ceil(RESEND_AFTER - (now - sentAt) / 1000));
+  const [checking, setChecking] = useState(false);
+  const [error, setError] = useState<{ message: string; attempt: number } | null>(null);
+  // Resends stay on this step: a refused resend (busy email) mustn't take away the box for the code already sent.
+  const [resent, resendAction, resending] = useActionState(sendMagicLink, initialSend);
+  const lastSentAt = resent.status === "sent" ? resent.sentAt : null;
+  const wait = useCountdown(RESEND_AFTER, lastSentAt);
 
-  // Put the cursor in the code box (its label is read out), then count down to "Send a new code".
   useEffect(() => {
     codeInput.current?.focus();
-    const t = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(t);
   }, []);
 
-  const error = state.status === "error" ? state.message : null;
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const code = new FormData(e.currentTarget).get("code");
+    const checked = checkCodeInput(email, typeof code === "string" ? code : "");
+    const fail = (message: string) => {
+      setError((prev) => ({ message, attempt: (prev?.attempt ?? 0) + 1 }));
+      codeInput.current?.focus();
+    };
+    if (!checked.ok) return fail(checked.message);
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) return fail("Sign-in isn't set up yet. Try again soon.");
+    setChecking(true);
+    const { error: err } = await supabase.auth.verifyOtp({ email: checked.email, token: checked.token, type: "email" });
+    if (err) {
+      setChecking(false);
+      return fail(codeErrorMessage(err.code));
+    }
+    // Signed in (the session cookies are set). Replace, so Back doesn't return to the code form.
+    router.replace(safeRedirectPath(next));
+    router.refresh();
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="font-display text-[28px] leading-[1.1]">
-          Check your email
-        </h2>
-        <p className="text-[16px] leading-relaxed text-ink/80" role="status">
-          We sent a code to <strong className="text-ink">{email}</strong>. It works once and expires in an hour.
+        <h2 className="font-display text-[28px] leading-[1.1]">Check your email</h2>
+        <p id="code-sent" className="text-[16px] leading-relaxed text-ink/80">
+          We sent a code to <strong className="text-ink">{email}</strong>. It works once and expires soon.
         </p>
       </div>
 
-      <form action={codeAction} className="flex flex-col gap-3" noValidate>
-        <input type="hidden" name="email" value={email} />
-        <input type="hidden" name="next" value={next} />
+      <form onSubmit={submit} className="flex flex-col gap-3" noValidate>
         <label htmlFor="code" className="text-[15px] font-semibold">
           Code from the email
         </label>
         <input
+          ref={codeInput}
           id="code"
           name="code"
           type="text"
           inputMode="numeric"
           autoComplete="one-time-code"
-          pattern="[0-9 \-]*"
-          maxLength={10}
+          maxLength={20}
           required
-          ref={codeInput}
           placeholder="123456"
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "code-error code-hint" : "code-hint"}
+          aria-describedby={error ? "code-error code-sent code-hint" : "code-sent code-hint"}
           className="field code-input h-16 px-4 outline-none aria-invalid:border-vermilion"
         />
+        {/* Keyed by attempt, so the same message is read out again after another wrong try. */}
         {error ? (
-          <p id="code-error" role="alert" className="text-[15px] text-vermilion">
-            {error}
+          <p key={error.attempt} id="code-error" role="alert" className="text-[15px] text-vermilion">
+            {error.message}
           </p>
         ) : null}
         <p id="code-hint" className="text-[15px] text-muted">
@@ -168,20 +176,52 @@ function CodeStep({
         </button>
       </form>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-ink/25 pt-5">
-        <form action={sendAction}>
-          <input type="hidden" name="email" value={email} />
-          <input type="hidden" name="next" value={next} />
-          <button type="submit" disabled={wait > 0 || sending} className="btn-quiet !min-h-11 disabled:cursor-not-allowed disabled:opacity-50">
-            {sending ? "Sending…" : wait > 0 ? `Send a new code in ${wait}s` : "Send a new code"}
+      <div className="flex flex-col gap-3 border-t border-ink/25 pt-5">
+        <div className="flex flex-wrap items-center gap-3">
+          <form action={resendAction}>
+            <input type="hidden" name="email" value={email} />
+            <input type="hidden" name="next" value={next} />
+            <button type="submit" disabled={wait > 0 || resending} className="btn-quiet !min-h-11 disabled:cursor-not-allowed disabled:opacity-50">
+              {resending ? "Sending…" : wait > 0 ? `Send a new code in ${wait}s` : "Send a new code"}
+            </button>
+          </form>
+          <button type="button" onClick={onChangeEmail} className="text-[15px] font-semibold text-ink underline underline-offset-4">
+            Use a different email
           </button>
-        </form>
-        <button type="button" onClick={onChangeEmail} className="text-[15px] font-semibold text-ink underline underline-offset-4">
-          Use a different email
-        </button>
+        </div>
+        <p role="status" className="text-[15px] text-ink/80 empty:sr-only">
+          {resent.status === "sent" ? "New code sent. Use the newest email." : ""}
+        </p>
+        {resent.status === "error" ? (
+          <p role="alert" className="text-[15px] text-vermilion">
+            {resent.message} The code you already have still works.
+          </p>
+        ) : null}
       </div>
     </div>
   );
+}
+
+/**
+ * Seconds left until another email may be sent, measured on this device's own
+ * clock (the server's may differ) from when the step appeared or the last
+ * resend went out. Works from timestamps, not by counting ticks, so a phone
+ * that pauses timers in the background still shows the right number.
+ */
+function useCountdown(seconds: number, restart: unknown) {
+  const [left, setLeft] = useState(seconds);
+  useEffect(() => {
+    const start = Date.now();
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil(seconds - (Date.now() - start) / 1000));
+      setLeft(remaining);
+      if (remaining === 0) window.clearInterval(t);
+    };
+    const t = window.setInterval(tick, 1000);
+    tick();
+    return () => window.clearInterval(t);
+  }, [seconds, restart]);
+  return left;
 }
 
 function GoogleButton({ next }: { next: string }) {

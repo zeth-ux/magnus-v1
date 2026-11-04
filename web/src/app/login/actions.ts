@@ -5,10 +5,7 @@ import { productionOrigin } from "@/lib/site/canonical";
 import { normaliseSiteOrigin } from "@/lib/auth/site-origin";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { redirect } from "next/navigation";
 import { safeRedirectPath } from "@/lib/safe-redirect";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { codeErrorMessage, normaliseCode } from "@/lib/auth/otp";
 
 export type MagicLinkState =
   | { status: "idle" }
@@ -108,34 +105,3 @@ export async function sendMagicLink(
   return { status: "sent", email, sentAt: Date.now() };
 }
 
-export type CodeState = { status: "idle" } | { status: "error"; message: string };
-
-/**
- * Sign in with the code from the email. Works for new and returning readers
- * alike (Supabase's email OTP), in whatever browser or installed app the
- * reader is using: nothing has to be opened from the email.
- * Supabase limits how often codes can be checked, and each code works once.
- */
-export async function verifyCode(_prev: CodeState, formData: FormData): Promise<CodeState> {
-  // Validate on the server, never trust the form.
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const token = normaliseCode(formData.get("code"));
-  const next = safeRedirectPath(String(formData.get("next") ?? ""));
-  if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
-    return { status: "error", message: "Something went wrong with your email. Start again with your email address." };
-  }
-  if (!token) {
-    return { status: "error", message: "Type the code from the email: 6 digits (some emails have 8)." };
-  }
-
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return { status: "error", message: "Sign-in isn't set up yet. Try again soon." };
-
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
-  if (error) {
-    console.error("[auth] verifyOtp (code) failed:", error.code ?? error.status);
-    return { status: "error", message: codeErrorMessage(error.code) };
-  }
-  // The session cookies are set on this response; go where the reader was heading.
-  redirect(next);
-}
