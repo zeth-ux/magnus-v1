@@ -21,9 +21,20 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
   - `/.well-known/security.txt` and `SECURITY.md`.
   - Supabase advisors re-run: only known, intentional items.
 - **Faster landing** (Lighthouse, mobile, local build): performance 70 → 81, largest paint 4.1 s → 3.1 s, because supabase-js now loads only when a sign-in link arrives (it was in every landing visit). Rendering fewer shelf copies would reach 92, but Steve showed the wrap seam would then show on wide screens and on browse at 1920 px, so the shelf keeps 30+ books. Vermilion books now use paper-white text (5.0:1), which fixed the one contrast failure Lighthouse found. Accessibility 100 on every page checked (landing, login, privacy, browse, activity, me, add, shelf); best practices and SEO 100.
+- **Meet-up card safety tip** (PR #37): "Meet somewhere public, like a station or a café, and tell a friend where you're going."
 - Research: `docs/research/2026-11-05-best-practice.md`.
+- Went live tonight: PRs #32 (code sign-in), #33 (first steps, empty pages), #34 (request progress), #35 (security pass + live migration `insert_limits`), #36 (faster landing), #37 (meet-up tip). No runtime errors on Vercel afterwards.
+- Lesson: parallel branches need their own git worktrees (Steve was reviewing one branch while another was checked out in the same folder). Turbopack also won't build with a symlinked `node_modules`, so each worktree gets its own `npm ci`.
+
+**Next (Claude, no input needed)**
+- [ ] Browser smoke tests in the repo (Playwright + a small fake Supabase, like the one used tonight), run in CI.
+- [ ] Enforce the full CSP once a real phone shows no reports.
+- [ ] "Joined <month>" next to owners' names (needs a privacy decision: it exposes join dates to signed-in readers).
 
 **Needs Zarith**
+- [ ] Try it on your phone: sign in with a code (once SMTP is on), first steps, Activity labels, the shelf in Safari.
+- [ ] OK to delete the old landing shelf code (`components/shelf/shelf.tsx`, `shelf-dialog.tsx`)?
+- [ ] Email notifications (new request, accepted, due soon) need a way to send app emails from Vercel: decide on a sender (Gmail SMTP or Resend) and add its key to Vercel.
 - [ ] GitHub: turn on **private vulnerability reporting** (repo Settings → Code security), so the link in `security.txt` and `SECURITY.md` works.
 - [ ] Supabase: set up SMTP (Gmail app password), raise emails per hour, and add `{{ .Token }}` to the Magic link and Confirm signup templates (README step 3-4). Until then the email has only the link.
 
