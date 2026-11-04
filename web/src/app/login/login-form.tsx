@@ -125,10 +125,20 @@ function CodeStep({ email, next, onChangeEmail }: { email: string; next: string;
     const supabase = createSupabaseBrowserClient();
     if (!supabase) return fail("Sign-in isn't set up yet. Try again soon.");
     setChecking(true);
-    const { error: err } = await supabase.auth.verifyOtp({ email: checked.email, token: checked.token, type: "email" });
-    if (err) {
+    let code_: string | undefined;
+    let failed = false;
+    try {
+      const { error: err } = await supabase.auth.verifyOtp({ email: checked.email, token: checked.token, type: "email" });
+      if (err) {
+        failed = true;
+        code_ = err.code;
+      }
+    } catch {
+      failed = true;
+    }
+    if (failed) {
       setChecking(false);
-      return fail(codeErrorMessage(err.code));
+      return fail(codeErrorMessage(code_));
     }
     // Signed in (the session cookies are set). Replace, so Back doesn't return to the code form.
     router.replace(safeRedirectPath(next));
