@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { FirstSteps } from "@/components/app/first-steps";
+import { EmptyState } from "@/components/app/empty-state";
 import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
@@ -23,6 +25,9 @@ export default function ActivityPage() {
     <AppShell>
       <div className="flex flex-col gap-12">
         <h1 className="page-title">Activity</h1>
+        <Suspense fallback={null}>
+          <FirstSteps />
+        </Suspense>
         <Announcer>
           <Suspense fallback={<p className="text-ink/70">Checking your requests…</p>}>
             <Requests />
@@ -132,7 +137,7 @@ async function Requests() {
           </ul>
         </section>
       ) : null}
-      <Section title="Asked of you" empty="Nobody has asked for your books yet.">
+      <Section title="Asked of you" empty={<EmptyState>Nobody has asked for your books yet. When someone does, you&apos;ll accept or decline here.</EmptyState>}>
         {incoming.map((r) => (
           <Item
             key={r.id}
@@ -147,11 +152,7 @@ async function Requests() {
       </Section>
       <Section
         title="Your requests"
-        empty={
-          <>
-            You haven&apos;t asked for any books. <Link href="/browse" className="underline underline-offset-4">Browse the shelf</Link>.
-          </>
-        }
+        empty={<EmptyState action={{ href: "/browse", label: "Browse the shelf" }}>You haven&apos;t asked for any books yet. Pick a book someone is giving or lending, and your request shows up here.</EmptyState>}
       >
         {outgoing.map((r) => (
           <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }} extension={moreTime(r, r.owner?.display_name ?? "the owner")} />
@@ -188,7 +189,11 @@ function Section({ title, empty, children }: { title: string; empty: React.React
   return (
     <section className="flex flex-col gap-5">
       <h2 className="section-title">{title}</h2>
-      {children.length === 0 ? <p className="text-[17px] text-ink/80">{empty}</p> : <ul className="flex flex-col gap-4">{children}</ul>}
+      {children.length === 0 ? (
+        typeof empty === "string" ? <p className="text-[17px] text-ink/80">{empty}</p> : empty
+      ) : (
+        <ul className="flex flex-col gap-4">{children}</ul>
+      )}
     </section>
   );
 }

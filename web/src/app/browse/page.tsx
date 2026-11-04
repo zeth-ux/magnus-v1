@@ -7,6 +7,8 @@ import { requireUser } from "@/lib/supabase/user";
 import { dressCopy } from "@/lib/shelf/dress";
 import { inputClass } from "@/components/app/field";
 import { BrowseShelf } from "./browse-shelf";
+import { FirstSteps } from "@/components/app/first-steps";
+import { EmptyState } from "@/components/app/empty-state";
 
 export const metadata: Metadata = { title: "Browse the shelf" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -38,7 +40,10 @@ export default function BrowsePage({ searchParams }: PageProps<"/browse">) {
             Your wishlist
           </Link>
         </div>
-        <Suspense fallback={<p className="text-ink/70">Reading the shelf…</p>}>
+        <Suspense fallback={null}>
+          <FirstSteps />
+        </Suspense>
+        <Suspense fallback={<p className="text-muted">Reading the shelf…</p>}>
           <Results searchParams={searchParams} />
         </Suspense>
       </div>
@@ -72,17 +77,19 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
           Couldn&apos;t read the shelf just now. Try again in a moment.
         </p>
       ) : rows.length === 0 ? (
-        <p className="text-[17px] text-ink/80">
-          {wishOnly && !q ? (
-            <>
-              None of your wishlist books are on the shelf yet. <Link href="/wishlist" className="underline underline-offset-4">See your wishlist</Link>.
-            </>
-          ) : q || mode ? (
-            "Nothing matches yet. Try another search."
-          ) : (
-            "The shelf is empty so far. Add the first book!"
-          )}
-        </p>
+        wishOnly ? (
+          <EmptyState action={{ href: "/wishlist", label: "See your wishlist" }}>
+            {q ? <>None of your wishlist books matching &ldquo;{q}&rdquo; are on the shelf yet.</> : "None of your wishlist books are on the shelf yet."} They show up here, and in Activity, when someone adds one.
+          </EmptyState>
+        ) : q ? (
+          <EmptyState action={{ href: "/browse", label: "Clear search" }} secondary={{ href: "/wishlist", label: "Add to wishlist by ISBN" }}>
+            Nothing on the shelf matches &ldquo;{q}&rdquo; yet. Put it on your wishlist and it shows up in Activity when someone adds it.
+          </EmptyState>
+        ) : mode ? (
+          <EmptyState action={{ href: "/browse", label: "Show all books" }}>Nothing {mode === "give" ? "to give" : "to lend"} on the shelf right now.</EmptyState>
+        ) : (
+          <EmptyState action={{ href: "/add", label: "Add a book" }}>The shelf is empty so far. Be the first to put a book on it.</EmptyState>
+        )
       ) : (
         <>
           {/* Three or more books: the turning shelf first (gives, then lends), the full list below. */}

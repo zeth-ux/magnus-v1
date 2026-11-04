@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { EmptyState } from "@/components/app/empty-state";
 import { Suspense } from "react";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/supabase/user";
@@ -53,7 +54,12 @@ async function Wishes() {
   const rows = (wishes.data ?? []) as unknown as Wish[];
   const onShelf = new Map<string, Available>();
   for (const a of (available.data ?? []) as Available[]) if (!onShelf.has(a.isbn)) onShelf.set(a.isbn, a);
-  if (rows.length === 0) return <p className="text-[17px] text-ink/80">Nothing yet. Add a book above, or tap &ldquo;Add to wishlist&rdquo; on any book page.</p>;
+  if (rows.length === 0)
+    return (
+      <EmptyState>
+        Nothing on your wishlist yet. Add a book above by its ISBN, or tap &ldquo;Add to wishlist&rdquo; on any book page.
+      </EmptyState>
+    );
 
   return (
     <ul className="flex flex-col gap-4">
