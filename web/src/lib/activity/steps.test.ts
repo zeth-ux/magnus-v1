@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, daysBetween, ownerLine, ownerOps, requesterLine, requesterOps, type Row } from "./steps";
+import { addDays, daysBetween, ownerLine, ownerOps, requestStages, requesterLine, requesterOps, type Row } from "./steps";
 
 const base: Row = {
   id: "r1",
@@ -93,5 +93,23 @@ describe("the borrower's due-date line", () => {
     expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
     expect(daysBetween("2026-12-30", "2027-01-02")).toBe(3);
     expect(daysBetween("2026-11-10", "2026-11-08")).toBe(-2);
+  });
+});
+
+describe("requestStages", () => {
+  const base = { owner_handed_over: false, requester_received: false, owner_got_back: false, requester_returned: false };
+  const states = (s: ReturnType<typeof requestStages>) => s?.map((x) => x.state).join(",");
+  it("walks a gift through asked, accepted, handed over", () => {
+    expect(states(requestStages({ ...base, mode: "give", status: "requested" }))).toBe("done,now,next");
+    expect(states(requestStages({ ...base, mode: "give", status: "accepted" }))).toBe("done,done,now");
+    expect(states(requestStages({ ...base, mode: "give", status: "handed_over" }))).toBe("done,done,done");
+  });
+  it("walks a loan through to returned", () => {
+    expect(requestStages({ ...base, mode: "lend", status: "on_loan" })?.map((s) => s.label)).toEqual(["Asked", "Accepted", "On loan", "Returned"]);
+    expect(states(requestStages({ ...base, mode: "lend", status: "on_loan" }))).toBe("done,done,done,now");
+    expect(states(requestStages({ ...base, mode: "lend", status: "returned" }))).toBe("done,done,done,done");
+  });
+  it("shows nothing for requests that stopped", () => {
+    for (const status of ["declined", "cancelled", "forfeited"] as const) expect(requestStages({ ...base, mode: "lend", status })).toBeNull();
   });
 });

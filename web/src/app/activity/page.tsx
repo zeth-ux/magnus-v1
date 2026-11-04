@@ -11,7 +11,7 @@ import { ExtensionCard } from "./extension-card";
 import { canExtend, extensionView, type Ask, type ExtensionView } from "@/lib/activity/extension";
 import { lendDays } from "@/lib/books/lend";
 import { formatSeoul, isPast, seoulPickerMax, seoulPickerMin } from "@/lib/activity/meetup-time";
-import { ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
+import { requestStages, ownerLine, ownerOps, requesterLine, requesterOps, seoulToday, STATUS_WORDS, type Row } from "@/lib/activity/steps";
 
 export const metadata: Metadata = { title: "Activity" };
 export const viewport: Viewport = APP_VIEWPORT;
@@ -211,9 +211,18 @@ function Item({
   after?: React.ReactNode;
 }) {
   const title = row.copy?.books?.title ?? "A book";
+  const stages = requestStages(row);
+  // A live request where one of your buttons moves it on is your turn.
+  const yourTurn = ops.some((o) => o.primary);
+  const live = stages?.some((s) => s.state === "now");
   return (
     <li className="flex flex-col gap-3 card p-5 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col gap-1">
+        {live ? (
+          <span className={`box lbl mb-1 self-start ${yourTurn ? "border-cobalt bg-cobalt text-white" : "text-muted"}`}>
+            {yourTurn ? "Your turn" : `Waiting for ${who}`}
+          </span>
+        ) : null}
         <p className="font-display text-[22px] leading-[1.15]">
           {row.copy ? (
             <Link href={`/browse/${row.copy.id}`} className="no-underline hover:underline">
@@ -227,6 +236,7 @@ function Item({
           {row.mode === "give" ? "Give" : "Lend"} · {who}
         </p>
         <p className="text-[15px] text-ink">{line}</p>
+        {stages ? <StageStrip stages={stages} /> : null}
       </div>
       <div className="flex flex-col gap-4 sm:max-w-[26rem]">
         <RequestActions request={row.id} title={title} ops={ops} />
@@ -266,5 +276,26 @@ function Item({
         )}
       </div>
     </li>
+  );
+}
+
+/** Where a request is: Asked → Accepted → Handed over (or On loan → Returned for a lend). */
+function StageStrip({ stages }: { stages: NonNullable<ReturnType<typeof requestStages>> }) {
+  return (
+    <ol aria-label="Progress" className="mt-3 flex flex-wrap items-center gap-y-2">
+      {stages.map((s, i) => (
+        <li key={s.label} className="flex items-center">
+          {i > 0 ? <span aria-hidden="true" className={`mx-2 h-px w-4 ${s.state === "next" ? "bg-ink/25" : "bg-cobalt"}`} /> : null}
+          <span
+            className={`lbl ${s.state === "done" ? "text-cobalt" : s.state === "now" ? "border-b-2 border-cobalt pb-0.5 text-ink" : "text-muted"}`}
+            aria-current={s.state === "now" ? "step" : undefined}
+          >
+            {s.state === "done" ? <span aria-hidden="true">✓ </span> : null}
+            {s.label}
+            <span className="sr-only">{s.state === "done" ? " (done)" : s.state === "now" ? " (now)" : ""}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
   );
 }

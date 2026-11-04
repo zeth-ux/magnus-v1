@@ -119,3 +119,17 @@ export function requesterOps(r: Row, today: string): Op[] {
   if (r.status !== "on_loan") return [];
   return r.requester_returned ? [] : [{ op: "returned", label: "I returned it", primary: true }];
 }
+
+/** The stages a request moves through, for the progress strip on each Activity row. */
+export type Stage = { label: string; state: "done" | "now" | "next" };
+
+export function requestStages(r: Pick<Row, "mode" | "status" | "owner_handed_over" | "requester_received" | "owner_got_back" | "requester_returned">): Stage[] | null {
+  const labels = r.mode === "give" ? ["Asked", "Accepted", "Handed over"] : ["Asked", "Accepted", "On loan", "Returned"];
+  // How many stages are complete; the next one is "now" while the request is live.
+  const reached: Partial<Record<Row["status"], number>> =
+    r.mode === "give" ? { requested: 1, accepted: 2, handed_over: 3 } : { requested: 1, accepted: 2, on_loan: 3, returned: 4 };
+  const n = reached[r.status];
+  if (n === undefined) return null; // declined, cancelled, forfeited: no progress to show
+  const finished = n >= labels.length;
+  return labels.map((label, i) => ({ label, state: i < n ? "done" : i === n && !finished ? "now" : "next" }));
+}
