@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/user";
 import { firstSteps } from "@/lib/onboarding/steps";
 
 /**
@@ -9,17 +9,19 @@ import { firstSteps } from "@/lib/onboarding/steps";
  * (or if the checks fail: never a reason to block the page).
  */
 export async function FirstSteps() {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return null;
-  const { data } = await supabase.auth.getUser();
-  const me = data.user?.id;
-  if (!me) return null;
+  const { supabase, user } = await getSessionUser();
+  const me = user?.id;
+  if (!supabase || !me) return null;
   const [card, books, asks] = await Promise.all([
     supabase.from("profiles").select("id").eq("id", me).maybeSingle(),
     supabase.from("copies").select("id", { count: "exact", head: true }).eq("owner_id", me),
     supabase.from("requests").select("id", { count: "exact", head: true }).eq("requester_id", me),
   ]);
-  if (card.error || books.error || asks.error) return null;
+  if (card.error || books.error || asks.error) {
+    // Never block the page for this, but leave a trace (a broken grant would show here).
+    console.error("[first-steps]", card.error?.code ?? books.error?.code ?? asks.error?.code);
+    return null;
+  }
   const result = firstSteps({ card: Boolean(card.data), book: (books.count ?? 0) > 0, ask: (asks.count ?? 0) > 0 });
   if (!result) return null;
 

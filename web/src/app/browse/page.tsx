@@ -77,14 +77,18 @@ async function Results({ searchParams }: Pick<PageProps<"/browse">, "searchParam
           Couldn&apos;t read the shelf just now. Try again in a moment.
         </p>
       ) : rows.length === 0 ? (
-        wishOnly && !q ? (
-          <EmptyState action={{ href: "/wishlist", label: "See your wishlist" }}>None of your wishlist books are on the shelf yet. We&apos;ll show them here when someone adds one.</EmptyState>
-        ) : q || mode ? (
-          <EmptyState action={{ href: "/browse", label: "Clear search" }} secondary={{ href: "/wishlist", label: "Add to wishlist" }}>
-            {q ? <>Nothing on the shelf matches &ldquo;{q}&rdquo; yet.</> : "Nothing on the shelf matches that yet."} Put it on your wishlist and it shows up in Activity when someone adds it.
+        wishOnly ? (
+          <EmptyState action={{ href: "/wishlist", label: "See your wishlist" }}>
+            {q ? <>None of your wishlist books matching &ldquo;{q}&rdquo; are on the shelf yet.</> : "None of your wishlist books are on the shelf yet."} They show up here, and in Activity, when someone adds one.
           </EmptyState>
+        ) : q ? (
+          <EmptyState action={{ href: "/browse", label: "Clear search" }} secondary={{ href: "/wishlist", label: "Add to wishlist by ISBN" }}>
+            Nothing on the shelf matches &ldquo;{q}&rdquo; yet. Put it on your wishlist and it shows up in Activity when someone adds it.
+          </EmptyState>
+        ) : mode ? (
+          <EmptyState action={{ href: "/browse", label: "Show all books" }}>Nothing {mode === "give" ? "to give" : "to lend"} on the shelf right now.</EmptyState>
         ) : (
-          <EmptyState action={{ href: "/add", label: "Add a book" }}>The shelf is empty so far. Be the first to put a book on it: it earns you a starter credit.</EmptyState>
+          <EmptyState action={{ href: "/add", label: "Add a book" }}>The shelf is empty so far. Be the first to put a book on it.</EmptyState>
         )
       ) : (
         <>

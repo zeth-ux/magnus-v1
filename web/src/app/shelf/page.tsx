@@ -94,7 +94,12 @@ async function Shelf() {
           Your books ({current.length})
         </h2>
         {current.length === 0 ? (
-          <EmptyState action={{ href: "/add", label: "Add a book" }}>No books on your shelf yet. Your first one earns a starter credit, which you can spend on a book from someone else.</EmptyState>
+          // The page header already has the "Add a book" button, so no second one here.
+          <EmptyState>
+            {copies.length === 0
+              ? "No books on your shelf yet. Your first one earns a starter credit, which you can spend on a book from someone else."
+              : "No books on your shelf right now. The ones you took off are listed below."}
+          </EmptyState>
         ) : (
           <ul className="flex flex-col gap-4">
             {current.map((c) => {

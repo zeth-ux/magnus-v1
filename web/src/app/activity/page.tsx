@@ -137,7 +137,7 @@ async function Requests() {
           </ul>
         </section>
       ) : null}
-      <Section title="Asked of you" empty="Nobody has asked for your books yet. When someone does, you'll accept or decline here.">
+      <Section title="Asked of you" empty={<EmptyState>Nobody has asked for your books yet. When someone does, you&apos;ll accept or decline here.</EmptyState>}>
         {incoming.map((r) => (
           <Item
             key={r.id}
@@ -152,7 +152,7 @@ async function Requests() {
       </Section>
       <Section
         title="Your requests"
-        empty={<EmptyState action={{ href: "/browse", label: "Browse the shelf" }}>You haven&apos;t asked for any books yet. Pick one to give or lend, and it shows up here.</EmptyState>}
+        empty={<EmptyState action={{ href: "/browse", label: "Browse the shelf" }}>You haven&apos;t asked for any books yet. Pick a book someone is giving or lending, and your request shows up here.</EmptyState>}
       >
         {outgoing.map((r) => (
           <Item key={r.id} row={r} who={r.owner?.display_name ?? "A reader"} line={requesterLine(r, today)} ops={requesterOps(r, today)} meetup={{ me: user.id, card: meetups.get(r.id) ?? null, minAt, maxAt, unavailable: Boolean(meetupError) }} extension={moreTime(r, r.owner?.display_name ?? "the owner")} />
