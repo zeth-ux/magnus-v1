@@ -8,6 +8,9 @@ import { getSupabaseEnv } from "./env";
  * A Supabase client for Server Components, Server Actions and Route Handlers.
  * Create a new one per request (never share it between requests).
  * Returns null when Supabase isn't configured yet.
+ *
+ * Never call it inside "use cache" or "use cache: private": it waits for a
+ * real request (connection()), which Next refuses in a cached scope.
  */
 export async function createSupabaseServerClient() {
   // Read cookies first: it marks the caller as per-request (never baked in at
