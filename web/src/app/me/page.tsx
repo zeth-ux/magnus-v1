@@ -81,7 +81,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
         />
       </div>
       {profile ? (
-        <aside aria-label="Your credits" className="h-fit card p-7 text-ink lg:col-span-4 lg:col-start-9">
+        <aside aria-label="Your credits" className="on-dark h-fit panel bg-cobalt p-7 text-cream lg:col-span-4 lg:col-start-9">
           <p className="font-display text-[22px] leading-[1.15]">Credits</p>
           {creditsError ? (
             <p className="mt-4 text-[15px]">Couldn&apos;t load your credits just now. Refresh to try again.</p>
@@ -96,12 +96,12 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
             ).map(([label, value]) => (
               <div key={label} className="flex flex-col">
                 <dt className="order-2 mt-1 text-[15px]">{label}</dt>
-                <dd className="order-1 font-display text-[2.2rem] leading-none font-semibold">{value}</dd>
+                <dd className="order-1 font-display text-[2.6rem] leading-none font-semibold text-mustard">{value}</dd>
               </div>
             ))}
           </dl>
           )}
-          <p className="mt-5 text-[15px] leading-relaxed">
+          <p className="mt-5 border-t border-cream/30 pt-4 text-[15px] leading-relaxed">
             Give a book: +1. Take one: −1. Borrowing holds 1 until the book is back. Your first listed book earns a starter credit.
           </p>
         </aside>

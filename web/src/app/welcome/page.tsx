@@ -60,7 +60,7 @@ async function Welcome() {
           {returning ? "Welcome back." : "You're in."}
         </h1>
         <p className="text-[17px] leading-relaxed text-ink/80">
-          Signed in as <strong className="text-ink">{email}</strong>. Put a
+          Signed in as <strong className="text-ink [overflow-wrap:anywhere]">{email}</strong>. Put a
           few books on the shelf now; the pilot opens for requests on{" "}
           <strong className="text-ink">9 November</strong>.
         </p>

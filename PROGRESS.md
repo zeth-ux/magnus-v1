@@ -10,6 +10,18 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 - Vercel's error list showed two groups on every signed-in page: "unstable value `Date.now()` while prerendering" and "waiting badge: my_waiting_count". Readers never saw them. Next prefetches a signed-in page ahead of time; supabase-js checks the session's expiry against the clock during that, Next stops the prerender and logs it, and the badge's database call is cut off with it (the function itself works: checked live as a signed-in reader).
 - Fix: `await connection()` in `createSupabaseServerClient` (`lib/supabase/server.ts`), Next's documented way to say "wait for a real request". Same signed-in walk through all five tabs on a local build: 14 errors before, 0 after; the badge and every page still render.
 - Note: Vercel's free plan keeps runtime logs for only an hour, so error details (like the badge's code) must be caught soon after they happen.
+## 2026-11-05: Contrast and depth (same palette, louder)
+
+**Done**
+- Zarith: the pages looked plain and cheap, with no contrast or depth, and the background never changed as you scrolled. Same theme kept (paper, ink, cobalt), now used soft and loud in turn. Rules written into `docs/brand.md` ("Contrast and depth").
+- **Landing:** the shelf stands under a warm lamp on a kraft plank (`.ts-plank`); "How a book moves" is a full cobalt band with four printed step cards and big numerals; safety is a kraft panel and the questions a sheet panel with boxed + buttons; the footer is ink with an invitation, a paper button with a mustard offset, boxed links and a giant mustard Bayu wordmark cut off at the bottom.
+- **Depth:** hard ink "print offset" shadows (`--shadow-print`, `--shadow-print-lg`) on cards, panels and the primary button (it presses flat when tapped). Cards inside cards stay flat.
+- **App:** ink top bar with a mustard block for the current page, ink tab bar on phones, ink footer that always reaches the bottom (the shell is now a flex column), more room under the bar. Me: the credits card is cobalt with mustard numbers.
+- **Sign-in:** books on a cobalt half (a cobalt band on phones); the form sits in a printed panel. Browser chrome matches (cobalt on sign-in, ink in the app).
+- Checked: screenshots desktop and phone for landing, sign-in, browse, shelf, add, activity, me. Lighthouse accessibility 100 on landing, login, me, activity, browse. Lint, typecheck, 202 tests, build.
+
+**Next**
+- [ ] Zarith to look at it on his phone and say which parts still feel flat.
 
 ---
 
