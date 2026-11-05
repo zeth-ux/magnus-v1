@@ -831,3 +831,17 @@ footer.bg-ink :focus-visible {
   letter-spacing: 0.3em;
   opacity: 0.35;
 }
+
+/* Barcode scanner: the box to hold the barcode in. ZXing reads the middle 80% x 50% of the
+   whole camera frame, which is a little bigger than this box (the preview is cropped to 4:3). */
+.scan-guide {
+  width: 80%;
+  height: 50%;
+  border: 2px solid rgb(255 255 255 / 0.9);
+  border-radius: 4px;
+  box-shadow: 0 0 0 100vmax rgb(20 20 20 / 0.35);
+  transition: border-color 0.2s var(--ease-paper);
+}
+.scan-guide.is-found {
+  border-color: var(--color-mustard);
+}
