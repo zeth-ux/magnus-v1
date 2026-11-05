@@ -46,6 +46,25 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 - **Labels carry facts** (give or lend, how long, area, condition, a step's state),
   never decoration, and never an eyebrow above every heading.
 
+**Contrast and depth** (*added 2026-11-05*: Zarith found the all-paper pages
+"plain" and "cheap", with no contrast or depth). Same palette, used louder:
+- **Soft, loud, soft, loud as you scroll.** Landing: the shelf under a warm lamp
+  standing on a kraft plank (soft) → "How a book moves" on a full cobalt band
+  (loud) → safety and questions as printed panels on paper (soft) → the footer
+  in ink with a giant mustard Bayu wordmark cut off at the edge (loud).
+- **Depth is a print offset, not a blur.** Raised things get a hard ink shadow,
+  like a block printed slightly off register: `--shadow-print` (4px) on cards,
+  `--shadow-print-lg` (7px) on landing panels (`.panel`), 3px on buttons that
+  presses flat when tapped. A card inside a card stays flat, so depth reads as
+  one layer. No soft grey shadows.
+- **The app has an ink frame:** an ink bar on top with a mustard block for the
+  page you're on, an ink tab bar on phones, and an ink footer that always
+  reaches the bottom of the screen.
+- **Sign-in pages** stand the books on a cobalt half (a cobalt band on phones)
+  beside the form in a printed panel.
+- **Loud moments are rare and mean something:** the credits card on Me is cobalt
+  with mustard numbers; on ink, buttons are paper with a mustard offset (`.btn-light`).
+
 **Colour tokens** (`web/src/app/globals.css`)
 | Token | Use | Hex |
 |---|---|---|
@@ -57,7 +76,7 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 | `cobalt-deep` | Hover and pressed | `#18328C` |
 | `vermilion` | Errors, stamps (text-safe) | `#B7351B` |
 
-**Print inks** (book covers and spines only, never body text): `print-vermilion`
+**Print inks** (book covers and spines; mustard and kraft also fill the loud blocks above, never as small text on paper): `print-vermilion`
 `#D9472B` (covers use `#C23A1E` where text sits on it), `mustard` `#E2B23A`,
 `cream` `#F1E9D6`, `kraft` `#D9CDB4`, plus ink and cobalt.
 
@@ -66,7 +85,8 @@ few inks (ink, cobalt, vermilion, mustard) on cream or kraft card.
 paper 4.9 · ink on kraft 11.7 · ink on mustard 9.4 · cream on ink 15.2 · cream
 on cobalt 7.3 · paper-white `#FFF6E8` on `#C23A1E` 5.0 (vermilion books use it instead of
 cream, which was 4.4) ·
-vermilion on sheet 5.3 · white on vermilion 5.9.
+vermilion on sheet 5.3 · white on vermilion 5.9 · `cream-muted` `#A8A49A` on ink 7.4 ·
+mustard on cobalt 4.45 (large numbers and decoration only, never small text).
 
 **Type**
 - **Newsreader** (variable, optical sizes): book titles, headings, reading text.

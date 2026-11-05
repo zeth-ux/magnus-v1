@@ -150,7 +150,7 @@ function CodeStep({ email, next, onChangeEmail }: { email: string; next: string;
       <div className="flex flex-col gap-2">
         <h2 className="font-display text-[28px] leading-[1.1]">Check your email</h2>
         <p id="code-sent" className="text-[16px] leading-relaxed text-ink/80">
-          We sent a code to <strong className="text-ink">{email}</strong>. It works once and expires soon.
+          We sent a code to <strong className="text-ink [overflow-wrap:anywhere]">{email}</strong>. It works once and expires soon.
         </p>
       </div>
 
