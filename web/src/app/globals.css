@@ -763,7 +763,8 @@ a {
   opacity: 0.35;
 }
 
-/* Barcode scanner: the box to hold the barcode in (matches the area that's read). */
+/* Barcode scanner: the box to hold the barcode in. ZXing reads the middle 80% x 50% of the
+   whole camera frame, which is a little bigger than this box (the preview is cropped to 4:3). */
 .scan-guide {
   width: 80%;
   height: 50%;

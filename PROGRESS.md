@@ -4,6 +4,19 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-05: The barcode scanner works
+
+**Done**
+- **Root cause:** the old scanner handed the camera to ZXing's `decodeFromConstraints`, and on many phones its video never started playing, so nothing was ever read and no book was looked up.
+- `app/add/scanner.tsx` now opens the camera itself (`getUserMedia`, back camera, ideal 1080p) and reads a frame every 180 ms: the browser's own `BarcodeDetector` where it exists (Chrome on Android), otherwise ZXing on the middle of the frame (≤960 px, EAN-13 only, try-harder). Only a valid ISBN counts, so price add-ons keep it scanning. On a hit: a short vibration, the camera turns off, and the ISBN fills in and looks up the book.
+- A guide box on the preview (mustard when found), a torch button where the phone has one, and a clear message for every failure: blocked, no camera, camera busy, in-app browsers (KakaoTalk/Instagram: "open in Safari or Chrome"), the reader not loading, and the camera stopping (with "Start the camera again"). If the phone refuses to play without a tap, a "Tap to start the camera" button appears. A few Android phones that won't start at 1080p get a second try at any size.
+- Checked with a fake camera in Chromium showing a real book barcode (9780571364879): the ISBN filled in under a second. Steve reviewed it (no blocking items; his should-fix items are in).
+
+**Next**
+- [ ] Try it on a real iPhone and Android phone over HTTPS (production). Plain `http://192.168…` on a phone has no camera access at all.
+
+---
+
 ## 2026-11-05 (overnight): Sign in with a code, first steps, request progress
 
 **Done**
