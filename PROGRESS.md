@@ -4,6 +4,15 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-05: Quiet logs on page prefetch
+
+**Done**
+- Vercel's error list showed two groups on every signed-in page: "unstable value `Date.now()` while prerendering" and "waiting badge: my_waiting_count". Readers never saw them. Next prefetches a signed-in page ahead of time; supabase-js checks the session's expiry against the clock during that, Next stops the prerender and logs it, and the badge's database call is cut off with it (the function itself works: checked live as a signed-in reader).
+- Fix: `await connection()` in `createSupabaseServerClient` (`lib/supabase/server.ts`), Next's documented way to say "wait for a real request". Same signed-in walk through all five tabs on a local build: 14 errors before, 0 after; the badge and every page still render.
+- Note: Vercel's free plan keeps runtime logs for only an hour, so error details (like the badge's code) must be caught soon after they happen.
+
+---
+
 ## 2026-11-05: Contrast and depth (same palette, louder)
 
 **Done**
