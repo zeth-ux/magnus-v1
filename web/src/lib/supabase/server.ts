@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "./env";
 
@@ -12,6 +13,13 @@ export async function createSupabaseServerClient() {
   // Read cookies first: it marks the caller as per-request (never baked in at
   // build time), whether or not Supabase is configured yet.
   const cookieStore = await cookies();
+  // Wait for a real request. When Next prefetches a signed-in page ahead of
+  // time, supabase-js checks the session's expiry against the clock, and
+  // Next stops any prerender that reads the time ("unstable value
+  // Date.now()"), logging an error and cutting off calls like the waiting
+  // badge. Stopping the prefetch here avoids both; the page still renders
+  // in full when the reader opens it.
+  await connection();
   const env = getSupabaseEnv();
   if (!env) return null;
 
