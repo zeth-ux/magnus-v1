@@ -19,7 +19,14 @@
   --color-cream: #f1e9d6;
   --color-kraft: #d9cdb4;
   --color-mustard: #e2b23a;
+  /* Text on the ink ground (footer, app bar): cream for words, a softer cream for small print. */
+  --color-cream-muted: #a8a49a; /* 7.4:1 on ink */
 
+  /* Depth, printed: a hard ink offset (like a block printed slightly out of
+     register) for things you press or that sit on the page; soft shadows only
+     for physical objects (books). */
+  --shadow-print: 4px 4px 0 var(--color-ink);
+  --shadow-print-lg: 7px 7px 0 var(--color-ink);
   --font-display: "Newsreader Variable", Georgia, serif;
   --font-text: "Inter Tight Variable", system-ui, sans-serif;
 
@@ -127,14 +134,42 @@ a {
     transition:
       background-color 0.3s var(--ease-paper),
       color 0.3s var(--ease-paper),
-      transform 0.2s var(--ease-paper);
+      transform 0.2s var(--ease-paper),
+      box-shadow 0.2s var(--ease-paper);
   }
   .btn-primary {
     background: var(--color-cobalt);
     color: #fff;
+    border: 1px solid var(--color-ink);
+    box-shadow: 3px 3px 0 var(--color-ink);
   }
   .btn-primary:hover {
     background: var(--color-cobalt-deep);
+  }
+  /* Pressing a printed button pushes it into its shadow. */
+  .btn-primary:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-ink);
+  }
+  /* On the ink ground: a paper button with a cobalt offset. */
+  .btn-light {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 22px;
+    border-radius: 2px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 3px 3px 0 var(--color-mustard);
+    transition: transform 0.2s var(--ease-paper), box-shadow 0.2s var(--ease-paper);
+  }
+  .btn-light:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--color-mustard);
   }
   .btn-quiet {
     border: 1px solid var(--color-ink);
@@ -145,7 +180,6 @@ a {
     background: var(--color-ink);
     color: var(--color-paper);
   }
-  .btn-primary:active,
   .btn-quiet:active {
     transform: scale(0.98);
   }
@@ -153,8 +187,20 @@ a {
   /* Raised paper with a printed rule. */
   .card {
     background: var(--color-sheet);
-    border: 1px solid rgb(20 20 20 / 0.14);
+    border: 1px solid rgb(20 20 20 / 0.9);
     border-radius: 2px;
+    box-shadow: var(--shadow-print);
+  }
+  /* A card inside a card (a meet-up inside a request) stays flat, so depth reads as one layer. */
+  .card .card {
+    border-color: rgb(20 20 20 / 0.3);
+    box-shadow: none;
+  }
+  /* A bigger printed panel (landing sections). */
+  .panel {
+    border: 1px solid var(--color-ink);
+    border-radius: 2px;
+    box-shadow: var(--shadow-print-lg);
   }
 
   /* Form fields: a sheet of paper with an ink rule. */
@@ -335,6 +381,10 @@ a {
   position: relative;
   /* Keep the books' z-index order inside the shelf, under the grain and any open book. */
   isolation: isolate;
+  /* A lamp over the shelf: lighter paper behind the books, darker at the edges. */
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 52%, #f7f5f0 0%, rgb(247 245 240 / 0) 70%),
+    linear-gradient(to bottom, #e6e3dc 0%, var(--color-paper) 30%, var(--color-paper) 62%, #dcd8cf 100%);
   height: 100svh;
   min-height: 600px;
   overflow: hidden;
@@ -391,7 +441,19 @@ a {
     transform 0.6s var(--ease-paper);
 }
 
+/* The shelf board the books stand on: a kraft plank with an ink front edge and a soft shadow below. */
+.ts-plank {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% + var(--H) / 2);
+  height: 16px;
+  background: linear-gradient(to bottom, #e4d9c2 0%, var(--color-kraft) 60%, #c9bb9e 100%);
+  border-top: 1px solid rgb(20 20 20 / 0.25);
+  border-bottom: 5px solid var(--color-ink);
+  box-shadow: 0 26px 40px -18px rgb(20 16 10 / 0.55);
+}
 .ts-shelf {
+  z-index: 1;
   position: absolute;
   inset-inline: 0;
   top: calc(50% - var(--H) / 2 - 40px);
@@ -699,27 +761,34 @@ a {
 }
 
 /* App navigation: catalogue tabs; the current page is the cobalt block. */
+/* On the ink app bar: cream boxes; the current page is a mustard block. */
 .app-tab {
-  min-height: 30px;
+  min-height: 32px;
   padding: 0 12px;
-  color: var(--color-ink);
+  border-color: rgb(241 233 214 / 0.55) !important;
+  color: var(--color-cream);
   transition:
     background-color 0.3s var(--ease-paper),
     color 0.3s var(--ease-paper);
 }
 .app-tab:hover {
-  background: rgb(20 20 20 / 0.06);
+  background: rgb(241 233 214 / 0.1);
 }
 .app-tab[aria-current="page"] {
   position: relative;
   z-index: 1;
-  border-color: var(--color-cobalt);
-  background: var(--color-cobalt);
-  color: #fff;
+  border-color: var(--color-mustard) !important;
+  background: var(--color-mustard);
+  color: var(--color-ink);
+}
+.app-nav :focus-visible,
+.app-tabs footer :focus-visible,
+footer.bg-ink :focus-visible {
+  outline-color: var(--color-mustard);
 }
 .app-tab-phone[aria-current="page"] {
-  color: var(--color-cobalt);
-  box-shadow: inset 0 3px 0 var(--color-cobalt);
+  color: var(--color-mustard);
+  box-shadow: inset 0 3px 0 var(--color-mustard);
 }
 
 /* Page and section titles in the app. */

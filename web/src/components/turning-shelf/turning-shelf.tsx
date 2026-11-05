@@ -475,6 +475,7 @@ export function TurningShelf({ copies, label, onOpen, start = 0 }: TurningShelfP
         ) : null}
       </div>
 
+      <div className="ts-plank" aria-hidden="true" />
       {/* Focusable so the arrow keys move the shelf and Enter opens the book in front. */}
       <div className="ts-shelf" tabIndex={0} role="group" aria-roledescription="shelf" aria-label={label} aria-describedby={helpId}>
         <div className="ts-stage">
