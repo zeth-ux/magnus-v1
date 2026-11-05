@@ -81,7 +81,7 @@ async function Profile({ searchParams }: Pick<PageProps<"/me">, "searchParams">)
         />
       </div>
       {profile ? (
-        <aside aria-label="Your credits" className="h-fit panel bg-cobalt p-7 text-cream lg:col-span-4 lg:col-start-9">
+        <aside aria-label="Your credits" className="on-dark h-fit panel bg-cobalt p-7 text-cream lg:col-span-4 lg:col-start-9">
           <p className="font-display text-[22px] leading-[1.15]">Credits</p>
           {creditsError ? (
             <p className="mt-4 text-[15px]">Couldn&apos;t load your credits just now. Refresh to try again.</p>

@@ -21,7 +21,7 @@ export function HowItWorks() {
           {HOW_STAGES.map((stage, i) => (
             <li key={stage.name} className="panel flex flex-col gap-4 bg-sheet p-6 text-ink lg:min-h-[300px]">
               <span className="flex items-baseline justify-between">
-                <span className="font-display text-[56px] leading-[0.8] text-cobalt">{i + 1}</span>
+                <span aria-hidden="true" className="font-display text-[56px] leading-[0.8] text-cobalt">{i + 1}</span>
                 <span className="lbl text-muted">Step {i + 1} of 4</span>
               </span>
               <h3 className="font-display text-[28px] leading-[1.05] font-normal tracking-[-0.01em]">{stage.name}</h3>

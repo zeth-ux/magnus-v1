@@ -8,7 +8,7 @@ import { BayuMark } from "@/components/bayu-mark";
  */
 export function Closing() {
   return (
-    <footer className="overflow-hidden bg-ink px-4 pt-16 text-cream sm:px-8 sm:pt-24">
+    <footer className="on-dark overflow-hidden bg-ink px-4 pt-16 text-cream sm:px-8 sm:pt-24">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-14">
         <div className="flex flex-wrap items-end justify-between gap-8">
           <p className="max-w-[16ch] font-display text-[clamp(2.4rem,5vw,4.4rem)] leading-[1] tracking-[-0.03em]">
@@ -20,16 +20,16 @@ export function Closing() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-6 border-t border-cream/25 pt-6">
           <nav aria-label="Footer" className="flex flex-wrap">
-            <a href="#how" className="box lbl !border-cream/60 text-cream no-underline">
+            <a href="#how" className="box lbl border-cream/60 text-cream no-underline">
               How it works
             </a>
-            <a href="#safety" className="box lbl -ml-px !border-cream/60 text-cream no-underline">
+            <a href="#safety" className="box lbl -ml-px border-cream/60 text-cream no-underline">
               Safety
             </a>
-            <a href="#faq" className="box lbl -ml-px !border-cream/60 text-cream no-underline">
+            <a href="#faq" className="box lbl -ml-px border-cream/60 text-cream no-underline">
               Questions
             </a>
-            <Link href="/privacy" className="box lbl -ml-px !border-cream/60 text-cream no-underline">
+            <Link href="/privacy" className="box lbl -ml-px border-cream/60 text-cream no-underline">
               Privacy
             </Link>
           </nav>

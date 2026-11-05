@@ -42,7 +42,7 @@ export function ShelfHero({ copies }: { copies: ShelfCopy[] }) {
         <h1 className="pointer-events-auto max-w-[24ch] font-display text-[17px] leading-snug sm:text-[20px]">
           Give and lend English books with readers near you in Ansan.
         </h1>
-        <span className="lbl hidden shrink-0 text-muted sm:block">{samples ? "Sample shelf" : "Newest first"}</span>
+        <span className="lbl hidden shrink-0 text-ink/80 sm:block">{samples ? "Sample shelf" : "Newest first"}</span>
       </div>
       {open ? (
         <BookSheet

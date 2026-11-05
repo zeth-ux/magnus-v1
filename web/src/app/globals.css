@@ -151,7 +151,7 @@ a {
     transform: translate(3px, 3px);
     box-shadow: 0 0 0 var(--color-ink);
   }
-  /* On the ink ground: a paper button with a cobalt offset. */
+  /* On the ink ground: a paper button with a mustard offset. */
   .btn-light {
     display: inline-flex;
     align-items: center;
@@ -166,6 +166,9 @@ a {
     text-decoration: none;
     box-shadow: 3px 3px 0 var(--color-mustard);
     transition: transform 0.2s var(--ease-paper), box-shadow 0.2s var(--ease-paper);
+  }
+  .btn-light:hover {
+    background: var(--color-sheet);
   }
   .btn-light:active {
     transform: translate(3px, 3px);
@@ -191,8 +194,9 @@ a {
     border-radius: 2px;
     box-shadow: var(--shadow-print);
   }
-  /* A card inside a card (a meet-up inside a request) stays flat, so depth reads as one layer. */
-  .card .card {
+  /* A card inside a card or panel (a meet-up inside a request, a notice in the sign-in panel) stays flat, so depth reads as one layer. */
+  .card .card,
+  .panel .card {
     border-color: rgb(20 20 20 / 0.3);
     box-shadow: none;
   }
@@ -384,7 +388,7 @@ a {
   /* A lamp over the shelf: lighter paper behind the books, darker at the edges. */
   background:
     radial-gradient(ellipse 70% 55% at 50% 52%, #f7f5f0 0%, rgb(247 245 240 / 0) 70%),
-    linear-gradient(to bottom, #e6e3dc 0%, var(--color-paper) 30%, var(--color-paper) 62%, #dcd8cf 100%);
+    linear-gradient(to bottom, #e6e3dc 0%, var(--color-paper) 30%, var(--color-paper) 62%, #e2ded6 100%);
   height: 100svh;
   min-height: 600px;
   overflow: hidden;
@@ -760,12 +764,11 @@ a {
   }
 }
 
-/* App navigation: catalogue tabs; the current page is the cobalt block. */
 /* On the ink app bar: cream boxes; the current page is a mustard block. */
 .app-tab {
   min-height: 32px;
   padding: 0 12px;
-  border-color: rgb(241 233 214 / 0.55) !important;
+  border-color: rgb(241 233 214 / 0.55);
   color: var(--color-cream);
   transition:
     background-color 0.3s var(--ease-paper),
@@ -777,14 +780,18 @@ a {
 .app-tab[aria-current="page"] {
   position: relative;
   z-index: 1;
-  border-color: var(--color-mustard) !important;
+  border-color: var(--color-mustard);
   background: var(--color-mustard);
   color: var(--color-ink);
 }
-.app-nav :focus-visible,
-.app-tabs footer :focus-visible,
-footer.bg-ink :focus-visible {
+/* Any ink or cobalt surface opts in once: the cobalt focus ring would vanish there
+   (1:1 on cobalt, 2.1:1 on ink), so it turns mustard (9.4:1 on ink, 4.45:1 on cobalt). */
+.on-dark :focus-visible {
   outline-color: var(--color-mustard);
+}
+.on-dark ::selection {
+  background: var(--color-mustard);
+  color: var(--color-ink);
 }
 .app-tab-phone[aria-current="page"] {
   color: var(--color-mustard);

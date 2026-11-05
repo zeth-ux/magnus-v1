@@ -1,7 +1,7 @@
 import { SHELF } from "@/content/shelf";
 import { PrintCover, PrintSpine } from "@/components/turning-shelf/print-art";
 
-const SPINES = ["circe", "the-midnight-library", "norwegian-wood", "kafka-on-the-shore", "pachinko"];
+const SPINES = ["circe", "the-little-prince", "norwegian-wood", "kafka-on-the-shore", "pachinko"];
 const COVER = "klara-and-the-sun";
 
 /**

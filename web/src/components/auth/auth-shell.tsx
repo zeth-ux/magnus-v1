@@ -22,7 +22,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         className="absolute inset-y-0 left-0 hidden w-1/2 bg-cobalt lg:block"
       />
       {/* Phones: a cobalt band across the top instead. */}
-      <header className="relative bg-cobalt lg:bg-transparent">
+      <header className="on-dark relative bg-cobalt lg:bg-transparent">
         <div className="mx-auto flex w-full max-w-[1200px] items-center px-6 py-5 sm:px-8">
           <Link
             href="/"
