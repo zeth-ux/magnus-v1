@@ -4,6 +4,22 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-17: Browser smoke tests in CI
+
+**Done**
+- **Browser smoke tests** (`web/e2e/`, Playwright 1.63, Chromium), a new CI job beside the old one. Until now CI only ran unit tests, so a page that crashes, a sign-in that loops or a camera that never starts could reach production (all three happened). 15 checks against the built app and a fake Supabase:
+  - landing renders without errors; the arrows move along the shelf
+  - sign in with a code (saved for the signed-in tests); wrong code, bad email, Supabase's email limit; a signed-out visit to /me goes to sign-in and back
+  - every tab opens signed in, the tabs navigate, the waiting badge shows
+  - **scanner:** a phone with a fake camera showing a book barcode (generated, not a video in the repo); the ISBN fills in and the book is found. Checked that it fails on the old broken scanner from before #39 and passes on the fixed one.
+- The fake Supabase and barcode video are the hand-run tools from Nov 5, now in the repo, deterministic, and documented in the README.
+
+**Next**
+- [ ] Zarith: the open items below still need you (scanner on a real phone, how the design feels on your phone, SMTP, a sender for email notifications).
+- [ ] Add a smoke test for each new feature as it's built (a request from Browse to Activity is the obvious next one).
+
+---
+
 ## 2026-11-17: Next.js 16.4.6 (security advisory)
 
 **Done**

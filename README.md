@@ -44,8 +44,11 @@ cp .env.example .env.local   # fill in your Supabase URL + publishable key
 npm install
 npm run dev                  # http://localhost:3000
 npm run lint && npm run typecheck && npm test   # what CI runs
+npm run e2e:build && npm run e2e                # browser smoke tests (CI runs these too)
 ```
 The landing page works without Supabase keys (it shows the sample shelf); sign-in needs them. `NEXT_PUBLIC_*` values are fixed when the app is built, so a build made without them keeps showing samples until the next build.
+
+**Browser smoke tests** (`web/e2e/`, Playwright, Chromium): the built app against a small fake Supabase (`e2e/fake-supabase.mjs`, sign in with any email and the code `123456`). They open the landing page, sign in with a code (and a wrong code, a bad email, the email limit), visit every tab signed in, and scan a book's barcode with Chromium's fake camera (a barcode video made by `e2e/barcode-video.mjs`). `e2e:build` bakes the fake Supabase's address into the app, so run a normal build again before `npm start`. First time on your computer: `npx playwright install chromium`. On a failure in CI, the report and screenshots are attached to the run.
 
 ## One-time setup (Supabase + Vercel)
 1. **Supabase** (free): create a project at supabase.com. In **Project Settings → API**, copy the Project URL and the **publishable** key into `web/.env.local`.
