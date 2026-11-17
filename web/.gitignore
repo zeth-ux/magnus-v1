@@ -44,5 +44,6 @@ next-env.d.ts
 
 # Browser smoke tests
 /e2e/.tmp/
+/.next-e2e/
 /test-results/
 /playwright-report/

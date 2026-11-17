@@ -9,7 +9,7 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "e2e:build": "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54329 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_e2e NEXT_PUBLIC_SITE_URL=http://localhost:3100 next build",
+    "e2e:build": "node e2e/build.mjs",
     "e2e": "playwright test"
   },
   "dependencies": {

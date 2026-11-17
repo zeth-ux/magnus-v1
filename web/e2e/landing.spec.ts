@@ -1,25 +1,29 @@
 import { expect, test } from "@playwright/test";
+import { watchForErrors } from "./watch";
 
 test.describe("landing page", () => {
-  test("renders the shelf, the sections and the footer without errors", async ({ page }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (e) => errors.push(e.message));
+  test("renders the shelf from Supabase, the sections and the footer, with no errors", async ({ page }) => {
+    const watch = watchForErrors(page);
     await page.goto("/");
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Next book" })).toBeVisible();
+    // A title only the fake Supabase has (public_shelf), not one of the built-in sample books.
+    await expect(page.getByText("The Vegetarian").first()).toBeAttached();
     await expect(page.getByRole("heading", { name: /How a book moves/ })).toBeVisible();
     await expect(page.locator("footer")).toBeVisible();
-    expect(errors).toEqual([]);
+    await watch.expectClean();
   });
 
-  test("the arrows move along the shelf", async ({ page }) => {
+  test("the next and previous arrows move along the shelf", async ({ page }) => {
     await page.goto("/");
-    const live = page.locator(".ts-live");
+    // The shelf announces the book it stops on.
+    const announced = page.locator(".turning-shelf [aria-live='polite']");
     await page.getByRole("button", { name: "Next book" }).click();
-    await expect(live).not.toBeEmpty();
-    const first = await live.textContent();
+    await expect(announced).not.toBeEmpty();
+    const first = (await announced.textContent()) ?? "";
     await page.getByRole("button", { name: "Next book" }).click();
-    await expect(live).not.toHaveText(first ?? "");
+    await expect(announced).not.toHaveText(first);
+    await page.getByRole("button", { name: "Previous book" }).click();
+    await expect(announced).toHaveText(first);
   });
 });

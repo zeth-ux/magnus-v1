@@ -68,6 +68,10 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // The browser smoke tests build into their own folder (e2e/build.mjs sets
+  // BAYU_E2E), so an e2e build never replaces the real one, and the tests
+  // can't run against a build that talks to the real Supabase.
+  distDir: process.env.BAYU_E2E ? ".next-e2e" : ".next",
   cacheComponents: true,
   // Don't advertise the framework in every response.
   poweredByHeader: false,

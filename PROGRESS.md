@@ -7,16 +7,20 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 ## 2026-11-17: Browser smoke tests in CI
 
 **Done**
-- **Browser smoke tests** (`web/e2e/`, Playwright 1.63, Chromium), a new CI job beside the old one. Until now CI only ran unit tests, so a page that crashes, a sign-in that loops or a camera that never starts could reach production (all three happened). 15 checks against the built app and a fake Supabase:
-  - landing renders without errors; the arrows move along the shelf
-  - sign in with a code (saved for the signed-in tests); wrong code, bad email, Supabase's email limit; a signed-out visit to /me goes to sign-in and back
-  - every tab opens signed in, the tabs navigate, the waiting badge shows
-  - **scanner:** a phone with a fake camera showing a book barcode (generated, not a video in the repo); the ISBN fills in and the book is found. Checked that it fails on the old broken scanner from before #39 and passes on the fixed one.
-- The fake Supabase and barcode video are the hand-run tools from Nov 5, now in the repo, deterministic, and documented in the README.
+- **Browser smoke tests** (`web/e2e/`, Playwright 1.63, Chromium), a new CI job beside the old one. Until now CI only ran unit tests, so a page that crashes, a sign-in that loops or a camera that never starts could reach production (all three happened). 22 checks against the built app and a fake Supabase:
+  - landing renders with the fake's shelf (not the built-in samples); next and previous move along the shelf
+  - sign-in: a signed-out visit to /me goes to sign-in and comes **back to /me** signed in (the old loop would fail this); a wrong code, a bad email and Supabase's email limit each show their own message
+  - every tab, signed in, on desktop **and on a phone** (bottom tab bar): each waits for something only the page's data part shows (streamed after the static shell), so a failed query can't hide behind a page that looks fine; the tabs navigate; the waiting badge reads "2 waiting for you"
+  - **scanner:** a phone with a fake camera showing a book barcode (generated, not a video in the repo); the ISBN fills in and the book is found
+  - every test fails on an uncaught error, any console error (our error page logs instead of throwing; CSP violations land there too) or the crash screen
+- **Proved they catch real breakage:** the scanner test fails on the scanner from before #39; the Me test fails when its card history throws.
+- `e2e/build.mjs` starts the fake during the build (so prerendered pages get its data), builds into `.next-e2e` and stops it. A local e2e run can never hit the real Supabase or overwrite the normal build. The fake logs any call it doesn't know, which found 8 the app makes (credits, ledger, meet-ups, blocks…); it now answers all of them.
+- Steve reviewed it: no blocking items; his should-fix items and most nits are in.
 
 **Next**
-- [ ] Zarith: the open items below still need you (scanner on a real phone, how the design feels on your phone, SMTP, a sender for email notifications).
-- [ ] Add a smoke test for each new feature as it's built (a request from Browse to Activity is the obvious next one).
+- [ ] The scanner test covers the ZXing reader only (Linux Chromium has no `BarcodeDetector`). Chrome on Android uses the native one: a real phone is still the check for that.
+- [ ] Add a smoke test with each new feature (a request from Browse to Activity is the obvious next one).
+- [ ] Zarith: the older items below still need you (scanner and design on your phone, SMTP, a sender for email notifications).
 
 ---
 

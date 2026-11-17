@@ -1,6 +1,5 @@
 import { expect, test as setup } from "@playwright/test";
-import { READER_STATE } from "../playwright.config";
-import { GOOD_CODE } from "./constants";
+import { GOOD_CODE, READER_STATE } from "./constants.mjs";
 
 /** Signs in once with the email code, the way a reader does, and saves the session for the signed-in tests. */
 setup("sign in with an email code", async ({ page }) => {

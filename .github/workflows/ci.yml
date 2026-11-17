@@ -46,6 +46,7 @@ jobs:
   e2e:
     name: Browser smoke tests (web)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: web
@@ -59,13 +60,12 @@ jobs:
       - run: npm ci
       # Only Chromium: the camera test uses Chromium's fake camera.
       - run: npx playwright install --with-deps chromium
-      # Builds against the fake Supabase in e2e/fake-supabase.mjs.
+      # Builds into .next-e2e against the fake Supabase (e2e/build.mjs).
       - run: npm run e2e:build
-        env:
-          NEXT_TELEMETRY_DISABLED: "1"
       - run: npm run e2e
+      # Also kept when a test only passed on its retry, so a flaky test's trace isn't lost.
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: |

@@ -6,12 +6,10 @@
 // - The JWT is unsigned in any meaningful way: the app never checks it locally
 //   (getClaims on an HS256 token asks /auth/v1/user, which answers here).
 import http from "node:http";
+import { BUSY_EMAIL, FAKE_PORT, GOOD_CODE, SCANNED_ISBN, SCANNED_TITLE } from "./constants.mjs";
 
-const PORT = Number(process.env.FAKE_SUPABASE_PORT ?? 54329);
 const ME = "11111111-1111-4111-8111-111111111111";
 const OTHER = "22222222-2222-4222-8222-222222222222";
-/** The ISBN the fake camera shows (see barcode-video.mjs). */
-const SCANNED_ISBN = "9780571364879";
 
 const b64url = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
 const JWT = [
@@ -67,7 +65,7 @@ const copyRow = (id) => {
   };
 };
 const request = (i, mode, status, owner, requester) => ({
-  id: `r000000${i}-0000-4000-8000-000000000000`,
+  id: `a000000${i}-0000-4000-8000-000000000000`,
   mode,
   status,
   return_by: mode === "lend" ? "2026-12-01" : null,
@@ -92,7 +90,28 @@ const RPC = {
   smooth_handovers: () => 2,
   wish_count: () => 1,
   my_waiting_count: () => 2,
+  my_credits: () => ({ balance: 3, locked: 1, available: 2 }),
 };
+
+/** The reader's library card: one stamp per credit movement (newest first). */
+const ledger = () => [
+  { id: 3, kind: "lend_lock", delta: 0, locked_delta: 1, ref_id: request(1, "lend", "on_loan", OTHER, ME).id, created_at: "2026-11-04T09:00:00Z" },
+  { id: 2, kind: "give_transfer", delta: -1, locked_delta: 0, ref_id: request(3, "give", "accepted", OTHER, ME).id, created_at: "2026-11-03T09:00:00Z" },
+  { id: 1, kind: "starter_grant", delta: 1, locked_delta: 0, ref_id: rows[5].copy_id, created_at: "2026-11-01T09:00:00Z" },
+];
+/** A meet-up card on the give that's been accepted, waiting for the reader to agree. */
+const meetups = () => [
+  {
+    id: "b0000001-0000-4000-8000-000000000000",
+    request_id: request(3, "give", "accepted", OTHER, ME).id,
+    purpose: "handover",
+    proposed_by: OTHER,
+    place: "Jungang station, exit 2",
+    meet_at: "2026-12-20T09:00:00Z",
+    note: null,
+    status: "proposed",
+  },
+];
 
 const server = http.createServer((req, res) => {
   const chunks = [];
@@ -126,13 +145,13 @@ const server = http.createServer((req, res) => {
     if (p === "/health") return send(200, { ok: true });
     if (p.startsWith("/auth/v1/user")) return send(200, user);
     if (p.startsWith("/auth/v1/otp")) {
-      if (body.email === "busy@example.com") {
+      if (body.email === BUSY_EMAIL) {
         return send(429, { code: "over_email_send_rate_limit", error_code: "over_email_send_rate_limit", msg: "rate limited" }, { "x-sb-error-code": "over_email_send_rate_limit" });
       }
       return send(200, {});
     }
     if (p.startsWith("/auth/v1/verify")) {
-      if (body.token === "123456") return send(200, session);
+      if (body.token === GOOD_CODE) return send(200, session);
       return send(403, { code: "otp_expired", error_code: "otp_expired", msg: "Token has expired or is invalid" }, { "x-sb-error-code": "otp_expired" });
     }
     if (p.startsWith("/auth/v1/token")) return send(200, session);
@@ -140,12 +159,15 @@ const server = http.createServer((req, res) => {
 
     // PostgREST
     if (p.startsWith("/rest/v1/rpc/")) {
-      const fn = RPC[p.slice("/rest/v1/rpc/".length)];
+      const name = p.slice("/rest/v1/rpc/".length);
+      const fn = RPC[name];
+      // An RPC the fake doesn't know: say so in the test log, or a page could quietly show an empty state.
+      if (!fn) console.error(`[fake supabase] unhandled rpc ${name}`);
       return send(200, fn ? fn() : null);
     }
     if (p === "/rest/v1/books") {
       const isbn = (url.searchParams.get("isbn") ?? "").replace("eq.", "");
-      const book = isbn === SCANNED_ISBN ? { isbn, title: "Klara and the Sun", authors: ["Kazuo Ishiguro"], cover_url: null, published_year: 2021 } : null;
+      const book = isbn === SCANNED_ISBN ? { isbn, title: SCANNED_TITLE, authors: ["Kazuo Ishiguro"], cover_url: null, published_year: 2021 } : null;
       return send(200, single ? book : book ? [book] : []);
     }
     if (p === "/rest/v1/copies") {
@@ -153,7 +175,14 @@ const server = http.createServer((req, res) => {
       if (single) return send(200, copyRow(id));
       return send(200, rows.filter((r) => r.owner_id === ME).map((r) => copyRow(r.copy_id)));
     }
-    if (p === "/rest/v1/requests" && req.method !== "HEAD" && !single) {
+    // Counts (select with head: true) only read the total in Content-Range.
+    if (req.method === "HEAD" && (p === "/rest/v1/requests" || p === "/rest/v1/credit_ledger")) {
+      return send(200, null, { "content-range": "*/3" });
+    }
+    if (p === "/rest/v1/credit_ledger") return send(200, ledger());
+    if (p === "/rest/v1/meetups") return send(200, meetups());
+    if (p === "/rest/v1/loan_extensions" || p === "/rest/v1/blocks") return send(200, []);
+    if (p === "/rest/v1/requests" && !single) {
       return send(200, [request(5, "lend", "requested", ME, OTHER), request(1, "lend", "on_loan", OTHER, ME), request(3, "give", "accepted", OTHER, ME)]);
     }
     if (p === "/rest/v1/profiles") {
@@ -161,8 +190,9 @@ const server = http.createServer((req, res) => {
       return send(200, single ? me : [me]);
     }
     if (p === "/rest/v1/profile_contacts") return send(200, single ? { id: ME, whatsapp: "+82 10 0000 0000" } : []);
+    console.error(`[fake supabase] unhandled ${req.method} ${p}`);
     return send(200, single ? null : []);
   });
 });
 
-server.listen(PORT, "127.0.0.1", () => console.log(`fake supabase on ${PORT}`));
+server.listen(FAKE_PORT, "127.0.0.1", () => console.log(`fake supabase on ${FAKE_PORT}`));

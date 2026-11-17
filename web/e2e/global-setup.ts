@@ -1,11 +1,10 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { writeBarcodeVideo } from "./barcode-video.mjs";
-import { SCANNED_ISBN } from "./constants";
+import { BARCODE_VIDEO, SCANNED_ISBN } from "./constants.mjs";
 
 /** Before any test: the fake camera's video (a book barcode). */
 export default function globalSetup() {
-  const dir = path.join(__dirname, ".tmp");
-  mkdirSync(dir, { recursive: true });
-  writeBarcodeVideo(path.join(dir, "barcode.y4m"), SCANNED_ISBN);
+  mkdirSync(path.dirname(BARCODE_VIDEO), { recursive: true });
+  writeBarcodeVideo(BARCODE_VIDEO, SCANNED_ISBN);
 }
