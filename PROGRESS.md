@@ -4,6 +4,19 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-17: Next.js 16.4.6 (security advisory)
+
+**Done**
+- `next` and `eslint-config-next` 16.4.3 → 16.4.6 (exact pins). Advisory [GHSA-mfr8-8qww-v76h](https://github.com/advisories/GHSA-mfr8-8qww-v76h), moderate: information disclosure across root params when a `"use cache"` function is called through `unstable_cache()` (16.3.0–16.4.4).
+- **Were we exposed?** No. Bayu never calls `unstable_cache` and doesn't use root params; our two `"use cache"` functions (`cached-lookup.ts`, `landing-shelf.ts`) are plain.
+- **How it showed up:** `next build` in Claude's session stopped with a `SecurityFatalError`. That is Next's *upgrade nudge for AI agents*: it only fires when Next detects an agent running the build (and lets a retry through). CI and Vercel builds were never blocked. The nudge text also tells the agent to offer running `next upgrade --agent=…`; that's Next's boilerplate, not something to act on automatically.
+- Lockfile: only `next`, `@next/*` and `eslint-config-next` move; no packages added or removed (Steve checked the tarball hashes). Lint, typecheck, 202 tests, build, `npm audit` 0.
+
+**Next**
+- [ ] With Cache Components, the 16.4.6 docs say a component calling `connection()` should sit inside `<Suspense>` (or under a `loading.js`), or navigation to it blocks. Our server client calls `connection()`; check every page that uses it has a boundary.
+
+---
+
 ## 2026-11-05: Quiet logs on page prefetch
 
 **Done**
