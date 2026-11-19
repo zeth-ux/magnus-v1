@@ -26,7 +26,8 @@ function insetFrom(rect: DOMRect) {
 export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTMLElement; onClose: () => void }) {
   const root = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
-  const joinHref = copy.copyId ? `/login?next=${encodeURIComponent(`/browse/${copy.copyId}`)}` : "/login";
+  // The shelf is open: a real book goes to its page (which asks you to sign in only when you ask for it).
+  const bookHref = copy.copyId ? `/browse/${copy.copyId}` : "/browse";
 
   // Lock the page behind: everything else in <body> goes inert, no scrolling.
   useEffect(() => {
@@ -158,8 +159,8 @@ export function BookSheet({ copy, from, onClose }: { copy: ShelfCopy; from: HTML
           </span>
           <span className="mask">
             <span data-rise="" className="mt-2 flex flex-wrap gap-3">
-              <Link href={joinHref} className="btn-primary">
-                {copy.mode === "give" ? "Join to request it" : "Join to borrow it"}
+              <Link href={bookHref} className="btn-primary">
+                {!copy.copyId ? "Browse the shelf" : copy.mode === "give" ? "Ask for this book" : "Ask to borrow it"}
               </Link>
             </span>
           </span>

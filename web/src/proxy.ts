@@ -3,12 +3,14 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { canonicalRedirect } from "@/lib/site/canonical";
 
-/** Pages that need a signed-in user. */
+/**
+ * Pages that need a signed-in user. Not /browse: the shelf and its book
+ * pages are open to everyone (asking for a book still needs an account).
+ */
 const PROTECTED_PATHS = [
   "/welcome",
   "/me",
   "/add",
-  "/browse",
   "/activity",
   "/shelf",
   "/wishlist",

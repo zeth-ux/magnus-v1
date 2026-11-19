@@ -7,10 +7,13 @@ export function SiteHeader() {
     <header className="absolute inset-x-0 top-0 z-[140]">
       <nav aria-label="Main" className="grid h-16 grid-cols-[1fr_auto_1fr] items-center px-4 sm:h-[84px] sm:px-8">
         <span className="flex items-center gap-1 justify-self-start">
-          <a href="#how" className="box lbl text-ink no-underline">
+          <Link href="/browse" className="box lbl text-ink no-underline">
+            The shelf
+          </Link>
+          <a href="#how" className="box lbl -ml-px hidden text-ink no-underline sm:inline-flex">
             How it works
           </a>
-          <a href="#faq" className="box lbl -ml-px hidden text-ink no-underline sm:inline-flex">
+          <a href="#faq" className="box lbl -ml-px hidden text-ink no-underline md:inline-flex">
             Questions
           </a>
         </span>

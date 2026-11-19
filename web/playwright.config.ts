@@ -27,7 +27,7 @@ export default defineConfig({
     { name: "sign-in", testMatch: /sign-in\.setup\.ts/ },
     {
       name: "signed-out",
-      testMatch: /(landing|login)\.spec\.ts/,
+      testMatch: /(landing|login|open-shelf)\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
     {

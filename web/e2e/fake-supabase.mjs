@@ -49,6 +49,9 @@ const rows = books.map((b, i) => ({
   owner_name: b[4],
   area: b[5],
 }));
+/** A listing as a signed-out visitor sees it (public_search_shelf), and one book's page (public_copy). */
+const publicRow = (r) => ({ copy_id: r.copy_id, isbn: r.isbn, title: r.title, authors: r.authors, cover_url: null, mode: r.mode, lend_max: r.lend_max, condition: "good", area: r.area });
+const publicCopy = (r) => ({ ...publicRow(r), published_year: 2018 });
 const copyRow = (id) => {
   const r = rows.find((x) => x.copy_id === id) ?? rows[0];
   return {
@@ -84,6 +87,9 @@ const request = (i, mode, status, owner, requester) => ({
 const RPC = {
   search_shelf: () => rows,
   wished_and_available: () => rows,
+  // The open shelf (signed out): what public_search_shelf / public_copy return, never owners or notes.
+  public_search_shelf: () => rows.map(publicRow),
+  public_copy: () => publicCopy(rows[1]),
   // The landing shelf: no owners or notes for signed-out visitors.
   public_shelf: () => rows.map((r) => ({ copy_id: r.copy_id, isbn: r.isbn, title: r.title, authors: r.authors, mode: r.mode, lend_max: r.lend_max, area: r.area })),
   setting: () => 183,
@@ -171,7 +177,9 @@ const server = http.createServer((req, res) => {
       return send(200, single ? book : book ? [book] : []);
     }
     if (p === "/rest/v1/copies") {
+      // One copy by id (single() or maybeSingle(), which asks for a list of at most one).
       const id = (url.searchParams.get("id") ?? "").replace("eq.", "");
+      if (id && !id.startsWith("in.")) return send(200, single ? copyRow(id) : [copyRow(id)]);
       if (single) return send(200, copyRow(id));
       return send(200, rows.filter((r) => r.owner_id === ME).map((r) => copyRow(r.copy_id)));
     }
@@ -181,7 +189,7 @@ const server = http.createServer((req, res) => {
     }
     if (p === "/rest/v1/credit_ledger") return send(200, ledger());
     if (p === "/rest/v1/meetups") return send(200, meetups());
-    if (p === "/rest/v1/loan_extensions" || p === "/rest/v1/blocks") return send(200, []);
+    if (p === "/rest/v1/loan_extensions" || p === "/rest/v1/blocks" || p === "/rest/v1/wishlist") return send(200, single ? null : []);
     if (p === "/rest/v1/requests" && !single) {
       return send(200, [request(5, "lend", "requested", ME, OTHER), request(1, "lend", "on_loan", OTHER, ME), request(3, "give", "accepted", OTHER, ME)]);
     }

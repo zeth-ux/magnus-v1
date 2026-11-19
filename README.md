@@ -43,6 +43,7 @@ cd web
 cp .env.example .env.local   # fill in your Supabase URL + publishable key
 npm install
 npm run dev                  # http://localhost:3000
+npm run dev:fake             # http://localhost:3100 against the fake Supabase: no real email, sign in with code 123456
 npm run lint && npm run typecheck && npm test   # what CI runs
 npm run e2e:build && npm run e2e                # browser smoke tests (CI runs these too)
 ```

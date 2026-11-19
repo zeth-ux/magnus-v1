@@ -29,6 +29,9 @@ export async function requireUser(next: string) {
 
 export type Profile = { display_name: string; area: string };
 
+/** A Supabase server client that exists (the app is configured). */
+export type ServerClient = NonNullable<Awaited<ReturnType<typeof getSessionUser>>["supabase"]>;
+
 /** The reader's public profile (null until they've made one). */
 export async function getProfile(supabase: Awaited<ReturnType<typeof requireUser>>["supabase"], userId: string) {
   const { data } = await supabase.from("profiles").select("display_name, area").eq("id", userId).maybeSingle();

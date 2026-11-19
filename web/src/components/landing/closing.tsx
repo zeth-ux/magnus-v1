@@ -14,9 +14,14 @@ export function Closing() {
           <p className="max-w-[16ch] font-display text-[clamp(2.4rem,5vw,4.4rem)] leading-[1] tracking-[-0.03em]">
             Finished a book? Let it breeze on.
           </p>
-          <Link href="/login" className="btn-light">
-            Join the pilot
-          </Link>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/login" className="btn-light">
+              Join the pilot
+            </Link>
+            <Link href="/browse" className="box lbl self-center border-cream/60 text-cream no-underline">
+              Browse the shelf
+            </Link>
+          </div>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-6 border-t border-cream/25 pt-6">
           <nav aria-label="Footer" className="flex flex-wrap">
