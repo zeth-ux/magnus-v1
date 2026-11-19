@@ -8,7 +8,8 @@
 | # | Step | What the user does | What Bayu does |
 |---|---|---|---|
 | 1 | **Arrive** | Opens a link a friend shared on WhatsApp | Shows the landing page ([landing.md](landing.md)) |
-| 2 | **Sign in** | Google or email magic link | Creates the account |
+| 1b | **Look around** (no account) | Browses the shelf and opens book pages | The **open shelf** (since 2026-11-19): the book, give/lend, condition and area only; never the owner or their note. Asking for a book, listing one, Activity and Me need an account |
+| 2 | **Sign in** | Email code (6 digits; the email's link is a backup) | Creates the account, then goes back to the page they came from |
 | 3 | **Profile** | Name, area of Ansan, WhatsApp number | Keeps the number **private** until a request is accepted |
 | 4 | **First book** | Scans the barcode (or searches), picks **give** or **lend** (+ max lend period), condition, optional note | Looks up the title. On the first listing it grants the **starter credit** (R5) |
 | 5 | **Browse** | Searches and filters (All / Give / Lend / On my wishlist) | Shows available copies; the credit badge is always visible |

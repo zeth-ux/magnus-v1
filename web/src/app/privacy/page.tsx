@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <h1 className="page-title">Privacy</h1>
           <p className="text-ink/80">
             Bayu is a small pilot run by Zarith Imran for readers in Ansan. This page says, in plain words, what we keep,
-            who can see it, and how to have it removed. Last updated 1 November 2026.
+            who can see it, and how to have it removed. Last updated 19 November 2026.
           </p>
         </div>
 
@@ -69,11 +69,12 @@ export default function PrivacyPage() {
         <Section title="Who can see it">
           <ul className="flex list-disc flex-col gap-2 pl-6">
             <li>
-              <strong>Anyone visiting the home page</strong> sees a few of the newest available books, with the owner&apos;s
-              area but never their name.
+              <strong>Anyone</strong>, signed in or not, can browse the books on the shelf and open their pages: the
+              book, give or lend, its condition and your area of Ansan. Never your name, your note or how to reach you.
+              Books that are lent out, paused or taken off the shelf don&apos;t show.
             </li>
             <li>
-              <strong>Other signed-in readers</strong> see your name, your area, the books you list (with
+              <strong>Other signed-in readers</strong> (anyone can make an account, so this isn&apos;t a vetted group) see your name, your area, the books you list (with
               your notes), and how many readers had a smooth handover with you. A book you&apos;ve taken off the shelf is
               hidden from them, except readers who asked for it or passed it on to you.
             </li>

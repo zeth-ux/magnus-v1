@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { AppShell, APP_VIEWPORT } from "@/components/app/app-shell";
 import { InkPoster } from "@/components/turning-shelf/ink-poster";
 import { Rise } from "@/components/motion/rise";
-import { requireUser } from "@/lib/supabase/user";
+import { getSessionUser, type ServerClient } from "@/lib/supabase/user";
 import { dressCopy } from "@/lib/shelf/dress";
 import { CONDITIONS } from "@/lib/books/validate";
 import { RequestForm } from "./request-form";
@@ -48,7 +48,10 @@ export default function CopyPage({ params }: PageProps<"/browse/[id]">) {
 async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">) {
   const { id } = await params;
   if (!UUID.test(id)) notFound();
-  const { supabase, user } = await requireUser(`/browse/${id}`);
+  const { supabase, user } = await getSessionUser();
+  if (!supabase) notFound();
+  // Signed out: the open shelf's view of the book (no owner, no note), and a way to sign in and ask.
+  if (!user) return <PublicCopy id={id} supabase={supabase} />;
 
   const { data, error } = await supabase
     .from("copies")
@@ -171,6 +174,77 @@ async function CopyDetail({ params }: Pick<PageProps<"/browse/[id]">, "params">)
             <RequestForm copyId={copy.id} mode={copy.mode} minDate={seoulDate(1)} maxDate={seoulDate(lendFor)} />
           )}
           {!isMine ? <WishButton isbn={copy.isbn} title={copy.books.title} wished={Boolean(myWish)} /> : null}
+        </div>
+      </Rise>
+    </div>
+  );
+}
+
+type PublicCopyRow = {
+  copy_id: string;
+  isbn: string;
+  title: string;
+  authors: string[] | null;
+  published_year: number | null;
+  mode: "give" | "lend";
+  lend_max: LendMax | null;
+  condition: keyof typeof CONDITIONS;
+  area: string;
+};
+
+/**
+ * A book on the open shelf, for a visitor who isn't signed in (public_copy):
+ * the book, give or lend, its condition and the area. Not who owns it or their
+ * note; those are for signed-in readers.
+ */
+async function PublicCopy({ id, supabase }: { id: string; supabase: ServerClient }) {
+  const { data, error } = await supabase.rpc("public_copy", { p_copy: id }).maybeSingle<PublicCopyRow>();
+  if (error) throw new Error(`copy ${id} could not be loaded (${error.code})`);
+  if (!data) notFound();
+
+  const look = { ...dressCopy(data), note: "" };
+  const facts = [data.mode === "give" ? "To give" : "To lend", data.mode === "give" ? "Yours to keep" : `Up to ${look.lendFor?.toLowerCase()}`, CONDITIONS[data.condition]];
+  const next = `/browse/${id}`;
+
+  return (
+    <div className="mt-8 grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-[4vw]">
+      <div className="flex justify-center md:order-2 md:sticky md:top-8">
+        <InkPoster copy={look} delay={0.15} className="relative aspect-[2/3] h-[46svh] max-w-full md:h-[min(72vh,720px)]" />
+      </div>
+
+      <Rise className="flex max-w-[560px] flex-col gap-[18px] md:order-1 md:pt-6">
+        <span className="mask">
+          <span data-rise="" className="lbl block text-cobalt">
+            {look.author}
+          </span>
+        </span>
+        <h1 className="mask font-display text-[42px] leading-[1] font-normal tracking-[-0.025em] md:text-[clamp(44px,5vw,76px)]">
+          <span data-rise="" className="block">
+            {data.title}
+          </span>
+        </h1>
+        <span className="mask">
+          <span data-rise="" className="flex flex-wrap">
+            {facts.map((f) => (
+              <span key={f} className="box lbl -ml-px first:ml-0">
+                {f}
+              </span>
+            ))}
+          </span>
+        </span>
+        <span className="mask">
+          <span data-rise="" className="block text-[16px] leading-[1.5]">
+            From a reader in {data.area}
+          </span>
+        </span>
+
+        <div className="mt-2 flex flex-col gap-4 border-t border-ink/90 pt-6">
+          <Link href={`/login?next=${encodeURIComponent(next)}`} className="btn-primary self-start">
+            Sign in to ask for this book
+          </Link>
+          <p className="text-[15px] leading-relaxed text-muted">
+            No password: we email you a code, then bring you back here. Signed-in readers also see who has the book and the note that travels with it.
+          </p>
         </div>
       </Rise>
     </div>

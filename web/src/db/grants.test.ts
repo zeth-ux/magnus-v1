@@ -126,13 +126,19 @@ describe("table privileges", () => {
     }
   });
 
-  it("give a signed-out visitor no table access, only the public shelf function", async () => {
+  it("give a signed-out visitor no table access, only the public shelf functions", async () => {
     await db.admin("set role anon");
     try {
       for (const t of ["profiles", "profile_contacts", "books", "copies", "requests", "credit_ledger", "wishlist", "app_settings", "meetups", "handover_ratings", "loan_extensions", "blocks", "reports", "feedback", "credit_balances"]) {
         await expect(db.admin(`select count(*) from public.${t}`), t).rejects.toThrow(/permission denied/);
       }
       await db.admin("select * from public.public_shelf(5)");
+      await db.admin("select * from public.public_search_shelf(null, null)");
+      await db.admin("select * from public.public_copy('00000000-0000-4000-8000-000000000000')");
+      // Everything else stays signed-in only.
+      for (const fn of ["search_shelf(null, null)", "my_waiting_count()", "my_credits()", "wished_and_available()"]) {
+        await expect(db.admin(`select * from public.${fn}`), fn).rejects.toThrow(/permission denied/);
+      }
     } finally {
       await db.admin("reset role");
     }

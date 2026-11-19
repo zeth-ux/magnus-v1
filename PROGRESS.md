@@ -4,6 +4,23 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-19: The open shelf (browse without an account)
+
+**Done**
+- Zarith studied bolahh.com and was tired of sign-in getting in the way. Decided together: don't switch login off (requests and credits need an account); **open the shelf** like Bolahh does (browse freely, sign in only to act). Next: light/dark toggle, then real covers and licensed photos.
+- **Database** (`20261119000100_public_browse.sql`, additive): `public_search_shelf(query, mode)` and `public_copy(id)` for signed-out visitors. Available copies only; the book, give/lend, condition and area. **Never** the owner (id or name), their note or the listing time (newest first, like the landing page, so the order is visible). Search text capped at 100 characters, results at 100. Tests check the exact columns, that names/notes/phone numbers never appear, and that paused, lent-out and withdrawn copies neither open nor show in search; anon still can't touch any table or the signed-in functions.
+- **Areas:** the app only offers a fixed list, but the database accepts any short text, so someone using the API directly could type an address. `public_area()` lets only the known areas (or plain "Ansan") reach the public; the landing page's `public_shelf` now uses it too (`create or replace`, same columns). Live check: the one reader's area is on the list, so nothing changes for anyone.
+- **Privacy page updated** (19 Nov): anyone can browse the shelf (book, give/lend, condition, area; never name, note or contact); signed-in readers are anyone with an account, not a vetted group. Pilot readers should hear about this in the next update.
+- **App:** `/browse` and `/browse/[id]` no longer need sign-in (proxy, pages). Signed out: rows say "From a reader", a strip under the shelf ("Want one of these books? Sign in to ask its owner…"), a book page with **Sign in to ask for this book** that comes back to the same book after the code; "On my wishlist" asks you to sign in. The app bar shows **Sign in** (back to the same page after) instead of the badge (the badge no longer asks the database for a visitor). Landing: "The shelf" in the header, "Browse the shelf" in the footer, and the book pop-up opens the book's page instead of the sign-in page.
+- **`npm run dev:fake`:** the app on your laptop against the fake Supabase from the tests. Any email, code 123456; no real email or data. Deliberately no test-login button on the live or preview site (anyone with a link could use it).
+- **Tests:** 3 new database tests; 6 new browser tests (browse signed out with no private names or notes on the page; open a book, sign in, land back on it signed in and see the owner; wishlist asks to sign in; Shelf/Add/Activity still need an account). 28 browser tests in all.
+
+**Next**
+- [ ] Light and dark mode toggle.
+- [ ] Real covers (Open Library) and licensed photos (Unsplash/Pexels).
+
+---
+
 ## 2026-11-17: Browser smoke tests in CI
 
 **Done**

@@ -4,6 +4,8 @@ import { BayuMark } from "@/components/bayu-mark";
 import { Suspense } from "react";
 import { NavLink } from "./nav-link";
 import { WaitingBadge } from "./waiting-badge";
+import { getSessionUser } from "@/lib/supabase/user";
+import { SignInLink } from "./sign-in-link";
 
 // viewportFit "cover" lets the phone tab bar sit above the home indicator (safe-area padding).
 export const APP_VIEWPORT: Viewport = { themeColor: "#141414", colorScheme: "light", viewportFit: "cover" };
@@ -25,7 +27,7 @@ const badgeFor = (href: string, corner = false) =>
     </Suspense>
   ) : null;
 
-/** The signed-in app frame: the mark, the main places as catalogue tabs, and the small print. */
+/** The app frame: the mark, the main places as catalogue tabs, and the small print. Signed out (the open shelf) it offers Sign in. */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-tabs flex min-h-svh flex-col bg-paper text-ink">
@@ -43,6 +45,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </NavLink>
             ))}
           </nav>
+          {/* Signed out (the open shelf): a way in. Reads the session, so it streams in. */}
+          <Suspense fallback={null}>
+            <SignInButton />
+          </Suspense>
         </header>
       </div>
       <main className="mx-auto w-full max-w-[1100px] flex-1 px-5 pt-8 pb-12 sm:px-8 sm:pt-12">{children}</main>
@@ -83,4 +89,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </nav>
     </div>
   );
+}
+
+/** Only for a visitor who isn't signed in: the paper button on the ink bar. */
+async function SignInButton() {
+  const { supabase, user } = await getSessionUser();
+  if (!supabase || user) return null;
+  return <SignInLink />;
 }

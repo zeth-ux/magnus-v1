@@ -1,13 +1,14 @@
 import { cache } from "react";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/user";
 
 /**
  * How many requests wait on the reader (my_waiting_count). Cached per request:
  * the top bar and the phone tab bar both show it, with one database call.
  */
 const getWaitingCount = cache(async (): Promise<number> => {
-  const supabase = await createSupabaseServerClient();
-  if (!supabase) return 0;
+  // Signed out (the open shelf): nothing waits on a visitor, and the database would refuse to count.
+  const { supabase, user } = await getSessionUser();
+  if (!supabase || !user) return 0;
   const { data, error } = await supabase.rpc("my_waiting_count");
   if (error) {
     // A badge can quietly show nothing, but a broken count should show up in the logs.
