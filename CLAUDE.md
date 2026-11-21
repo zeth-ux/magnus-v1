@@ -7,6 +7,7 @@ Instructions for Claude Code working in this repo.
 - I want to understand the code, not just accept it. Explain non-obvious decisions briefly.
 
 ## The product
+- **New session? Start with `docs/handoff/05-HANDOFF.md`** (current state, what to do next, how to work), then `docs/handoff/01-PRD.md`, `02-DESIGN.md`, `03-ARCHITECTURE.md`, `04-DATA-AND-RULES.md`.
 - **Bayu** (code name Magnus): readers give and lend physical books to each other. Current plan: `ROADMAP.md`.
 - Key rules live in decision records. Read them before touching related code:
   - `docs/decisions/003-credit-system.md`: credits, lending, limits (R1-R9). **The ledger is append-only.**
