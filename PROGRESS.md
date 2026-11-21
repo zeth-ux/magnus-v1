@@ -4,6 +4,17 @@ Newest entries at the top. Each entry: what was done, decisions made, what's nex
 
 ---
 
+## 2026-11-21: Handoff docs for the next Claude
+
+**Done**
+- Zarith is ending this long session. Wrote `docs/build/`: **01-PRD** (what Bayu is, feature status, scope), **02-DESIGN** (look, tokens, voice, and the planned dark mode and covers/photos), **03-ARCHITECTURE** (stack, Next 16 traps, auth, security, testing, deploy), **04-DATA-AND-RULES** (tables, credit rules, lifecycle, who sees what, how to change the DB), **05-HANDOFF** (state, next steps, what waits on Zarith, how to work with him, lessons learned). CLAUDE.md now points new sessions to 05 first.
+- Facts checked against the code and migrations, not memory. Copies are also saved to the claude.ai Project.
+
+**Next**
+- [ ] Light / dark mode toggle (02-DESIGN, "PLANNED 1"), then real covers and licensed photos.
+
+---
+
 ## 2026-11-19: The open shelf (browse without an account)
 
 **Done**
